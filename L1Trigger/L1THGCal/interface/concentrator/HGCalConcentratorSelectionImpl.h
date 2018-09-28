@@ -6,6 +6,7 @@
 
 #include "DataFormats/L1THGCal/interface/HGCalTriggerCell.h"
 #include "DataFormats/L1THGCal/interface/HGCalTriggerSums.h"
+#include "DataFormats/L1THGCal/interface/HGCalSuperTriggerCellMap.h"
 
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 
@@ -20,6 +21,7 @@ class HGCalConcentratorSelectionImpl
 
     void bestChoiceSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);    
     void thresholdSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
+    void superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
     
     // Retrieve parameters
     size_t   nCellsInModule() const {return nCellsInModule_;}
@@ -33,6 +35,10 @@ class HGCalConcentratorSelectionImpl
     double   TCThresholdBH_MIP() const {return TCThresholdBH_MIP_;} 
 
   private:
+
+    l1t::HGCalSuperTriggerCellMap* getSuperTriggerCell_(l1t::HGCalTriggerCell TC);
+    std::map<int,l1t::HGCalSuperTriggerCellMap> mapSuperTriggerCellMap_; 
+
     size_t   nData_;
     size_t   nCellsInModule_;
     double   linLSB_;
@@ -47,6 +53,8 @@ class HGCalConcentratorSelectionImpl
     double   triggercell_threshold_scintillator_;
 
     HGCalTriggerTools triggerTools_;
+
+
 };
 
 #endif

@@ -53,3 +53,49 @@ bestChoiceSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput,
   
 }
 
+
+l1t::HGCalSuperTriggerCellMap*
+HGCalConcentratorSelectionImpl::
+getSuperTriggerCell_(l1t::HGCalTriggerCell TC)
+{
+
+  HGCalDetId TC_id( TC.detId() );
+  int TC_wafer = TC_id.wafer();
+  int TC_3rd = ((TC_id.cell())>>4)&0x3;
+
+  long SuperTriggerCellMap_id = 0;
+  if(TC_id.subdetId()==HGCHEB) SuperTriggerCellMap_id = TC_id.cell();
+  else SuperTriggerCellMap_id = TC_3rd + (TC_wafer<<2);
+
+  return &mapSuperTriggerCellMap_[SuperTriggerCellMap_id];
+
+}
+
+void 
+HGCalConcentratorSelectionImpl::
+superTriggerCellsSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
+{ 
+
+  for (size_t i = 0; i<trigCellVecInput.size();i++){
+
+  
+    getSuperTriggerCell_( trigCellVecInput.at(i) )->addTriggerCell( trigCellVecInput.at(i) );
+
+  }
+
+  for (size_t i = 0; i<trigCellVecInput.size();i++){
+
+
+    int threshold = (HGCalDetId( trigCellVecInput.at(i).detId()).subdetId()==ForwardSubdetector::HGCHEB ? TCThresholdBH_ADC_ : TCThreshold_ADC_);
+    if ( trigCellVecInput.at(i).hwPt() < threshold)  trigCellVecInput.at(i).setHwPt(0);
+
+    l1t::HGCalSuperTriggerCellMap* TCmap = getSuperTriggerCellMap_( trigCellVecInput.at(i) );    
+    //Check if TC is the most energetic in towerMap and assign the full hwPt of the towerMap
+    //Else zeroed
+    if(TCmap->maxTriggerCell().detId() == trigCellVecInput.at(i).detId()) trigCellVecOutput.at(i).setHwPt(TCmap->hwPt());
+    else trigCellVecOutput.at(i).setHwPt(0);
+  
+  }  
+
+
+}
