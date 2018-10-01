@@ -73,8 +73,10 @@ getSuperTriggerCell_(l1t::HGCalTriggerCell TC)
 
 void 
 HGCalConcentratorSelectionImpl::
-superTriggerCellsSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
+superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
 { 
+
+  std::cout << "Going into the SuperTriggerCell" << std::endl;
 
   for (size_t i = 0; i<trigCellVecInput.size();i++){
 
@@ -85,11 +87,12 @@ superTriggerCellsSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVe
 
   for (size_t i = 0; i<trigCellVecInput.size();i++){
 
+    trigCellVecOutput.push_back( trigCellVecInput.at(i) );
 
     int threshold = (HGCalDetId( trigCellVecInput.at(i).detId()).subdetId()==ForwardSubdetector::HGCHEB ? TCThresholdBH_ADC_ : TCThreshold_ADC_);
-    if ( trigCellVecInput.at(i).hwPt() < threshold)  trigCellVecInput.at(i).setHwPt(0);
+    if ( trigCellVecInput.at(i).hwPt() < threshold)    trigCellVecOutput.at(i).setHwPt(0);
 
-    l1t::HGCalSuperTriggerCellMap* TCmap = getSuperTriggerCellMap_( trigCellVecInput.at(i) );    
+    l1t::HGCalSuperTriggerCellMap* TCmap = getSuperTriggerCell_( trigCellVecInput.at(i) );    
     //Check if TC is the most energetic in towerMap and assign the full hwPt of the towerMap
     //Else zeroed
     if(TCmap->maxTriggerCell().detId() == trigCellVecInput.at(i).detId()) trigCellVecOutput.at(i).setHwPt(TCmap->hwPt());
