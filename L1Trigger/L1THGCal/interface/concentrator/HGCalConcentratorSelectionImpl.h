@@ -21,7 +21,7 @@ class HGCalConcentratorSelectionImpl
 
     void bestChoiceSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);    
     void thresholdSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
-    void superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
+    void superTriggerCellSelectImpl(uint32_t module_id, const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
     
     // Retrieve parameters
     size_t   nCellsInModule() const {return nCellsInModule_;}
@@ -36,8 +36,9 @@ class HGCalConcentratorSelectionImpl
 
   private:
 
-    l1t::HGCalSuperTriggerCellMap* getSuperTriggerCell_(l1t::HGCalTriggerCell TC);
-    std::map<int,l1t::HGCalSuperTriggerCellMap> mapSuperTriggerCellMap_; 
+    l1t::HGCalSuperTriggerCellMap* getSuperTriggerCell_(uint32_t module_id, l1t::HGCalTriggerCell TC);
+    std::map<uint32_t,std::map<int,l1t::HGCalSuperTriggerCellMap> > mapSuperTriggerCellMap_; 
+    void clearSuperTriggerCellMap();
 
     size_t   nData_;
     size_t   nCellsInModule_;

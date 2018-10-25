@@ -47,13 +47,24 @@ namespace l1t
             
             void   setMipPt( double value ) { mipPt_ = value; }
             double mipPt() const            { return mipPt_;  }
-            
+
+	    //User
+
+	    void setNSTC( int value ){ NSTC_ = value; }
+	    int NSTC() const {return NSTC_; }
+	    void setAveDist( double value ){ AveDist_ = value; }
+	    double AveDist() const {return AveDist_; }
+
         private:
             
             HGCalDetId detid_;
             GlobalPoint position_;
             
             double mipPt_;
+
+	    //User
+	    int NSTC_;
+	    double AveDist_;
 
     };
 

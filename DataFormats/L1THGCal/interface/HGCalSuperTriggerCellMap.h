@@ -18,19 +18,23 @@ namespace l1t
 
   public:
 
-    HGCalSuperTriggerCellMap() {}
+    //HGCalSuperTriggerCellMap() { triggerCellCounter=0;}
+     HGCalSuperTriggerCellMap() {}
 
     ~HGCalSuperTriggerCellMap() {}
 
     void addTriggerCell( HGCalTriggerCell TC );
+    //   int getNumberOfConstituentCells( );
     std::vector<HGCalTriggerCell> triggerCells() { return triggerCells_; }
     HGCalTriggerCell maxTriggerCell() { return maxTriggerCell_; }
-        
+    double findAverageDistanceBetweenCells();
+    
           
   private:
   
     std::vector<HGCalTriggerCell> triggerCells_;
     HGCalTriggerCell maxTriggerCell_;
+    //        int triggerCellCounter;
 
   };
 

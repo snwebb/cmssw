@@ -62,6 +62,12 @@ class HGCalTriggerNtupleHGCTriggerCells : public HGCalTriggerNtupleBase
     std::vector<uint32_t> tc_multicluster_id_;
     std::vector<float> tc_multicluster_pt_;
 
+
+  //User Output
+
+  std::vector<int> tc_super_n_;
+  std::vector<double> tc_ave_dist_;
+
 };
 
 DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
@@ -117,6 +123,12 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   tree.Branch("tc_cluster_id", &tc_cluster_id_);
   tree.Branch("tc_multicluster_id", &tc_multicluster_id_);
   tree.Branch("tc_multicluster_pt", &tc_multicluster_pt_);
+
+  //User
+
+  tree.Branch("tc_super_n", &tc_super_n_);
+  tree.Branch("tc_ave_dist", &tc_ave_dist_);
+
 
 }
 
@@ -199,6 +211,12 @@ fill(const edm::Event& e, const edm::EventSetup& es)
       tc_cluster_id_.emplace_back(cl_id);
       tc_multicluster_id_.emplace_back(mcl_id);
       tc_multicluster_pt_.emplace_back(mcl_pt);
+
+
+      //User
+      tc_super_n_.emplace_back(tc_itr->NSTC());
+      tc_ave_dist_.emplace_back(tc_itr->AveDist());
+
 
       if(fill_simenergy_)
       {
@@ -339,4 +357,9 @@ clear()
   tc_cluster_id_.clear();
   tc_multicluster_id_.clear();
   tc_multicluster_pt_.clear();
+
+  //User
+  tc_super_n_.clear();
+  tc_ave_dist_.clear();
+
 }

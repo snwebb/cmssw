@@ -53,8 +53,9 @@
   <class name="l1t::HGCalMulticlusterBxCollection"/>
   <class name="edm::Wrapper<l1t::HGCalMulticlusterBxCollection>"/>
 
-  <class name="l1t::HGCalTriggerCell" ClassVersion="10">
-    <version ClassVersion="10" checksum="1275348814"/>
+  <class name="l1t::HGCalTriggerCell" ClassVersion="13">
+   <version ClassVersion="13" checksum="940686072"/>
+    <version ClassVersion="12" checksum="1307423120"/>
   </class>
   <class name="std::vector<l1t::HGCalTriggerCell>" />
   <class name="l1t::HGCalTriggerCellBxCollection"/>
