@@ -46,6 +46,8 @@ private:
 
     std::vector<GlobalPoint> computeMaxSeeds( const Histogram & histoClusters );
 
+    std::vector<GlobalPoint> computeModifiedMaxSeeds( const Histogram & histoClusters );
+
     std::vector<GlobalPoint> computeThresholdSeeds( const Histogram & histoClusters );
 
     std::vector<l1t::HGCalMulticluster> clusterSeedMulticluster(const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs,
