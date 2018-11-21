@@ -34,6 +34,12 @@ public:
 
 
 private:
+    enum MulticlusterType{
+      HistoMaxC3d,
+      HistoModifiedMaxC3d,
+      HistoThresholdC3d,
+      HistoInterpolatedMaxC3d
+    };
 
     typedef std::map<std::array<int,3>,float> Histogram;
 
@@ -48,6 +54,8 @@ private:
 
     std::vector<GlobalPoint> computeModifiedMaxSeeds( const Histogram & histoClusters );
 
+    std::vector<GlobalPoint> computeInterpolatedMaxSeeds( const Histogram & histoClusters );
+
     std::vector<GlobalPoint> computeThresholdSeeds( const Histogram & histoClusters );
 
     std::vector<l1t::HGCalMulticluster> clusterSeedMulticluster(const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs,
@@ -59,11 +67,14 @@ private:
     
     double dr_;
     double ptC3dThreshold_;
+    MulticlusterType multiclusteringAlgoType_;
     std::string multiclusterAlgoType_;
     unsigned nBinsRHisto_ = 36;
     unsigned nBinsPhiHisto_ = 216;
     std::vector<unsigned> binsSumsHisto_;
     double histoThreshold_ = 20.;
+    std::vector<double> neighbour_weights_;
+    static constexpr unsigned neighbour_weights_size_ = 9;
 
     HGCalShowerShape shape_;
     HGCalTriggerTools triggerTools_;

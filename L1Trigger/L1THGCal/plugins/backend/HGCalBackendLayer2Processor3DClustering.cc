@@ -22,12 +22,8 @@ class HGCalBackendLayer2Processor3DClustering : public HGCalBackendLayer2Process
         multiclusteringAlgoType_ = dRC3d;
       }else if(typeMulticluster=="DBSCANC3d"){
         multiclusteringAlgoType_ = DBSCANC3d;
-      }else if(typeMulticluster=="HistoMaxC3d"){
-        multiclusteringAlgoType_ = HistoMaxC3d;
-      }else if(typeMulticluster=="HistoModifiedMaxC3d"){
-        multiclusteringAlgoType_ = HistoModifiedMaxC3d;
-      }else if(typeMulticluster=="HistoThresholdC3d"){
-        multiclusteringAlgoType_ = HistoThresholdC3d;
+      }else if(typeMulticluster.find("Histo")!=std::string::npos){
+        multiclusteringAlgoType_ = HistoC3d;
       }else {
         throw cms::Exception("HGCTriggerParameterError")
           << "Unknown Multiclustering type '" << typeMulticluster;
@@ -57,9 +53,7 @@ class HGCalBackendLayer2Processor3DClustering : public HGCalBackendLayer2Process
         case DBSCANC3d:
           multiclustering_.clusterizeDBSCAN( clustersPtrs, collCluster3D, *triggerGeometry_);
           break;
-        case HistoMaxC3d :
-        case HistoModifiedMaxC3d :
-        case HistoThresholdC3d :
+        case HistoC3d :
           multiclusteringHisto_.clusterizeHisto( clustersPtrs, collCluster3D, *triggerGeometry_);
           break;
         default:
@@ -72,9 +66,7 @@ class HGCalBackendLayer2Processor3DClustering : public HGCalBackendLayer2Process
     enum MulticlusterType{
       dRC3d,
       DBSCANC3d,
-      HistoMaxC3d,
-      HistoModifiedMaxC3d,
-      HistoThresholdC3d
+      HistoC3d
     };
         
     edm::ESHandle<HGCalTriggerGeometryBase> triggerGeometry_;
