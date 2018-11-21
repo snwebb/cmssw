@@ -25,12 +25,14 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(50)
+    input = cms.untracked.int32(5)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-       fileNames = cms.untracked.vstring('/store/relval/CMSSW_9_3_0/RelValSinglePiPt25Eta1p7_2p7/GEN-SIM-DIGI-RAW/93X_upgrade2023_realistic_v2_2023D17noPU-v1/00000/240935CF-1C9B-E711-9F7D-0025905A60BE.root'),
+#       fileNames = cms.untracked.vstring('/store/relval/CMSSW_9_3_0/RelValSinglePiPt25Eta1p7_2p7/GEN-SIM-DIGI-RAW/93X_upgrade2023_realistic_v2_2023D17noPU-v1/00000/240935CF-1C9B-E711-9F7D-0025905A60BE.root'),
+
+       fileNames = cms.untracked.vstring('/store/mc/PhaseIITDRFall17DR/VBF_HToInvisible_M125_14TeV_powheg_pythia8/GEN-SIM-RECO/PU200_93X_upgrade2023_realistic_v2-v1/30000/000529D7-EEB8-E711-95AF-7845C4FC37B5.root'),
        inputCommands=cms.untracked.vstring(
            'keep *',
            'drop l1tEMTFHit2016Extras_simEmtfDigis_CSC_HLT',
@@ -65,6 +67,23 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 # load HGCAL TPG simulation
 process.load('L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff')
 process.hgcl1tpg_step = cms.Path(process.hgcalTriggerPrimitives)
+
+from L1Trigger.L1THGCal.customTriggerCellSelect import custom_triggercellselect_supertriggercell, custom_triggercellselect_threshold
+from L1Trigger.L1THGCal.customClustering import *
+
+#TCs
+process = custom_triggercellselect_threshold(process)
+#process = custom_triggercellselect_supertriggercell(process)
+#1st Stage
+process = custom_2dclustering_dummy(process)
+#2nd Stage
+
+#process = custom_3dclustering_distance(process)
+#process = custom_3dclustering_histoMax(process)
+#process = custom_3dclustering_histoInterpolatedMax2ndOrder(process)
+#process = custom_3dclustering_histoInterpolatedMax1stOrder(process)
+process = custom_3dclustering_histoModifiedMax(process)
+
 
 # Change to V7 trigger geometry for older samples
 #  from L1Trigger.L1THGCal.customTriggerGeometry import custom_geometry_ZoltanSplit_V7
