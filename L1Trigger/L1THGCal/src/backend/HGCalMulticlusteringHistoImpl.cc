@@ -2,6 +2,8 @@
 #include "L1Trigger/L1THGCal/interface/backend/HGCalShowerShape.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "TFile.h"
+#include "TH2D.h"
 
 HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::ParameterSet& conf ) :
     dr_(conf.getParameter<double>("dR_multicluster")),
@@ -16,6 +18,8 @@ HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::Paramet
   
     if(multiclusterAlgoType_=="HistoMaxC3d"){
       multiclusteringAlgoType_ = HistoMaxC3d;
+    }else if(multiclusterAlgoType_=="HistoModifiedMaxC3d"){
+      multiclusteringAlgoType_ = HistoModifiedMaxC3d;
     }else if(multiclusterAlgoType_=="HistoThresholdC3d"){
       multiclusteringAlgoType_ = HistoThresholdC3d;
     }else if(multiclusterAlgoType_=="HistoInterpolatedMaxC3d"){
@@ -35,9 +39,9 @@ HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::Paramet
     id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification"));
     if(multiclusterAlgoType_.find("Histo")!=std::string::npos && nBinsRHisto_!=binsSumsHisto_.size()) throw cms::Exception("Inconsistent nBins_R_histo_multicluster and binSumsHisto size in HGCalMulticlustering");
     if(neighbour_weights_.size()!=neighbour_weights_size_) throw cms::Exception("Inconsistent size of neighbour weights vector in HGCalMulticlustering");
+
+
 }
-
-
 
 
 
@@ -309,16 +313,24 @@ std::vector<GlobalPoint> HGCalMulticlusteringHistoImpl::computeModifiedMaxSeeds(
 
     //TESTING
 
-    for(int z_side : {-1,1}){
+    TFile * file = new TFile ("ModMax.root", "RECREATE");
+    TH2D * hist2D = new TH2D( "ModMax","",50,-0.5,49.5,250,-0.5,249.5);
+
+    //    for(int z_side : {-1,1}){
+    for(int z_side : {1}){
         for(int bin_R = 0; bin_R<int(nBinsRHisto_); bin_R++){
             for(int bin_phi = 0; bin_phi<int(nBinsPhiHisto_); bin_phi++){
 
                 float MIPT_seed = histoClusters.at({{z_side,bin_R,bin_phi}});
-		std::cout << MIPT_seed << ", " << z_side <<", "<<bin_R<<", "<<bin_phi << ", " << primarySeedPositions[bin_R][bin_phi][z_side] << ", " << secondarySeedPositions[bin_R][bin_phi][z_side] << std::endl;
-
+		//		std::cout << MIPT_seed << ", " << z_side <<", "<<bin_R<<", "<<bin_phi << ", " << primarySeedPositions[bin_R][bin_phi][z_side] << ", " << secondarySeedPositions[bin_R][bin_phi][z_side] << std::endl;
+		if ( primarySeedPositions[bin_R][bin_phi][z_side] ) hist2D->Fill ( bin_R, bin_phi, MIPT_seed );
+		if ( secondarySeedPositions[bin_R][bin_phi][z_side] ) hist2D->Fill ( bin_R, bin_phi, MIPT_seed );
 	    }
 	}
     }
+
+    hist2D->Write();
+    file->Close();
 
     return seedPositions;
 
@@ -331,6 +343,11 @@ std::vector<GlobalPoint> HGCalMulticlusteringHistoImpl::computeModifiedMaxSeeds(
 
 
 std::vector<GlobalPoint> HGCalMulticlusteringHistoImpl::computeMaxSeeds( const Histogram & histoClusters ){
+
+    TFile * file = new TFile ("DefaultMax.root", "RECREATE");
+    TH2D * hist2D = new TH2D( "DefaultMax","",50,-0.5,49.5,250,-0.5,249.5);
+
+
 
     std::vector<GlobalPoint> seedPositions;
 
@@ -377,13 +394,20 @@ std::vector<GlobalPoint> HGCalMulticlusteringHistoImpl::computeMaxSeeds( const H
                     float x_seed = ROverZ_seed*cos(phi_seed);
                     float y_seed = ROverZ_seed*sin(phi_seed);
                     seedPositions.emplace_back(x_seed,y_seed,z_side);
-                }
+		    
+		    
+		    if ( z_side == 1){
+		      hist2D->Fill ( bin_R, bin_phi, MIPT_seed );
+		    }
 
+		}
             }
 
         }
 
     }
+    hist2D->Write();
+    file->Close();
 
     return seedPositions;
 
@@ -391,9 +415,9 @@ std::vector<GlobalPoint> HGCalMulticlusteringHistoImpl::computeMaxSeeds( const H
 
 
 std::vector<GlobalPoint> HGCalMulticlusteringHistoImpl::computeInterpolatedMaxSeeds( const Histogram & histoClusters ){
-
-    std::vector<GlobalPoint> seedPositions;
-
+  
+  std::vector<GlobalPoint> seedPositions;
+  
     for(int z_side : {-1,1}){
 
         for(int bin_R = 0; bin_R<int(nBinsRHisto_); bin_R++){
