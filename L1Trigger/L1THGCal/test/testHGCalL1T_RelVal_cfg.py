@@ -72,17 +72,18 @@ from L1Trigger.L1THGCal.customTriggerCellSelect import custom_triggercellselect_
 from L1Trigger.L1THGCal.customClustering import *
 
 #TCs
-process = custom_triggercellselect_threshold(process)
-#process = custom_triggercellselect_supertriggercell(process)
+#process = custom_triggercellselect_threshold(process)
+process = custom_triggercellselect_supertriggercell(process)
 #1st Stage
 process = custom_2dclustering_dummy(process)
 #2nd Stage
 
 #process = custom_3dclustering_distance(process)
-#process = custom_3dclustering_histoMax(process,0.03)
+#process = custom_3dclustering_histoThreshold(process)
+process = custom_3dclustering_histoMax(process,0.03)
 #process = custom_3dclustering_histoInterpolatedMax2ndOrder(process)
 #process = custom_3dclustering_histoInterpolatedMax1stOrder(process)
-process = custom_3dclustering_histoModifiedMax(process)
+#process = custom_3dclustering_histoModifiedMax(process)
 
 
 # Change to V7 trigger geometry for older samples
