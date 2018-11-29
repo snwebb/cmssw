@@ -79,7 +79,7 @@ process = custom_2dclustering_dummy(process)
 #2nd Stage
 
 #process = custom_3dclustering_distance(process)
-#process = custom_3dclustering_histoMax(process)
+#process = custom_3dclustering_histoMax(process,0.03)
 #process = custom_3dclustering_histoInterpolatedMax2ndOrder(process)
 #process = custom_3dclustering_histoInterpolatedMax1stOrder(process)
 process = custom_3dclustering_histoModifiedMax(process)
