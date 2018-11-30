@@ -11,8 +11,8 @@ HGCalMulticluster::HGCalMulticluster( const LorentzVector p4,
 }
 
 
-HGCalMulticluster::HGCalMulticluster( const edm::Ptr<l1t::HGCalCluster> &clusterSeed )
-    : HGCalClusterT<l1t::HGCalCluster>(clusterSeed)
+HGCalMulticluster::HGCalMulticluster( const edm::Ptr<l1t::HGCalCluster> &clusterSeed, float fraction )
+    : HGCalClusterT<l1t::HGCalCluster>(clusterSeed, fraction)
 {
 }
 

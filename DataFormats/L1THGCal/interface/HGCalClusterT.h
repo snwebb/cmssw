@@ -36,7 +36,7 @@ namespace l1t
         mipPt_(0),
         seedMipPt_(0){}
 
-      HGCalClusterT( const edm::Ptr<C>& c ):
+       HGCalClusterT( const edm::Ptr<C>& c, float fraction=1. ):
         valid_(true),
         detId_( c->detId() ),
         centre_(0., 0., 0.),
@@ -44,7 +44,7 @@ namespace l1t
         mipPt_(0.),
         seedMipPt_(0.)
       {
-        addConstituent(c);
+        addConstituent(c, true, fraction);
       }
       
       ~HGCalClusterT() override {};
@@ -72,7 +72,6 @@ namespace l1t
           }
         }
         updateP4AndPosition(c, updateCentre, fraction);
-
 
         constituents_.emplace( c->detId(), c );
         constituentsFraction_.emplace( c->detId(), fraction );
@@ -102,7 +101,7 @@ namespace l1t
       double mipPt() const { return mipPt_; }
       double seedMipPt() const { return seedMipPt_; }
       uint32_t detId() const { return detId_.rawId(); }
-
+      double sumPt() const { return sumPt_; }
 
       /* distance in 'cm' */
       double distance( const l1t::HGCalTriggerCell &tc ) const { return ( tc.position() - centre_ ).mag(); }
@@ -199,6 +198,7 @@ namespace l1t
 
       double mipPt_;
       double seedMipPt_;
+      double sumPt_;
 
       //shower shape
 
@@ -222,6 +222,7 @@ namespace l1t
       void updateP4AndPosition(const edm::Ptr<C>& c, bool updateCentre=true, float fraction=1.)
       {
         double cMipt = c->mipPt()*fraction;
+        double cPt = c->pt()*fraction;
         /* update cluster positions (IF requested) */
         if( updateCentre ){
           Basic3DVector<float> constituentCentre( c->position() );
@@ -242,10 +243,10 @@ namespace l1t
 
         /* update cluster energies */
         mipPt_ += cMipt;
+	sumPt_ += cPt;
 
         int updatedPt = hwPt() + (int)(c->hwPt()*fraction);
         setHwPt( updatedPt );
-
         math::PtEtaPhiMLorentzVector updatedP4 ( p4() );
         updatedP4 += (c->p4()*fraction);
         setP4( updatedP4 );

@@ -30,7 +30,8 @@
 
   <class name="l1t::HGCalClusterT<l1t::HGCalTriggerCell>" />
   <class name="l1t::HGCalClusterT<l1t::HGCalTriggerSums>" />
-  <class name="l1t::HGCalCluster" ClassVersion="14">
+  <class name="l1t::HGCalCluster" ClassVersion="15">
+   <version ClassVersion="15" checksum="3010477672"/>
   <version ClassVersion="14" checksum="3289642235"/>
   <version ClassVersion="13" checksum="3397489079"/>
   <version ClassVersion="12" checksum="623703096"/>
@@ -42,7 +43,8 @@
   <class name="edm::Wrapper<l1t::HGCalClusterBxCollection>"/>
 
   <class name="l1t::HGCalClusterT<l1t::HGCalCluster>" />
-  <class name="l1t::HGCalMulticluster" ClassVersion="14">
+  <class name="l1t::HGCalMulticluster" ClassVersion="15">
+   <version ClassVersion="15" checksum="786729082"/>
   <version ClassVersion="14" checksum="2315302819"/>
   <version ClassVersion="13" checksum="816077951"/>
   <version ClassVersion="12" checksum="4221677522"/>
