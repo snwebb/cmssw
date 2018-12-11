@@ -34,7 +34,9 @@ namespace l1t
         centre_(0, 0, 0),
         centreProj_(0., 0., 0.),
         mipPt_(0),
-        seedMipPt_(0){}
+        seedMipPt_(0),
+        sumPt_(0){}
+
 
        HGCalClusterT( const edm::Ptr<C>& c, float fraction=1. ):
         valid_(true),
@@ -42,7 +44,8 @@ namespace l1t
         centre_(0., 0., 0.),
         centreProj_(0., 0., 0.),
         mipPt_(0.),
-        seedMipPt_(0.)
+        seedMipPt_(0.),
+        sumPt_(0.)
       {
         addConstituent(c, true, fraction);
       }
@@ -244,7 +247,6 @@ namespace l1t
         /* update cluster energies */
         mipPt_ += cMipt;
 	sumPt_ += cPt;
-
         int updatedPt = hwPt() + (int)(c->hwPt()*fraction);
         setHwPt( updatedPt );
         math::PtEtaPhiMLorentzVector updatedP4 ( p4() );
