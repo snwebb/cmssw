@@ -7,6 +7,8 @@
 
 HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::ParameterSet& conf ) :
     dr_(conf.getParameter<double>("dR_multicluster")),
+    drA_(conf.getParameter<double>("dR_multicluster_A")),
+    drB_(conf.getParameter<double>("dR_multicluster_B")),
     ptC3dThreshold_(conf.getParameter<double>("minPt_multicluster")),
     multiclusterAlgoType_(conf.getParameter<string>("type_multicluster")),    
     nBinsRHisto_(conf.getParameter<unsigned>("nBins_R_histo_multicluster")),
@@ -521,7 +523,8 @@ std::vector<l1t::HGCalMulticluster> HGCalMulticlusteringHistoImpl::clusterSeedMu
 
         int z_side = triggerTools_.zside(clu->detId());
 
-        double minDist = dr_;
+	double minDist = drA_ + drB_*(2.3 - std::abs(clu->eta()) ) ;
+
 	std::vector<int> targetSeeds;
 	std::vector<double> targetSeedsEnergy;
 	//        int targetSeed = -1;
