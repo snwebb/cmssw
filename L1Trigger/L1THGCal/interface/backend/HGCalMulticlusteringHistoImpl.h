@@ -66,6 +66,8 @@ private:
             const HGCalTriggerGeometryBase&);
     
     double dr_;
+    double drA_;
+    double drB_;
     double ptC3dThreshold_;
     MulticlusterType multiclusteringAlgoType_;
     std::string multiclusterAlgoType_;

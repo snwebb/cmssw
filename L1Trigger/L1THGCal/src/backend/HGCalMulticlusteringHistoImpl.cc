@@ -7,6 +7,8 @@
 
 HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::ParameterSet& conf ) :
     dr_(conf.getParameter<double>("dR_multicluster")),
+    drA_(conf.getParameter<double>("dR_multicluster_A")),
+    drB_(conf.getParameter<double>("dR_multicluster_B")),
     ptC3dThreshold_(conf.getParameter<double>("minPt_multicluster")),
     multiclusterAlgoType_(conf.getParameter<string>("type_multicluster")),    
     nBinsRHisto_(conf.getParameter<unsigned>("nBins_R_histo_multicluster")),
@@ -31,6 +33,8 @@ HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::Paramet
     } 
 
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster dR: " << dr_;  
+    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster dR A parameter: " << drA_;  
+    edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster dR B parameter: " << drB_;  
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster minimum transverse-momentum: " << ptC3dThreshold_;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster number of R-bins for the histo algorithm: " << nBinsRHisto_<<endl;
     edm::LogInfo("HGCalMulticlusterParameters") << "Multicluster number of Phi-bins for the histo algorithm: " << nBinsPhiHisto_<<endl;
@@ -514,7 +518,8 @@ std::vector<l1t::HGCalMulticluster> HGCalMulticlusteringHistoImpl::clusterSeedMu
         HGCalDetId cluDetId( clu->detId() );
         int z_side = cluDetId.zside();
 
-        double minDist = dr_;
+	double minDist = drA_ + drB_*(2.3 - std::abs(clu->eta()) ) ;
+
 	std::vector<int> targetSeeds;
 	std::vector<double> targetSeedsEnergy;
 	//        int targetSeed = -1;
