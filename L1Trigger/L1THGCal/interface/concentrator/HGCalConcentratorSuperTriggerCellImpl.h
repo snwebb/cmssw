@@ -24,6 +24,7 @@ class HGCalConcentratorSuperTriggerCellImpl
 
     int getSuperTriggerCellId(int detid) const ;
     HGCalTriggerTools triggerTools_;
+    std::vector<unsigned> stcSize_;
 
     class SuperTriggerCell {
   
