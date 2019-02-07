@@ -36,6 +36,7 @@ public:
 private:
     enum MulticlusterType{
       HistoMaxC3d,
+      HistoModifiedMaxC3d,
       HistoThresholdC3d,
       HistoInterpolatedMaxC3d
     };
@@ -49,20 +50,24 @@ private:
 
     Histogram fillSmoothRPhiHistoClusters( const Histogram & histoClusters );
 
-    std::vector<GlobalPoint> computeMaxSeeds( const Histogram & histoClusters );
+    std::vector<std::pair<GlobalPoint, double> > computeMaxSeeds( const Histogram & histoClusters );
 
-    std::vector<GlobalPoint> computeInterpolatedMaxSeeds( const Histogram & histoClusters );
-
-    std::vector<GlobalPoint> computeThresholdSeeds( const Histogram & histoClusters );
+    std::vector<std::pair<GlobalPoint, double> > computeModifiedMaxSeeds( const Histogram & histoClusters );
+    
+    std::vector<std::pair<GlobalPoint, double> > computeInterpolatedMaxSeeds( const Histogram & histoClusters );
+    
+    std::vector<std::pair<GlobalPoint, double> > computeThresholdSeeds( const Histogram & histoClusters );
 
     std::vector<l1t::HGCalMulticluster> clusterSeedMulticluster(const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs,
-								const std::vector<GlobalPoint> & seeds);
+								const std::vector<std::pair<GlobalPoint, double> > & seeds);
 
     void finalizeClusters(std::vector<l1t::HGCalMulticluster>&,
             l1t::HGCalMulticlusterBxCollection&,
             const HGCalTriggerGeometryBase&);
     
     double dr_;
+    double drA_;
+    double drB_;
     double ptC3dThreshold_;
     MulticlusterType multiclusteringAlgoType_;
     std::string multiclusterAlgoType_;
@@ -71,6 +76,7 @@ private:
     std::vector<unsigned> binsSumsHisto_;
     double histoThreshold_ = 20.;
     std::vector<double> neighbour_weights_;
+    std::string cluster_association_;
 
     HGCalShowerShape shape_;
     HGCalTriggerTools triggerTools_;
