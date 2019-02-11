@@ -43,10 +43,7 @@ HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::Paramet
     if(multiclusterAlgoType_.find("Histo")!=std::string::npos && nBinsRHisto_!=binsSumsHisto_.size()) throw cms::Exception("Inconsistent nBins_R_histo_multicluster and binSumsHisto size in HGCalMulticlustering");
     if(neighbour_weights_.size()!=neighbour_weights_size_) throw cms::Exception("Inconsistent size of neighbour weights vector in HGCalMulticlustering");
 
-
 }
-
-
 
 float HGCalMulticlusteringHistoImpl::dR( const l1t::HGCalCluster & clu,
                                          const GlobalPoint & seed) const
@@ -57,10 +54,6 @@ float HGCalMulticlusteringHistoImpl::dR( const l1t::HGCalCluster & clu,
     return (seed_proj - clu.centreProj() ).mag();
 
 }
-
-
-
-
 
 HGCalMulticlusteringHistoImpl::Histogram HGCalMulticlusteringHistoImpl::fillHistoClusters( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs ){
 
@@ -317,10 +310,6 @@ std::vector<std::pair<GlobalPoint, double > > HGCalMulticlusteringHistoImpl::com
 
 std::vector<std::pair<GlobalPoint, double > > HGCalMulticlusteringHistoImpl::computeMaxSeeds( const Histogram & histoClusters ){
 
-    // TFile * file = new TFile ("DefaultMax.root", "RECREATE");
-    // TH2D * hist2D = new TH2D( "DefaultMax","",50,-0.5,49.5,250,-0.5,249.5);
-
-
     std::vector<std::pair<GlobalPoint, double > > seedPositions;
 
     for(int z_side : {-1,1}){
@@ -366,9 +355,6 @@ std::vector<std::pair<GlobalPoint, double > > HGCalMulticlusteringHistoImpl::com
                     float x_seed = ROverZ_seed*cos(phi_seed);
                     float y_seed = ROverZ_seed*sin(phi_seed);
                     seedPositions.emplace_back( std::make_pair( GlobalPoint(x_seed,y_seed,z_side), MIPT_seed) );
-                    // if ( z_side == 1){
-                    //   hist2D->Fill ( bin_R, bin_phi, MIPT_seed );
-                    // }
 
                 }
             }
@@ -376,8 +362,6 @@ std::vector<std::pair<GlobalPoint, double > > HGCalMulticlusteringHistoImpl::com
         }
 
     }
-    //    hist2D->Write();
-    //    file->Close();
 
     return seedPositions;
 
@@ -396,9 +380,6 @@ std::vector<std::pair<GlobalPoint, double > > HGCalMulticlusteringHistoImpl::com
             for(int bin_phi = 0; bin_phi<int(nBinsPhiHisto_); bin_phi++){
               
                 float MIPT_seed = histoClusters.at({{z_side,bin_R,bin_phi}});
-                //                bool isMax = MIPT_seed > histoThreshold_;             
-                //                bool isMax = MIPT_seed ;              
-                
                 float MIPT_S = bin_R<(int(nBinsRHisto_)-1) ? histoClusters.at({{z_side,bin_R+1,bin_phi}}) : 0;
                 float MIPT_N = bin_R>0 ? histoClusters.at({{z_side,bin_R-1,bin_phi}}) : 0;
                 
@@ -419,7 +400,7 @@ std::vector<std::pair<GlobalPoint, double > > HGCalMulticlusteringHistoImpl::com
                   + neighbour_weights_.at(3) * MIPT_W + neighbour_weights_.at(5) * MIPT_E + neighbour_weights_.at(6) * MIPT_SW
                   + neighbour_weights_.at(7) * MIPT_S + neighbour_weights_.at(8) * MIPT_SE;
                 
-                bool isMax = MIPT_seed>=(MIPT_pred+histoThreshold_);//check
+                bool isMax = MIPT_seed>=(MIPT_pred+histoThreshold_);
                 
                 if(isMax){
                   float ROverZ_seed = kROverZMin_ + (bin_R+0.5) * (kROverZMax_-kROverZMin_)/nBinsRHisto_;
@@ -480,7 +461,6 @@ std::vector<l1t::HGCalMulticluster> HGCalMulticlusteringHistoImpl::clusterSeedMu
 
     std::map<int,l1t::HGCalMulticluster> mapSeedMulticluster;
     std::vector<l1t::HGCalMulticluster> multiclustersTmp;
-    //total number of seeds = 216*36 = 7776
 
     for(auto & clu : clustersPtrs){
 
@@ -610,20 +590,12 @@ finalizeClusters(std::vector<l1t::HGCalMulticluster>& multiclusters_in,
         // compute the eta, phi from its barycenter
         // + pT as scalar sum of pT of constituents
         double sumPt=multicluster.sumPt();
-        //        const std::unordered_map<uint32_t, edm::Ptr<l1t::HGCalCluster>>& clusters = multicluster.constituents();
-        // for(const auto& id_cluster : clusters) {
-        //   sumPt += id_cluster.second->pt();
-        // }
 
         math::PtEtaPhiMLorentzVector multiclusterP4(  sumPt,
-        //      math::PtEtaPhiMLorentzVector multiclusterP4(  multicluster.pt(),
                 multicluster.centre().eta(),
                 multicluster.centre().phi(),
                 0. );
         multicluster.setP4( multiclusterP4 );
-
-
-        //      std::cout << "mc pt =  "<< multicluster.pt() << std::endl;
 
         if( multicluster.pt() > ptC3dThreshold_ ){
             //compute shower shapes
