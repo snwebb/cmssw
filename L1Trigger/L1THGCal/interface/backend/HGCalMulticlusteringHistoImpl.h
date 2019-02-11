@@ -36,7 +36,7 @@ public:
 private:
     enum MulticlusterType{
       HistoMaxC3d,
-      HistoModifiedMaxC3d,
+      HistoSecondaryMaxC3d,
       HistoThresholdC3d,
       HistoInterpolatedMaxC3d
     };
@@ -52,7 +52,7 @@ private:
 
     std::vector<std::pair<GlobalPoint, double> > computeMaxSeeds( const Histogram & histoClusters );
 
-    std::vector<std::pair<GlobalPoint, double> > computeModifiedMaxSeeds( const Histogram & histoClusters );
+    std::vector<std::pair<GlobalPoint, double> > computeSecondaryMaxSeeds( const Histogram & histoClusters );
     
     std::vector<std::pair<GlobalPoint, double> > computeInterpolatedMaxSeeds( const Histogram & histoClusters );
     
