@@ -78,6 +78,7 @@ namespace l1t
         }
         updateP4AndPosition(c, updateCentre, fraction);
 
+
         constituents_.emplace( c->detId(), c );
         constituentsFraction_.emplace( c->detId(), fraction );
 
@@ -251,6 +252,7 @@ namespace l1t
 	sumPt_ += cPt;
         int updatedPt = hwPt() + (int)(c->hwPt()*fraction);
         setHwPt( updatedPt );
+
         math::PtEtaPhiMLorentzVector updatedP4 ( p4() );
         updatedP4 += (c->p4()*fraction);
         setP4( updatedP4 );
