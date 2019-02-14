@@ -41,6 +41,11 @@ private:
       HistoInterpolatedMaxC3d
     };
 
+    enum ClusterStrategy{
+      NearestNeighbour_,
+      EnergySplit_
+    };
+
     typedef std::map<std::array<int,3>,float> Histogram;
 
     Histogram fillHistoClusters( const std::vector<edm::Ptr<l1t::HGCalCluster>> & clustersPtrs );
@@ -66,10 +71,11 @@ private:
             const HGCalTriggerGeometryBase&);
     
     double dr_;
-    double drA_;
-    double drB_;
+    double radiusCoefficientA_;
+    double radiusCoefficientB_;
     double ptC3dThreshold_;
     MulticlusterType multiclusteringAlgoType_;
+    ClusterStrategy cluster_strategy_;
     std::string multiclusterAlgoType_;
     unsigned nBinsRHisto_ = 36;
     unsigned nBinsPhiHisto_ = 216;

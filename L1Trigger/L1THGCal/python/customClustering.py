@@ -112,16 +112,16 @@ def custom_3dclustering_histoSecondaryMax(process,
     return process
 
 
-def custom_3dclustering_distanceAssociation(process):
+def custom_3dclustering_nearestNeighbourAssociation(process):
     
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
-    parameters_c3d.cluster_association = cms.string('distance')
+    parameters_c3d.cluster_association = cms.string('NearestNeighbour')
     return process
 
-def custom_3dclustering_energyAssociation(process):
+def custom_3dclustering_EnergySplitAssociation(process):
     
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
-    parameters_c3d.cluster_association = cms.string('energy')
+    parameters_c3d.cluster_association = cms.string('EnergySplit')
     return process
 
 
