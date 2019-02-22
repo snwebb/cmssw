@@ -83,8 +83,7 @@ def custom_3dclustering_histoMax(process,
         binSumsHisto = binSums,                        
         ):
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
-    parameters_c3d.radiusCoefficientA = cms.double(distance_A)
-    parameters_c3d.radiusCoefficientB = cms.double(distance_B)
+    parameters_c3d.dR_multicluster = cms.double(distance)
     parameters_c3d.nBins_R_histo_multicluster = cms.uint32(nBins_R)
     parameters_c3d.nBins_Phi_histo_multicluster = cms.uint32(nBins_Phi)
     parameters_c3d.threshold_histo_multicluster = cms.double(threshold)
@@ -100,8 +99,7 @@ def custom_3dclustering_histoSecondaryMax(process,
         binSumsHisto = binSums,
         ):
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
-    parameters_c3d.radiusCoefficientA = cms.double(distance_A)
-    parameters_c3d.radiusCoefficientB = cms.double(distance_B)
+    parameters_c3d.dR_multicluster = cms.double(distance)
     parameters_c3d.nBins_R_histo_multicluster = cms.uint32(nBins_R)
     parameters_c3d.nBins_Phi_histo_multicluster = cms.uint32(nBins_Phi)
     parameters_c3d.binSumsHisto = binSumsHisto
@@ -163,12 +161,12 @@ def custom_3dclustering_histoThreshold(process,
 
 
 
-def custom_3dclustering_clusteringRadiusLinearWithEta(process):
+def custom_3dclustering_clusteringRadiusLinearWithEta(process, radius_A, radius_B):
     
     parameters_c3d = process.hgcalBackEndLayer2Producer.ProcessorParameters.C3d_parameters
     parameters_c3d.clusteringRadiusStrategy = cms.string('LinearWithEta')
-    parameters_c3d.radiusCoefficient_A = cms.double(distance_A)
-    parameters_c3d.radiusCoefficient_B = cms.double(distance_B)
+    parameters_c3d.radiusCoefficient_A = cms.double(radius_A)
+    parameters_c3d.radiusCoefficient_B = cms.double(radius_B)
 
     return process
 
