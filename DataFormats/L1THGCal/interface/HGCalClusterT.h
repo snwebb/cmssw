@@ -9,6 +9,7 @@
 #include "DataFormats/L1THGCal/interface/ClusterShapes.h"
 #include "DataFormats/ForwardDetId/interface/ForwardSubdetector.h"
 #include "DataFormats/HcalDetId/interface/HcalSubdetector.h"
+#include "DataFormats/ForwardDetId/interface/HGCalTriggerDetId.h"
 
 /* ROOT */
 #include "Math/Vector3D.h"
@@ -136,6 +137,8 @@ namespace l1t
             pt_em += id_constituent.second->pt() * fraction;
           } else if (id.det() == DetId::HGCalEE) {
             pt_em += id_constituent.second->pt() * fraction;
+          } else if (id.det() == DetId::HGCalTrigger && HGCalTriggerDetId(id).subdet()==HGCalTriggerSubdetector::HGCalEETrigger) {
+            pt_em += id_constituent.second->pt() * fraction;
           } else if(id.det() == DetId::Forward && id.subdetId()==HGCHEF) {
             pt_had += id_constituent.second->pt() * fraction;
           } else if( id.det() == DetId::Hcal && id.subdetId() == HcalEndcap) {
@@ -143,6 +146,8 @@ namespace l1t
           } else if (id.det() == DetId::HGCalHSi) {
             pt_had += id_constituent.second->pt() * fraction;
           } else if (id.det() == DetId::HGCalHSc) {
+            pt_had += id_constituent.second->pt() * fraction;
+          } else if (id.det() == DetId::HGCalTrigger && HGCalTriggerDetId(id).subdet()==HGCalTriggerSubdetector::HGCalHSiTrigger) {
             pt_had += id_constituent.second->pt() * fraction;
           }
         }
