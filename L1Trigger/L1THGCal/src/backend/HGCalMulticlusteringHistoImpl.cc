@@ -5,8 +5,8 @@
 
 HGCalMulticlusteringHistoImpl::HGCalMulticlusteringHistoImpl( const edm::ParameterSet& conf ) :
     dr_(conf.getParameter<double>("dR_multicluster")),
-    dr_byLayer_coefficientA_(conf.existsAs<std::vector<double>>("dR_multicluster_byLayer_coefficient_A") ? conf.getParameter<std::vector<double>>("dR_multicluster_byLayer_coefficient_A") : std::vector<double>()),
-    dr_byLayer_coefficientB_(conf.existsAs<std::vector<double>>("dR_multicluster_byLayer_coefficient_B") ? conf.getParameter<std::vector<double>>("dR_multicluster_byLayer_coefficient_B") : std::vector<double>()),
+    dr_byLayer_coefficientA_(conf.existsAs<std::vector<double>>("dR_multicluster_byLayer_coefficientA") ? conf.getParameter<std::vector<double>>("dR_multicluster_byLayer_coefficientA") : std::vector<double>()),
+    dr_byLayer_coefficientB_(conf.existsAs<std::vector<double>>("dR_multicluster_byLayer_coefficientB") ? conf.getParameter<std::vector<double>>("dR_multicluster_byLayer_coefficientB") : std::vector<double>()),
     ptC3dThreshold_(conf.getParameter<double>("minPt_multicluster")),
     multiclusterAlgoType_(conf.getParameter<string>("type_multicluster")),    
     cluster_association_input_(conf.getParameter<string>("cluster_association")),
