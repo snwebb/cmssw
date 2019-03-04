@@ -2,10 +2,9 @@
 #include <algorithm>
 #include "DataFormats/L1THGCal/interface/HGCalCluster.h"
 #include "DataFormats/L1THGCal/interface/HGCalMulticluster.h"
-#include "DataFormats/ForwardDetId/interface/HGCalDetId.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
-#include "L1Trigger/L1THGCal/interface/HGCalTriggerNtupleBase.h"
+#include "L1Trigger/L1THGCalUtilities/interface/HGCalTriggerNtupleBase.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 
 
