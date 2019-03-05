@@ -31,6 +31,9 @@ class HGCalConcentratorSuperTriggerCellImpl
     static const int kSTCsize4_ = 4;
     static const int kNLayers_ = 3;
 
+    static std::map<std::pair<int,int>,int> stcMap4;
+    static std::map<std::pair<int,int>,int> stcMap16;
+
     HGCalTriggerTools triggerTools_;
     std::vector<unsigned> stcSize_;
 
