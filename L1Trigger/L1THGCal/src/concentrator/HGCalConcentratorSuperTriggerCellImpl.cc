@@ -90,42 +90,56 @@ std::map<std::pair<int,int>,int> HGCalConcentratorSuperTriggerCellImpl::stcMap16
 int
 HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
 
-  //V8
-  HGCalDetId TC_idV8(detid);
-  if(TC_idV8.subdetId()==HGCEE || TC_idV8.subdetId()==HGCHEF || TC_idV8.subdetId()==HGCHEB) {
-    if (TC_idV8.subdetId()==HGCHEB)
+
+  DetId TC_id( detid );
+  if ( TC_id.det() == DetId::Forward ){//V8
+
+    HGCalDetId TC_idV8(detid);
+
+    if( triggerTools_.isScintillator(detid) ){
       return TC_idV8.cell(); //scintillator
+    }
     else{
       int TC_wafer = TC_idV8.wafer();
       int TC_12th = ( TC_idV8.cell() & kSplit12_ );
       int TC_3rd = ( TC_idV8.cell() & kSplit3_ );
-
+      
       int thickness = triggerTools_.thicknessIndex(detid,true);
       int TC_split = TC_12th;
       if (stcSize_.at(thickness) == kSTCsize16_) TC_split = TC_3rd;
-
+      
       return TC_wafer<<kWafer_offset_ | TC_split;
     }
+
   }
 
-  //V9
-  HGCalTriggerDetId TC_id(detid);
-  if(TC_id.det()!= DetId::HGCalTrigger) {
-    return TC_id.triggerCellU() << kWafer_offset_ | TC_id.triggerCellV();
-  }
-  else {
-    int TC_wafer = TC_id.waferU() << kWafer_offset_ | TC_id.waferV() ;
-    int thickness = triggerTools_.thicknessIndex(detid);
+  else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
+    
+    HGCalTriggerDetId TC_idV9(detid);
 
-    int sTC_id =  stcMap4[ std::make_pair( TC_id.triggerCellU(),TC_id.triggerCellV() )   ];
-
-    if (stcSize_.at(thickness) == kSTCsize16_){
-      sTC_id =  stcMap16[ std::make_pair( TC_id.triggerCellU(),TC_id.triggerCellV() )   ];
+    if( triggerTools_.isScintillator(detid) ){
+      return TC_idV9.triggerCellU() << kWafer_offset_ | TC_idV9.triggerCellV(); //scintillator
     }
-    return TC_wafer<<kWafer_offset_ | sTC_id;
+    else {
+      int TC_wafer = TC_idV9.waferU() << kWafer_offset_ | TC_idV9.waferV() ;
+      int thickness = triggerTools_.thicknessIndex(detid);
+      
+      int sTC_idV9 =  stcMap4[ std::make_pair( TC_idV9.triggerCellU(),TC_idV9.triggerCellV() )   ];
+      
+      if (stcSize_.at(thickness) == kSTCsize16_){
+	sTC_idV9 =  stcMap16[ std::make_pair( TC_idV9.triggerCellU(),TC_idV9.triggerCellV() )   ];
+      }
+      return TC_wafer<<kWafer_offset_ | sTC_idV9;
+      
+    }
+    
+    
 
   }
-
+  else{
+    return -1;
+  }
+  
 }
 
 void 
