@@ -16,7 +16,6 @@ conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSele
                      TCThresholdBH_MIP = cms.double(0.),
                      triggercell_threshold_silicon = cms.double(2.), # MipT
                      triggercell_threshold_scintillator = cms.double(2.), # MipT
-                     stcSize = cms.vuint32(4,4,4)
                      )
 
 hgcalConcentratorProducer = cms.EDProducer(
