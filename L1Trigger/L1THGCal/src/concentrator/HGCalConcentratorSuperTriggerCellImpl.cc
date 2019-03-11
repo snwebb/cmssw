@@ -21,72 +21,6 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
     
 }
 
-std::map<std::pair<int,int>,int> HGCalConcentratorSuperTriggerCellImpl::stcMap4={
-
-  {std::make_pair(0,1),0}, {std::make_pair(1,1),0},
-  {std::make_pair(0,0),0}, {std::make_pair(1,0),0},
-  {std::make_pair(0,3),1}, {std::make_pair(1,3),1},
-  {std::make_pair(0,2),1}, {std::make_pair(1,2),1},
-  {std::make_pair(2,3),2}, {std::make_pair(3,3),2},
-  {std::make_pair(2,2),2}, {std::make_pair(3,2),2},
-  {std::make_pair(2,1),3}, {std::make_pair(3,1),3},
-  {std::make_pair(2,0),3}, {std::make_pair(3,0),3},
-
-  {std::make_pair(2,5),4}, {std::make_pair(3,5),4},
-  {std::make_pair(1,4),4}, {std::make_pair(2,4),4},
-  {std::make_pair(4,7),5}, {std::make_pair(5,7),5},
-  {std::make_pair(3,6),5}, {std::make_pair(4,6),5},
-  {std::make_pair(6,7),6}, {std::make_pair(7,7),6},
-  {std::make_pair(5,6),6}, {std::make_pair(6,6),6},
-  {std::make_pair(4,5),7}, {std::make_pair(5,5),7},
-  {std::make_pair(3,4),7}, {std::make_pair(4,4),7},
-
-  {std::make_pair(4,1),8}, {std::make_pair(5,2),8},
-  {std::make_pair(4,0),8}, {std::make_pair(5,1),8},
-  {std::make_pair(4,3),9}, {std::make_pair(5,4),9},
-  {std::make_pair(4,2),9}, {std::make_pair(5,3),9},
-  {std::make_pair(6,5),10}, {std::make_pair(7,6),10},
-  {std::make_pair(6,4),10}, {std::make_pair(7,5),10},
-  {std::make_pair(6,3),11}, {std::make_pair(7,4),11},
-  {std::make_pair(6,2),11}, {std::make_pair(7,3),11},
-
-};
-
-
-std::map<std::pair<int,int>,int> HGCalConcentratorSuperTriggerCellImpl::stcMap16={
-
-  {std::make_pair(0,1),0}, {std::make_pair(1,1),0},
-  {std::make_pair(0,0),0}, {std::make_pair(1,0),0},
-  {std::make_pair(0,3),0}, {std::make_pair(1,3),0},
-  {std::make_pair(0,2),0}, {std::make_pair(1,2),0},
-  {std::make_pair(2,3),0}, {std::make_pair(3,3),0},
-  {std::make_pair(2,2),0}, {std::make_pair(3,2),0},
-  {std::make_pair(2,1),0}, {std::make_pair(3,1),0},
-  {std::make_pair(2,0),0}, {std::make_pair(3,0),0},
-
-  {std::make_pair(2,5),1}, {std::make_pair(3,5),1},
-  {std::make_pair(1,4),1}, {std::make_pair(2,4),1},
-  {std::make_pair(4,7),1}, {std::make_pair(5,7),1},
-  {std::make_pair(3,6),1}, {std::make_pair(4,6),1},
-  {std::make_pair(6,7),1}, {std::make_pair(7,7),1},
-  {std::make_pair(5,6),1}, {std::make_pair(6,6),1},
-  {std::make_pair(4,5),1}, {std::make_pair(5,5),1},
-  {std::make_pair(3,4),1}, {std::make_pair(4,4),1},
-
-  {std::make_pair(4,1),2}, {std::make_pair(5,2),2},
-  {std::make_pair(4,0),2}, {std::make_pair(5,1),2},
-  {std::make_pair(4,3),2}, {std::make_pair(5,4),2},
-  {std::make_pair(4,2),2}, {std::make_pair(5,3),2},
-  {std::make_pair(6,5),2}, {std::make_pair(7,6),2},
-  {std::make_pair(6,4),2}, {std::make_pair(7,5),2},
-  {std::make_pair(6,3),2}, {std::make_pair(7,4),2},
-  {std::make_pair(6,2),2}, {std::make_pair(7,3),2},
-
-};
-
-
-
-
 int
 HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
 
@@ -123,17 +57,34 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
     else {
       int TC_wafer = TC_idV9.waferU() << kWafer_offset_ | TC_idV9.waferV() ;
       int thickness = triggerTools_.thicknessIndex(detid);
+      int TC_cell = TC_idV9.triggerCellU() << kThree_ | TC_idV9.triggerCellV();
       
-      int sTC_idV9 =  stcMap4[ std::make_pair( TC_idV9.triggerCellU(),TC_idV9.triggerCellV() )   ];
-      
-      if (stcSize_.at(thickness) == kSTCsize16_){
-	sTC_idV9 =  stcMap16[ std::make_pair( TC_idV9.triggerCellU(),TC_idV9.triggerCellV() )   ];
+      int TC_12th = ( TC_cell & kSplit12_v9_1 ) << kTwo_;
+      int TC_3rd = 0;
+
+      if ( TC_idV9.triggerCellU() > kThree_ || TC_idV9.triggerCellV() > kThree_ ){
+
+        if ( TC_idV9.triggerCellU() <=  TC_idV9.triggerCellV() ){
+          TC_12th = ( ( TC_cell & kSplit12_v9_2 ) << kTwo_ ) | kOne_;
+          TC_3rd = kOne_;
+        }
+        else{
+          TC_12th = ( ( TC_cell & kSplit12_v9_3 ) << kTwo_ ) | kTwo_;
+          TC_3rd = kTwo_;
+        }
       }
-      return TC_wafer<<kWafer_offset_ | sTC_idV9;
+      int TC_split = TC_12th;
+
+
+      if (stcSize_.at(thickness) == kSTCsize16_){
+        TC_split =  TC_3rd;
+      }
+
+      std::cout << TC_split << " - " << TC_idV9.triggerCellU() <<  " - " << TC_idV9.triggerCellV() << std::endl;
+      return TC_wafer<<kWafer_offset_ | TC_split;
       
     }
-    
-    
+        
 
   }
   else{
