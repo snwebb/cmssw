@@ -13,9 +13,9 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
             << "Inconsistent size of super trigger cell size vector" << stcSize_.size() ;
     }
     for(auto stc : stcSize_) {
-        if ( stc!=kSTCsizeFine_ && stc!=kSTCsizeCoarse_ && stc!=8){
+        if ( stc!=kSTCsizeFine_ && stc!=kSTCsizeCoarse_ && stc!=8 && stc!=2){
             throw cms::Exception("HGCTriggerParameterError")
-              << "Super Trigger Cell should be of size 4 or 16" ;
+              << "Super Trigger Cell should be of size 2, 4, 8 or 16" ;
         }
     }
     
@@ -23,6 +23,7 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
 
 std::map<int,int> 
 HGCalConcentratorSuperTriggerCellImpl::kSplit_ = {
+  {2, 0x3e},
   {4, 0x3a},
   {8, 0x38},
   {16, 0x30}
@@ -122,26 +123,18 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     trigCellVecInputEnlarged.push_back ( tc );
   }
 
+  //  std::cout << trigCellVecInputEnlarged.size() << " - " << trigCellVecInput.size() << std::endl;
 
-  //  DetId TC_id( tc.detId() );
-  //  if ( !triggerTools_.isScintillator( detid) ){   
-  //  std::cout << "** - " << STCs.size() << std::endl;
+  //If we want to find and create the missing TCs (i.e. TCs with pT = 0)
+  //   std::cout << "** - " << STCs.size() << std::endl;
+  
   for (auto& s: STCs){
-
-    //    std::cout << s.first << " - " << s.second.GetNTCs() << std::endl;
-
-    //    std::cout << s.second.GetTCList().size() << std::endl;
     bool satisfy = false;
+    //    std::cout << s.first << " - " << s.second.GetNTCs() << std::endl;
+    //Find and create missing TCs (for super TC 4)
+    int thickness = triggerTools_.thicknessIndex(s.second.GetTCList().at(0),true);
+    if ( stcSize_.at(thickness) ==  4 ){
 
-
-
-
-
-      //Find and create missing TCs
-    //      int mask = 1;
-      //      int mask2 = 0x4;
-
-      //      bool satisfy = false;
       for ( int i = 0; i < 2; i++ ){
 	for ( int j = 0; j < 2; j++ ){
 
@@ -149,36 +142,25 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
 	  for (auto tc:s.second.GetTCList() ){
 	    HGCalDetId TC_idV8(tc);
 	    if ( ((TC_idV8.cell() & 1) == i && ((TC_idV8.cell()>>2) & 1) == j )){
-	      //	      std::bitset<32> x(tc);
-	      //       	      std::cout << x << " - " << ((TC_idV8.cell()>>2) & mask) << " --- " << (TC_idV8.cell() & mask) <<  std::endl;
 	      satisfy = true;
 	    }
 
 	  }
-	  if ( satisfy == false ){
-
-	    //	    std::cout << "missing TC " << j << " - " << i << std::endl;
-	    //CREATE TC
-	    
+	  if ( satisfy == false ){//Create new TC
 	    int tc_base = s.second.GetTCList().at(0);
-	    //Clear relevant bits
+	    //Clear relevant bits	    
 	    tc_base = tc_base & ~(1 << 2); 
 	    tc_base = tc_base & ~(1); 
 	    //Set bits based on i and j values
 	    int newtc = tc_base | i;
 	    newtc = newtc | (j<<2);
 
-
-	    //	    std::bitset<32> x(newtc);
-	    //	    std::cout <<  "missing TC: " << x << " - " << j << " - " << i <<  std::endl;
-	      
-
-
 	    l1t::HGCalTriggerCell triggerCell;
 	    GlobalPoint point = triggerTools_.getTCPosition(newtc);
 	    math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
 	    triggerCell.setPosition(point);
 	    triggerCell.setP4(p4);
+	    triggerCell.setDetId(newtc);
 
 	    s.second.add( triggerCell );
 	    trigCellVecInputEnlarged.push_back ( triggerCell );
@@ -187,31 +169,74 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
 
 	}
       }
+    }
 
-  
+    else if (stcSize_.at(thickness) ==  2){
 
-      //      if ( satisfy == false );
-      //
-      //      trigCellVecInputEnlarged.push_back( newTC );
+      for ( int i = 0; i < 2; i++ ){
+
+	  satisfy = false;
+	  for (auto tc:s.second.GetTCList() ){
+	    HGCalDetId TC_idV8(tc);
+	    if ( ((TC_idV8.cell() & 1) == i)){
+	      
+	      // std::bitset<32> x(tc);
+	      // std::cout << "existing TC: "<<x << " --- " << (TC_idV8.cell() & 1) <<  std::endl;
+	      satisfy = true;
+	    }
+	  }
+	  if ( satisfy == false ){//Create new TC
+	    int tc_base = s.second.GetTCList().at(0);
+	    //Clear relevant bits	    
+	    tc_base = tc_base & ~(1); 
+	    //Set bits based on i value
+	    int newtc = tc_base | i;
+	    
+	    // std::bitset<32> x(newtc);
+	    // std::cout <<  "missing TC: " << x  << " - " << i <<  std::endl;
+	    
+	    l1t::HGCalTriggerCell triggerCell;
+	    GlobalPoint point = triggerTools_.getTCPosition(newtc);
+	    math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
+	    triggerCell.setPosition(point);
+	    triggerCell.setP4(p4);
+	    triggerCell.setDetId(newtc);
+	    
+	    s.second.add( triggerCell );
+	    trigCellVecInputEnlarged.push_back ( triggerCell );
+	      
+	  }
+	  
+      }
       
+    }
+    
+    
+    
 
-      
+    
 
   }
-  //  }
 
 
 
+  
+  //  std::cout << "Enlarge: " << trigCellVecInputEnlarged.size() << " - " << trigCellVecInput.size() << std::endl;  
   // second pass, write them out
-  //  for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
+
+  //  for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
     
     //If scintillator use a simple threshold cut
     if (tc.subdetId() == HGCHEB) {
       trigCellVecOutput.push_back( tc );
     } else {
       const auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
-      if (tc.detId() == stc.GetMaxId() ) {
+      //      if (tc.detId() == stc.GetMaxId() ) { //Standard selection
+
+      // std::bitset<32> x(tc.detId());
+      // std::cout << x << std::endl;
+      if (!(tc.detId() & 1)) { //Selecting even TCs (for the stc-2 case)
         trigCellVecOutput.push_back( tc );
         stc.assignEnergy(trigCellVecOutput.back());
       }
@@ -220,5 +245,5 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     }
     
   } // end of second loop
-  
+
 }
