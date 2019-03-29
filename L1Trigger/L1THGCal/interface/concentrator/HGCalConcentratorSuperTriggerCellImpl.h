@@ -43,7 +43,8 @@ class HGCalConcentratorSuperTriggerCellImpl
         float sumPt_, sumMipPt_;
         int sumHwPt_, maxHwPt_; 
         unsigned maxId_;
-        
+	std::vector<int> TClist_;
+
     public:
         SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0 ;}
         void add(const l1t::HGCalTriggerCell &c) {
@@ -54,6 +55,8 @@ class HGCalConcentratorSuperTriggerCellImpl
                 maxHwPt_ = c.hwPt();
                 maxId_ = c.detId();
             }
+
+	    TClist_.push_back( c.detId() );
         }
         void assignEnergy(l1t::HGCalTriggerCell &c) const {
             c.setHwPt(sumHwPt_);
@@ -61,6 +64,9 @@ class HGCalConcentratorSuperTriggerCellImpl
             c.setPt( sumPt_ );
         }
         unsigned GetMaxId()const{return maxId_;}
+        unsigned GetNTCs()const{return TClist_.size();}
+	std::vector<int> GetTCList()const{return TClist_;}
+
     };
     
 };
