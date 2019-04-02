@@ -44,6 +44,24 @@ class HGCalShowerShape{
     float sigmaRRMax(const l1t::HGCalMulticluster& c3d) const;  
     float sigmaRRMean(const l1t::HGCalMulticluster& c3d, float radius=5.) const;
 
+
+    /* int firstLayer_; */
+    /* int lastLayer_; */
+    /* int maxLayer_; */
+    /* int showerLength_; */
+    /* int coreShowerLength_;   */
+    /* float eMax_;  */
+    /* float sigmaZZ_; */
+    /* float sigmaEtaEtaTot_; */
+    /* float sigmaEtaEtaMax_;     */
+    /* float sigmaPhiPhiTot_; */
+    /* float sigmaPhiPhiMax_; */
+    /* float sigmaRRTot_; */
+    /* float sigmaRRMax_; */
+    /* float sigmaRRMean_; */
+
+    //    void setMultiClusterShowerShapeVariables(const l1t::HGCalMulticluster& c3d) const;
+
     private: 
     
     float meanX(const std::vector<pair<float,float> >& energy_X_tc) const;

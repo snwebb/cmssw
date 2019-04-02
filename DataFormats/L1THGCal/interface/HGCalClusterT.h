@@ -7,6 +7,7 @@
 #include "DataFormats/L1Trigger/interface/L1Candidate.h"
 #include "DataFormats/L1THGCal/interface/HGCalTriggerCell.h"
 #include "DataFormats/L1THGCal/interface/ClusterShapes.h"
+#include "L1Trigger/L1THGCal/interface/backend/HGCalShowerShape.h"
 #include "DataFormats/ForwardDetId/interface/ForwardSubdetector.h"
 #include "DataFormats/HcalDetId/interface/HcalSubdetector.h"
 #include "DataFormats/ForwardDetId/interface/HGCalTriggerDetId.h"
@@ -184,6 +185,24 @@ namespace l1t
       void sigmaRRTot(float sigmaRRTot) { sigmaRRTot_ = sigmaRRTot;}
       void sigmaRRMean(float sigmaRRMean) { sigmaRRMean_ = sigmaRRMean;}
       void sigmaZZ(float sigmaZZ) { sigmaZZ_ = sigmaZZ;}
+
+      /* void setShowerShape( const HGCalShowerShape& shape_ ){ */
+
+      /* 	showerLength( shape_.showerLength_ ); */
+      /* 	coreshowerLength( shape_.coreshowerLength_ ); */
+      /* 	firstLayer( shape_.firstLayer_ ); */
+      /* 	maxLayer( shape_.maxLayer_ ); */
+      /* 	sigmaEtaEtaTot( shape_.sigmaEtaEtaTot_ ); */
+      /* 	sigmaEtaEtaMax( shape_.sigmaEtaEtaMax_ ); */
+      /* 	sigmaPhiPhiTot( shape_.sigmaPhiPhiTot_ ); */
+      /* 	sigmaPhiPhiMax( shape_.sigmaPhiPhiMax_ ); */
+      /* 	sigmaRRTot( shape_.sigmaRRTot_ ); */
+      /* 	sigmaRRMax( shape_.sigmaRRMax_ ); */
+      /* 	sigmaRRMean( shape_.sigmaRRMean_ ); */
+      /* 	sigmaZZ( shape_.sigmaZZ_ ); */
+      /* 	eMax( shape_.eMax_ ); */
+
+      /* }; */
       
       /* operators */
       bool operator<(const HGCalClusterT<C>& cl) const {return mipPt() < cl.mipPt();}

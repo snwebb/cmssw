@@ -486,3 +486,22 @@ float HGCalShowerShape::sigmaRRTot(const l1t::HGCalCluster& c2d) const {
   return Srr;
   
 }       
+
+// void HGCalShowerShape::setMultiClusterShowerShapeVariables(const l1t::HGCalMulticluster& c3d) const {
+
+//   firstLayer_ = firstLayer( c3d );
+//   lastLayer_ = lastLayer( c3d );
+//   maxLayer_ = maxLayer( c3d );
+//   showerLength_ = showerLength( c3d );
+//   coreshowerLength_ = coreshowerLength( c3d );
+//   eMax_ = eMax( c3d );
+//   sigmaZZ_ = sigmaZZ( c3d );
+//   sigmaEtaEtaTot_ = sigmaEtaEtaTot( c3d );
+//   sigmaEtaEtaMax_ = sigmaEtaEtaMax( c3d );
+//   sigmaPhiPhiTot_ = sigmaPhiPhiTot( c3d );
+//   sigmaPhiPhiMax_ = sigmaPhiPhiMax( c3d );
+//   sigmaRRTot_ = sigmaRRTot( c3d );
+//   sigmaRRMax_ = sigmaRRMax( c3d );
+//   sigmaRRMean_ = sigmaRRMean( c3d );
+
+// }

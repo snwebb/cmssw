@@ -54,8 +54,8 @@ std::vector<l1t::HGCalMulticluster> HGCalHistoClusteringImpl::clusterSeedMulticl
         int z_side = triggerTools_.zside(clu->detId());
 
 
-        double radiusCoefficientA = dr_byLayer_coefficientA_.empty() ? dr_ : dr_byLayer_coefficientA_.at(triggerTools_.layerWithOffset(clu->detId())); // use at() to get the assert, for the moment
-        double radiusCoefficientB = dr_byLayer_coefficientB_.empty() ? 0 : dr_byLayer_coefficientB_.at(triggerTools_.layerWithOffset(clu->detId())); // use at() to get the assert, for the moment
+        double radiusCoefficientA = dr_byLayer_coefficientA_.empty() ? dr_ : dr_byLayer_coefficientA_[triggerTools_.layerWithOffset(clu->detId())];
+        double radiusCoefficientB = dr_byLayer_coefficientB_.empty() ? 0 : dr_byLayer_coefficientB_[triggerTools_.layerWithOffset(clu->detId())]; 
 
         double minDist = radiusCoefficientA + radiusCoefficientB*(kMidRadius_ - std::abs(clu->eta()) ) ;
 
@@ -157,6 +157,8 @@ finalizeClusters(std::vector<l1t::HGCalMulticluster>& multiclusters_in,
                 0. );
         multicluster.setP4( multiclusterP4 );
 
+	//	_shape.setMultiClusterShowerShapeVariables( multicluster );
+
         if( multicluster.pt() > ptC3dThreshold_ ){
             //compute shower shapes
             multicluster.showerLength(shape_.showerLength(multicluster));
@@ -172,6 +174,9 @@ finalizeClusters(std::vector<l1t::HGCalMulticluster>& multiclusters_in,
             multicluster.sigmaRRMax(shape_.sigmaRRMax(multicluster));
             multicluster.sigmaRRMean(shape_.sigmaRRMean(multicluster));
             multicluster.eMax(shape_.eMax(multicluster));
+
+
+	  //  	    multicluster.setShowerShape( _shape );
             // fill quality flag
             multicluster.setHwQual(id_->decision(multicluster));
             // fill H/E
