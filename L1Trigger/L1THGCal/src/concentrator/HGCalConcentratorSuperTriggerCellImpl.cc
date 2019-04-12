@@ -13,9 +13,9 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
             << "Inconsistent size of super trigger cell size vector" << stcSize_.size() ;
     }
     for(auto stc : stcSize_) {
-        if ( stc!=kSTCsizeFine_ && stc!=kSTCsizeCoarse_ ){
+        if ( stc!=kSTCsizeFine_ && stc!=kSTCsizeCoarse_ && stc!=kSTCsizeMid_ && stc!=kSTCsizeVeryFine_){
             throw cms::Exception("HGCTriggerParameterError")
-              << "Super Trigger Cell should be of size 4 or 16" ;
+              << "Super Trigger Cell should be of size 2, 4, 8 or 16" ;
         }
     }
     
@@ -23,7 +23,9 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
 
 std::map<int,int> 
 HGCalConcentratorSuperTriggerCellImpl::kSplit_ = {
+  {2, 0x3e},
   {4, 0x3a},
+  {8, 0x38},
   {16, 0x30}
 };
 
@@ -107,31 +109,158 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
 
 void 
 HGCalConcentratorSuperTriggerCellImpl::
+createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
+{ 
+
+
+    for (auto& s: STCs){
+      bool satisfy = false;
+      //Find and create missing TCs (for super TC 4)
+      int thickness = triggerTools_.thicknessIndex(s.second.GetTCList().at(0),true);
+      
+      if ( stcSize_.at(thickness) ==  4 ){
+	
+	for ( int i = 0; i < 2; i++ ){
+	  for ( int j = 0; j < 2; j++ ){
+	    
+	    satisfy = false;
+	    for (auto tc:s.second.GetTCList() ){
+	      HGCalDetId TC_idV8(tc);
+	      if ( ((TC_idV8.cell() & 1) == i && ((TC_idV8.cell()>>2) & 1) == j )){
+		satisfy = true;
+	      }
+	      
+	    }
+	    if ( satisfy == false ){//Create new TC
+	      int tc_base = s.second.GetTCList().at(0);
+	      //Clear relevant bits	    
+	      tc_base = tc_base & ~(1 << 2); 
+	      tc_base = tc_base & ~(1); 
+	      //Set bits based on i and j values
+	      int newtc = tc_base | i;
+	      newtc = newtc | (j<<2);
+	      
+	      l1t::HGCalTriggerCell triggerCell;
+	      GlobalPoint point = triggerTools_.getTCPosition(newtc);
+	      math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
+	      triggerCell.setPosition(point);
+	      triggerCell.setP4(p4);
+	      triggerCell.setDetId(newtc);
+	      
+	      s.second.add( triggerCell );
+	      trigCellVecOutput.push_back ( triggerCell );
+	      
+	    }
+	    
+	  }
+	}
+      }
+      
+      else if (stcSize_.at(thickness) == 2){
+	
+	for ( int i = 0; i < 2; i++ ){
+	  
+	  satisfy = false;
+	  for (auto tc:s.second.GetTCList() ){
+	    HGCalDetId TC_idV8(tc);
+	    if ( ((TC_idV8.cell() & 1) == i)){
+	      satisfy = true;
+	    }
+	  }
+	  if ( satisfy == false ){//Create new TC
+	    int tc_base = s.second.GetTCList().at(0);
+	    //Clear relevant bits	    
+	    tc_base = tc_base & ~(1); 
+	    //Set bits based on i value
+	    int newtc = tc_base | i;
+	    
+	    if ( !triggerTools_.validTriggerCell(newtc) ) {
+	      s.second.reject();
+	      continue;
+	    }
+	    
+	    
+	    l1t::HGCalTriggerCell triggerCell;
+	    GlobalPoint point = triggerTools_.getTCPosition(newtc);
+	    math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
+	    
+	    triggerCell.setPosition(point);	    
+	    triggerCell.setP4(p4);
+	    triggerCell.setDetId(newtc);
+	    
+	    s.second.add( triggerCell );
+	    
+	    trigCellVecOutput.push_back ( triggerCell );
+	    
+	  }
+	  
+	}
+	
+      }
+      
+    }
+        
+ 
+}
+
+void 
+HGCalConcentratorSuperTriggerCellImpl::
 superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
 { 
 
   std::unordered_map<unsigned,SuperTriggerCell> STCs;
+  std::vector<l1t::HGCalTriggerCell> trigCellVecInputEnlarged;
+
 
   // first pass, fill the super trigger cells
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
+    trigCellVecInputEnlarged.push_back ( tc );
     if (tc.subdetId() == HGCHEB) continue;
     STCs[getSuperTriggerCellId(tc.detId())].add(tc);
   }
-    
-  // second pass, write them out
-  for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
+
+  
+  //  bool doCoarseTCs = false;
+  bool doCoarseTCs = true; //Would have a configurable option if it was the correct way to go.
+  //If we want to create the coarse TCs
+  if ( doCoarseTCs ){
+    createMissingTriggerCells( STCs, trigCellVecInputEnlarged);
+  }
+
+
+
+    // second pass, write them out
+  for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
     
     //If scintillator use a simple threshold cut
     if (tc.subdetId() == HGCHEB) {
       trigCellVecOutput.push_back( tc );
     } else {
       const auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
-      if (tc.detId() == stc.GetMaxId() ) {
-        trigCellVecOutput.push_back( tc );
-        stc.assignEnergy(trigCellVecOutput.back());
+
+
+
+      //If selecting the max id
+      if ( !doCoarseTCs ){
+	if (tc.detId() == stc.GetMaxId() ) { //Standard selection
+	  trigCellVecOutput.push_back( tc );
+	  stc.assignEnergy(trigCellVecOutput.back());
+	}
       }
+      else{
+      //If selecting the even id (currently only works for coarse-2)
+	if (!(tc.detId() & 1)) { 
+	  if ( !stc.rejected() ) { //Selecting even TCs (for the stc-2 case)
+	    trigCellVecOutput.push_back( tc );
+	    stc.assignEnergy(trigCellVecOutput.back());
+	  }
+	}
+      }
+
     }
+
     
   } // end of second loop
-  
+
+
 }
