@@ -62,10 +62,22 @@ class HGCalConcentratorSuperTriggerCellImpl
 
 	    TClist_.push_back( c.detId() );
         }
-        void assignEnergy(l1t::HGCalTriggerCell &c) const {
+        void assignEnergy(l1t::HGCalTriggerCell &c, std::string type) const {
+
+	  if ( type == "STC" ){
             c.setHwPt(sumHwPt_);
             c.setMipPt(sumMipPt_);
             c.setPt( sumPt_ );
+	  }
+	  if ( type == "EqualShare" ){
+            c.setHwPt( sumHwPt_/4 );
+            c.setMipPt( sumMipPt_/4 );
+            c.setPt( sumPt_/4 );
+	  }
+
+
+
+
         }
         unsigned GetMaxId()const{return maxId_;}
         unsigned GetNTCs()const{return TClist_.size();}
