@@ -27,6 +27,7 @@ class HGCalConcentratorSuperTriggerCellImpl
   private:
 
     int getSuperTriggerCellId(int detid) const ;
+    int getCoarseTriggerCellId(int detid) const ;
     static std::map<int,int> kSplit_;
     static const int kWafer_offset_ = 6;
     static const int kSTCsizeCoarse_ = 16;
@@ -43,14 +44,15 @@ class HGCalConcentratorSuperTriggerCellImpl
     class SuperTriggerCell {
   
     private:
-        float sumPt_, sumMipPt_;
+        float sumPt_, sumMipPt_, fracsum_;
         int sumHwPt_, maxHwPt_; 
         unsigned maxId_;
 	std::vector<int> TClist_;
 	bool reject_;
+	//      int num_;
 
     public:
-        SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, reject_=false ;}
+        SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0,reject_=false ;}
         void add(const l1t::HGCalTriggerCell &c) {
             sumPt_ += c.pt();
             sumMipPt_ += c.mipPt();
@@ -62,6 +64,32 @@ class HGCalConcentratorSuperTriggerCellImpl
 
 	    TClist_.push_back( c.detId() );
         }
+        void getFractionSum(const l1t::HGCalTriggerCell &c) {
+
+	  if ( c.detId() != maxId_ ){
+	    double f = c.pt() / sumPt_ ;
+	    double frac = 0;
+	    /* if ( f < 1./6. ){ */
+	    /*   frac = 1./12.; */
+	    /* } */
+	    /* else if ( f < 2./3. ){ */
+	    /*   frac = 3./12.; */
+	    /* } */
+	    /* else{ */
+	    /*   frac = 5./12.; */
+	    /* } */
+	    if ( f < 1./8. ){
+	      frac = 1./16.;
+	    }
+	    else{
+	      frac = 1./4.;
+	    }
+	    fracsum_ += frac;
+	  }
+
+
+	}
+
         void assignEnergy(l1t::HGCalTriggerCell &c, std::string type) const {
 
 	  if ( type == "STC" ){
@@ -75,11 +103,35 @@ class HGCalConcentratorSuperTriggerCellImpl
             c.setPt( sumPt_/4 );
 	  }
 
+	  if ( type == "1bit" ){
 
-
+	    double f = c.pt() / sumPt_ ;
+	    double frac = 0;
+	    
+	    if ( c.detId() != maxId_ ){
+	      if ( f < 1./8. ){
+		frac = 1./16.;
+	      }
+	      else{
+		frac = 1./4.;
+	      }
+	    }
+	    else{
+	      frac = 1-fracsum_;
+	    }
+	    
+	    c.setHwPt(sumHwPt_ * frac );
+	    c.setMipPt(sumMipPt_ * frac );
+	    c.setPt( sumPt_ * frac );
+	  }
 
         }
+        void SetMaxTC(const l1t::HGCalTriggerCell &c){
+	  maxId_ = c.detId();
+	  maxHwPt_ = c.hwPt();
+	}
         unsigned GetMaxId()const{return maxId_;}
+        int GetMaxHwPt()const{return maxHwPt_;}
         unsigned GetNTCs()const{return TClist_.size();}
 	std::vector<int> GetTCList()const{return TClist_;}
         bool rejected()const{return reject_;}
@@ -87,6 +139,7 @@ class HGCalConcentratorSuperTriggerCellImpl
 
     };
     void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
+    void coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
     
 };
 
