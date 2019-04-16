@@ -64,6 +64,9 @@ class HGCalConcentratorSuperTriggerCellImpl
 
 	    TClist_.push_back( c.detId() );
         }
+        void addToList(const l1t::HGCalTriggerCell &c) {
+	  TClist_.push_back( c.detId() );
+	}
         void getFractionSum(const l1t::HGCalTriggerCell &c) {
 
 	  if ( c.detId() != maxId_ ){

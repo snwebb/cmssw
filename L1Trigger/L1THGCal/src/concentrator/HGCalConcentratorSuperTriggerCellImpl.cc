@@ -130,6 +130,7 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 
 
     for (auto& s: STCs){
+
       bool satisfy = false;
       //Find and create missing TCs (for super TC 4)
       int thickness = triggerTools_.thicknessIndex(s.second.GetTCList().at(0),true);
@@ -169,7 +170,7 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 	      triggerCell.setP4(p4);
 	      triggerCell.setDetId(newtc);
 	      
-	      s.second.add( triggerCell );
+	      s.second.addToList( triggerCell );
 	      trigCellVecOutput.push_back ( triggerCell );
 	      
 	    }
@@ -209,8 +210,8 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 	    triggerCell.setPosition(point);	    
 	    triggerCell.setP4(p4);
 	    triggerCell.setDetId(newtc);
-	    
-	    s.second.add( triggerCell );
+
+	    s.second.addToList( triggerCell );	    
 	    
 	    trigCellVecOutput.push_back ( triggerCell );
 	    
@@ -258,8 +259,8 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 		triggerCell.setPosition(point);	    
 		triggerCell.setP4(p4);
 		triggerCell.setDetId(newtc);
-		
-		s.second.add( triggerCell );		
+
+		s.second.addToList( triggerCell );	    		
 		trigCellVecOutput.push_back ( triggerCell );
 		
 	      }
@@ -289,8 +290,12 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 
 
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-    if (tc.subdetId() == HGCHEB) continue;
-    coarseTCs[getCoarseTriggerCellId(tc.detId())].add(tc);
+    if (tc.subdetId() != HGCHEB) {
+      coarseTCs[getCoarseTriggerCellId(tc.detId())].add(tc);
+    }
+    else{
+      trigCellVecOutput.push_back( tc );
+    }
   }
 
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
@@ -301,7 +306,7 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 
       if (!(tc.detId() & 1)) { //if even
 	const auto & ctc = coarseTCs[getCoarseTriggerCellId(tc.detId())]; 
-	auto stc = STCs[getSuperTriggerCellId(tc.detId())]; 
+	auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
 	trigCellVecOutput.push_back( tc );
 	ctc.assignEnergy(trigCellVecOutput.back(), "STC");	
 	// 	  //reassign max id to the correct one;
@@ -311,6 +316,10 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 	  if ( stc.GetMaxId() != tc.detId() ){
 	    stc.SetMaxTC( trigCellVecOutput.back() );
 	  }
+
+
+
+
 
 	}
 
@@ -329,12 +338,12 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 
 
 
-  //Scintialltor specific
-  for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-    if (tc.subdetId() == HGCHEB) {;
-      coarseTCs[getCoarseTriggerCellId(tc.detId())].add(tc);
-    }    
-  }
+  // //Scintialltor specific
+  // for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
+  //   if (tc.subdetId() == HGCHEB) {
+  //     coarseTCs[getCoarseTriggerCellId(tc.detId())].add(tc);
+  //   }    
+  // }
 
 
   
@@ -362,25 +371,30 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     STCs[getSuperTriggerCellId(tc.detId())].add(tc);
   }
 
+  
+
   createMissingTriggerCells( STCs, trigCellVecInputEnlarged);
+
 
   //Coarsen if needed
   std::vector<l1t::HGCalTriggerCell> trigCellVecInputCoarsened;
   coarsenTriggerCells( STCs, trigCellVecInputEnlarged, trigCellVecInputCoarsened);
+
   
-  // int choice = 0;//stc
-  //    int choice = 1;//equalshare
-    int choice = 2;//1 bit
+  //  int choice = 0;//stc
+  //      int choice = 1;//equalshare
+     int choice = 2;//1 bit
   
   if ( choice == 2 ){
     //Get the 1 bit fractions. There should be exactly 4 TCs per STC
     for (const l1t::HGCalTriggerCell & tc : trigCellVecInputCoarsened) {
       if (tc.subdetId() == HGCHEB) continue;
-      auto stc = STCs[getSuperTriggerCellId(tc.detId())]; 
+      //      auto stc = STCs[getSuperTriggerCellId(tc.detId())]; 
       STCs[getSuperTriggerCellId(tc.detId())].getFractionSum(tc);
 
     }
   }
+
 
     // second pass, write them out
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInputCoarsened) {
@@ -390,8 +404,11 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     } else {
       const auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
       if ( stc.rejected() ) continue;
+
       
       if ( (choice > 0) || ( choice == 0 && (tc.detId() == stc.GetMaxId()) ) )  {
+
+
 
 	trigCellVecOutput.push_back( tc );
 	
