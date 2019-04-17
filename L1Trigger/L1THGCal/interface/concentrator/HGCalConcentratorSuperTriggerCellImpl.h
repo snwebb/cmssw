@@ -55,9 +55,9 @@ class HGCalConcentratorSuperTriggerCellImpl
         float sumPt_, sumMipPt_, fracsum_;
         int sumHwPt_, maxHwPt_; 
         unsigned maxId_;
-	std::vector<int> TClist_;
-	bool reject_;
-	//      int num_;
+        std::vector<int> TClist_;
+        bool reject_;
+        //      int num_;
 
     public:
         SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0,reject_=false ;}
@@ -70,81 +70,72 @@ class HGCalConcentratorSuperTriggerCellImpl
                 maxId_ = c.detId();
             }
 
-	    TClist_.push_back( c.detId() );
+            TClist_.push_back( c.detId() );
         }
         void addToList(const l1t::HGCalTriggerCell &c) {
-	  TClist_.push_back( c.detId() );
-	}
+          TClist_.push_back( c.detId() );
+        }
         void getFractionSum(const l1t::HGCalTriggerCell &c) {
 
-	  if ( c.detId() != maxId_ ){
-	    double f = c.pt() / sumPt_ ;
-	    double frac = 0;
-	    /* if ( f < 1./6. ){ */
-	    /*   frac = 1./12.; */
-	    /* } */
-	    /* else if ( f < 2./3. ){ */
-	    /*   frac = 3./12.; */
-	    /* } */
-	    /* else{ */
-	    /*   frac = 5./12.; */
-	    /* } */
-	    if ( f < 1./8. ){
-	      frac = 1./16.;
-	    }
-	    else{
-	      frac = 1./4.;
-	    }
-	    fracsum_ += frac;
-	  }
+          if ( c.detId() != maxId_ ){
+            double f = c.pt() / sumPt_ ;
+            double frac = 0;
+            if ( f < 1./8. ){
+              frac = 1./16.;
+            }
+            else{
+              frac = 1./4.;
+            }
+            fracsum_ += frac;
+          }
 
 
-	}
+        }
 
         void assignEnergy(l1t::HGCalTriggerCell &c, std::string type) const {
 
-	  if ( type == "STC" ){
+          if ( type == "STC" ){
             c.setHwPt(sumHwPt_);
             c.setMipPt(sumMipPt_);
             c.setPt( sumPt_ );
-	  }
-	  if ( type == "EqualShare" ){
+          }
+          if ( type == "EqualShare" ){
             c.setHwPt( sumHwPt_/4 );
             c.setMipPt( sumMipPt_/4 );
             c.setPt( sumPt_/4 );
-	  }
+          }
 
-	  if ( type == "1bit" ){
+          if ( type == "1bit" ){
 
-	    double f = c.pt() / sumPt_ ;
-	    double frac = 0;
-	    
-	    if ( c.detId() != maxId_ ){
-	      if ( f < 1./8. ){
-		frac = 1./16.;
-	      }
-	      else{
-		frac = 1./4.;
-	      }
-	    }
-	    else{
-	      frac = 1-fracsum_;
-	    }
-	    
-	    c.setHwPt(sumHwPt_ * frac );
-	    c.setMipPt(sumMipPt_ * frac );
-	    c.setPt( sumPt_ * frac );
-	  }
+            double f = c.pt() / sumPt_ ;
+            double frac = 0;
+            
+            if ( c.detId() != maxId_ ){
+              if ( f < 1./8. ){
+                frac = 1./16.;
+              }
+              else{
+                frac = 1./4.;
+              }
+            }
+            else{
+              frac = 1-fracsum_;
+            }
+            
+            c.setHwPt(sumHwPt_ * frac );
+            c.setMipPt(sumMipPt_ * frac );
+            c.setPt( sumPt_ * frac );
+          }
 
         }
         void SetMaxTC(const l1t::HGCalTriggerCell &c){
-	  maxId_ = c.detId();
-	  maxHwPt_ = c.hwPt();
-	}
+          maxId_ = c.detId();
+          maxHwPt_ = c.hwPt();
+        }
         unsigned GetMaxId()const{return maxId_;}
         int GetMaxHwPt()const{return maxHwPt_;}
         unsigned GetNTCs()const{return TClist_.size();}
-	std::vector<int> GetTCList()const{return TClist_;}
+        std::vector<int> GetTCList()const{return TClist_;}
         bool rejected()const{return reject_;}
         void reject(){reject_ = true;}
 
