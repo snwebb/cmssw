@@ -26,6 +26,14 @@ class HGCalConcentratorSuperTriggerCellImpl
 
   private:
 
+    enum EnergyDivisionType{
+      superTriggerCell,
+      oneBitFraction,
+      equalShare
+    };
+    EnergyDivisionType energyDivisionType_;
+    bool fixedDataSize_;
+
     int getSuperTriggerCellId(int detid) const ;
     int getCoarseTriggerCellId(int detid) const ;
     static std::map<int,int> kSplit_;
