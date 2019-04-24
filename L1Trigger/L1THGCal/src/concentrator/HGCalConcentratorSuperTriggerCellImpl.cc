@@ -50,30 +50,6 @@ HGCalConcentratorSuperTriggerCellImpl::kSplit_v9_ = {
   {kSTCsizeMid_, kSplit_v9_Mid_},
 };
 
-// int
-// HGCalConcentratorSuperTriggerCellImpl::getCoarseTriggerCellId(int detid) const {
-
-//   DetId TC_id( detid );
-//   if ( TC_id.det() == DetId::Forward ){//V8
-    
-//     HGCalDetId TC_idV8(detid);
-    
-//     if( triggerTools_.isScintillator(detid) ){
-//       return TC_idV8.cell(); //scintillator
-//     }
-//     else{
-//       int TC_wafer = TC_idV8.wafer();
-//       int TC_split = ( TC_idV8.cell() & kSplit_.at( 2 ) );
-//       return TC_wafer<<kWafer_offset_ | TC_split;
-//     }
-//   }
-//   else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
-    
-//   }
-
-
-// }
-
 int
 HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid, int STCsize) const {
 

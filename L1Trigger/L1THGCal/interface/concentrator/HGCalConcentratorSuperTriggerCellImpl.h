@@ -36,7 +36,6 @@ class HGCalConcentratorSuperTriggerCellImpl
     bool fixedDataSize_;
 
     int getSuperTriggerCellId(int detid, int STCsize = -1) const ;
-    //    int getCoarseTriggerCellId(int detid) const ;
     static std::map<int,int> kSplit_;
     static std::map<int,int> kSplit_v9_;
     static const int kWafer_offset_ = 6;
@@ -71,7 +70,6 @@ class HGCalConcentratorSuperTriggerCellImpl
         unsigned maxId_;
         std::vector<int> TClist_;
         bool reject_;
-        //      int num_;
 
     public:
         SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0,reject_=false ;}
