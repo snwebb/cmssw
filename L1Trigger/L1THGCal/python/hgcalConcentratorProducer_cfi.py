@@ -5,6 +5,7 @@ import SimCalorimetry.HGCalSimProducers.hgcalDigitizer_cfi as digiparam
 adcSaturationBH_MIP = digiparam.hgchebackDigitizer.digiCfg.feCfg.adcSaturation_fC
 adcNbitsBH = digiparam.hgchebackDigitizer.digiCfg.feCfg.adcNbits
 
+<<<<<<< Updated upstream
 
 threshold_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
                                Method = cms.string('thresholdSelect'),
@@ -36,6 +37,7 @@ best_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcesso
 
 supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
                              Method = cms.string('superTriggerCellSelect'),
+                             type_energy_division = cms.string('equalShare'),# superTriggerCell,oneBitFraction,equalShare
                              stcSize = cms.vuint32(4,4,4)
                              )
 
@@ -49,7 +51,6 @@ phase2_hgcalV9.toModify(threshold_conc_proc,
                         triggercell_threshold_silicon=cms.double(1.5),  # MipT
                         triggercell_threshold_scintillator=cms.double(1.5),  # MipT
                         )
-
 
 hgcalConcentratorProducer = cms.EDProducer(
     "HGCalConcentratorProducer",
