@@ -5,7 +5,8 @@
 
 HGCalConcentratorSuperTriggerCellImpl::
 HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
-  : stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize"))
+  : energyType_(conf.getParameter<string>("type_energy_division")),
+    stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize"))
 {
 
     if ( stcSize_.size() != kNLayers_ ){
@@ -18,6 +19,17 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
               << "Super Trigger Cell should be of size 2, 4, 8 or 16" ;
         }
     }
+
+    if(energyType_=="superTriggerCell"){
+      energyDivisionType_ = superTriggerCell;
+    }else if(energyType_=="oneBitFraction"){
+      energyDivisionType_ = oneBitFraction;
+    }else if(energyType_=="equalShare"){
+      energyDivisionType_ = equalShare;
+    }else {
+      energyDivisionType_ = superTriggerCell;
+    } 
+
     
 }
 
@@ -338,7 +350,6 @@ HGCalConcentratorSuperTriggerCellImpl::
 superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
 { 
 
-  energyDivisionType_ = superTriggerCell;
   fixedDataSize_ = true;
 
   std::unordered_map<unsigned,SuperTriggerCell> STCs;

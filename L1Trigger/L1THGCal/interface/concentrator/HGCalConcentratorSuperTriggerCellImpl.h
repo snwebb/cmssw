@@ -32,6 +32,7 @@ class HGCalConcentratorSuperTriggerCellImpl
       equalShare
     };
     EnergyDivisionType energyDivisionType_;
+    std::string energyType_;
     bool fixedDataSize_;
 
     int getSuperTriggerCellId(int detid) const ;
