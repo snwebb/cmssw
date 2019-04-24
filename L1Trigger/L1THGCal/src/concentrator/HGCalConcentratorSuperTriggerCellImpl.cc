@@ -38,30 +38,53 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
 std::map<int,int> 
 HGCalConcentratorSuperTriggerCellImpl::kSplit_ = {
   {kSTCsizeVeryFine_, kSplit_v8_VeryFine_},
-  {kSTCsizeFine_, kSplit_v8_Fine_}
+  {kSTCsizeFine_, kSplit_v8_Fine_},
   {kSTCsizeMid_, kSplit_v8_Mid_},
   {kSTCsizeCoarse_, kSplit_v8_Coarse_}
 };
 
+std::map<int,int> 
+HGCalConcentratorSuperTriggerCellImpl::kSplit_v9_ = {
+  {kSTCsizeVeryFine_, kSplit_v9_VeryFine_},
+  {kSTCsizeFine_, kSplit_v9_Fine_},
+  {kSTCsizeMid_, kSplit_v9_Mid_},
+};
+
+// int
+// HGCalConcentratorSuperTriggerCellImpl::getCoarseTriggerCellId(int detid) const {
+
+//   DetId TC_id( detid );
+//   if ( TC_id.det() == DetId::Forward ){//V8
+    
+//     HGCalDetId TC_idV8(detid);
+    
+//     if( triggerTools_.isScintillator(detid) ){
+//       return TC_idV8.cell(); //scintillator
+//     }
+//     else{
+//       int TC_wafer = TC_idV8.wafer();
+//       int TC_split = ( TC_idV8.cell() & kSplit_.at( 2 ) );
+//       return TC_wafer<<kWafer_offset_ | TC_split;
+//     }
+//   }
+//   else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
+    
+//   }
+
+
+// }
+
 int
-HGCalConcentratorSuperTriggerCellImpl::getCoarseTriggerCellId(int detid) const {
+HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid, int STCsize) const {
 
-  HGCalDetId TC_idV8(detid);
-  
-  if( triggerTools_.isScintillator(detid) ){
-    return TC_idV8.cell(); //scintillator
+  if ( STCsize > 0 ){
+    if ( STCsize!=kSTCsizeFine_ && STCsize!=kSTCsizeCoarse_ && STCsize!=kSTCsizeMid_ && STCsize!=kSTCsizeVeryFine_){
+      throw cms::Exception("HGCTriggerParameterError")
+	<< "Super Trigger Cell should be of size "<<
+	kSTCsizeVeryFine_ << " or " << kSTCsizeFine_ <<
+	kSTCsizeMid_ << " or " << kSTCsizeCoarse_;
+    }
   }
-  else{
-    int TC_wafer = TC_idV8.wafer();
-    int TC_split = ( TC_idV8.cell() & kSplit_.at( 2 ) );
-    return TC_wafer<<kWafer_offset_ | TC_split;
-  }
-
-}
-
-int
-HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
-
 
   DetId TC_id( detid );
   if ( TC_id.det() == DetId::Forward ){//V8
@@ -74,7 +97,14 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
     else{
       int TC_wafer = TC_idV8.wafer();
       int thickness = triggerTools_.thicknessIndex(detid,true);
-      int TC_split = ( TC_idV8.cell() & kSplit_.at( stcSize_.at(thickness) ) );
+      int TC_split = -1;
+      if ( STCsize > 0 ){
+	( TC_idV8.cell() & kSplit_.at( STCsize ) );
+      }
+      else{
+	( TC_idV8.cell() & kSplit_.at( stcSize_.at(thickness) ) );
+      }
+
 
       return TC_wafer<<kWafer_offset_ | TC_split;
     }
@@ -117,19 +147,27 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid) const {
 
       }
 
-      TC_12th =  (rocnum << kRocShift_) | ( (Uprime << kUShift_ | Vprime) & kSplit_v9_ );
+      int TC_split = -1;
 
-      int TC_split =  TC_12th;
-      if (stcSize_.at(thickness) == kSTCsizeCoarse_){
-        TC_split =  rocnum;
+      if ( STCsize > 0 ){
+	TC_split =  (rocnum << kRocShift_) | ( (Uprime << kUShift_ | Vprime) & kSplit_v9_.at( 2 ) );
       }
+      else{
+	
+	if (stcSize_.at(thickness) == kSTCsizeCoarse_){
+	  TC_split =  rocnum;
+	}
+	else{
+	  TC_split =  (rocnum << kRocShift_) | ( (Uprime << kUShift_ | Vprime) & kSplit_v9_.at( stcSize_.at(thickness) ) );
+	}
 
+      }
+    
       return TC_wafer<<kWafer_offset_ | TC_split;
       
     }
     
     
-
   }
   else{
     return -1;
@@ -305,7 +343,7 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
     if (tc.subdetId() != HGCHEB) {
-      coarseTCs[getCoarseTriggerCellId(tc.detId())].add(tc);
+      coarseTCs[getSuperTriggerCellId(tc.detId(),2)].add(tc);
     }
     else{
       trigCellVecOutput.push_back( tc );
@@ -319,7 +357,7 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
      if ( thickness > 0 ){
 
       if (!(tc.detId() & 1)) { //if even
-        const auto & ctc = coarseTCs[getCoarseTriggerCellId(tc.detId())]; 
+        const auto & ctc = coarseTCs[getSuperTriggerCellId(tc.detId(),2)]; 
         auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
         trigCellVecOutput.push_back( tc );
         ctc.assignEnergy(trigCellVecOutput.back(), "STC");      

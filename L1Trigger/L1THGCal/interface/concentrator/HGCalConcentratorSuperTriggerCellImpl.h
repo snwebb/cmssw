@@ -35,9 +35,10 @@ class HGCalConcentratorSuperTriggerCellImpl
     std::string energyType_;
     bool fixedDataSize_;
 
-    int getSuperTriggerCellId(int detid) const ;
-    int getCoarseTriggerCellId(int detid) const ;
+    int getSuperTriggerCellId(int detid, int STCsize = -1) const ;
+    //    int getCoarseTriggerCellId(int detid) const ;
     static std::map<int,int> kSplit_;
+    static std::map<int,int> kSplit_v9_;
     static const int kWafer_offset_ = 6;
     static const int kSTCsizeCoarse_ = 16;
     static const int kSTCsizeMid_ = 8;
@@ -48,7 +49,10 @@ class HGCalConcentratorSuperTriggerCellImpl
     static const int kSplit_v8_Fine_ = 0x3a;
     static const int kSplit_v8_VeryFine_ = 0x3e;
     static const int kNLayers_ = 3;
-    static const int kSplit_v9_ = 0x36;
+    static const int kSplit_v9_VeryFine_ = 0x37;
+    static const int kSplit_v9_Fine_ = 0x36;
+    static const int kSplit_v9_Mid_ = 0x26;
+
 
     static const int kRocShift_ = 6;
     static const int kRotate4_ = 4;
