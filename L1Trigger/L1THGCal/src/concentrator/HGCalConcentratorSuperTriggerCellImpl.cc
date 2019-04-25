@@ -99,7 +99,6 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid, int STCs
       int TC_wafer = TC_idV9.waferU() << kWafer_offset_ | TC_idV9.waferV() ;
       int thickness = triggerTools_.thicknessIndex(detid);
 
-      int TC_12th = 0;
       int Uprime = 0;
       int Vprime = 0;
       int rocnum = detIdToROC_.getROCNumber( TC_idV9.triggerCellU() , TC_idV9.triggerCellV(), 1 );
