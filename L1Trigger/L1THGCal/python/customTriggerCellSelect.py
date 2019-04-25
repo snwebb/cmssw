@@ -4,10 +4,12 @@ from L1Trigger.L1THGCal.hgcalConcentratorProducer_cfi import threshold_conc_proc
 
 
 def custom_triggercellselect_supertriggercell(process,
-                                              stcSize=supertc_conc_proc.stcSize
+                                              stcSize=supertc_conc_proc.stcSize,
+                                              type_energy_division=supertc_conc_proc.type_energy_division
                                               ):
     parameters = supertc_conc_proc.clone()
     parameters.stcSize = stcSize
+    parameters.type_energy_division = type_energy_division
     process.hgcalConcentratorProducer.ProcessorParameters = parameters
     return process
 

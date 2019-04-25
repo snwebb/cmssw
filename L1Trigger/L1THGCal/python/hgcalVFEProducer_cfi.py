@@ -34,6 +34,8 @@ thicknessCorrection_200 = thicknessCorrection[1]
 triggerCellLsbBeforeCompression = 100./1024.
 triggerCellTruncationBits = 0
 
+sensor_thresh = 3.
+
 vfe_proc = cms.PSet( ProcessorName = cms.string('HGCalVFEProcessorSums'),
                      linLSB = cms.double(triggerCellLsbBeforeCompression),
                      adcsaturation = adcSaturation_fC,
@@ -46,8 +48,8 @@ vfe_proc = cms.PSet( ProcessorName = cms.string('HGCalVFEProcessorSums'),
                      scintillatorCellLSB_MIP = cms.double(float(adcSaturationBH_MIP.value())/(2**float(adcNbitsBH.value()))),
                      # cell thresholds before TC sums
                      # Cut at 3sigma of the noise
-                     thresholdsSilicon = cms.vdouble([3.*x for x in digiparam.HGCAL_noise_fC.values.value()]),
-                     thresholdScintillator = cms.double(3.*digiparam.HGCAL_noise_MIP.value.value()),
+                     thresholdsSilicon = cms.vdouble([sensor_thresh*x for x in digiparam.HGCAL_noise_fC.values.value()]),
+                     thresholdScintillator = cms.double(sensor_thresh*digiparam.HGCAL_noise_MIP.value.value()),
                      # Floating point compression
                      exponentBits = cms.uint32(4),
                      mantissaBits = cms.uint32(4),

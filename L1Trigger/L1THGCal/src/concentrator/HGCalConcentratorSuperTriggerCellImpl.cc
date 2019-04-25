@@ -75,10 +75,10 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid, int STCs
       int thickness = triggerTools_.thicknessIndex(detid,true);
       int TC_split = -1;
       if ( STCsize > 0 ){
-	( TC_idV8.cell() & kSplit_.at( STCsize ) );
+	TC_split = ( TC_idV8.cell() & kSplit_.at( STCsize ) );
       }
       else{
-	( TC_idV8.cell() & kSplit_.at( stcSize_.at(thickness) ) );
+        TC_split = (TC_idV8.cell() & kSplit_.at( stcSize_.at(thickness) ) );
       }
 
 
@@ -334,7 +334,7 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 
       if (!(tc.detId() & 1)) { //if even
         const auto & ctc = coarseTCs[getSuperTriggerCellId(tc.detId(),2)]; 
-        auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
+        const auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
         trigCellVecOutput.push_back( tc );
         ctc.assignEnergy(trigCellVecOutput.back(), "STC");      
         //        //reassign max id to the correct one;

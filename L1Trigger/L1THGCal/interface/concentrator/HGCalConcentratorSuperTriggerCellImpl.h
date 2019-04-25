@@ -147,12 +147,12 @@ class HGCalConcentratorSuperTriggerCellImpl
         unsigned GetMaxId()const{return maxId_;}
         int GetMaxHwPt()const{return maxHwPt_;}
         unsigned GetNTCs()const{return TClist_.size();}
-        std::vector<int> GetTCList()const{return TClist_;}
+        const std::vector<int>& GetTCList()const{return TClist_;}
         bool rejected()const{return reject_;}
         void reject(){reject_ = true;}
 
     };
-    void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
+    void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
     void coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
     
 };
