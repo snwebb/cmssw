@@ -153,7 +153,7 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid, int STCs
 
 void 
 HGCalConcentratorSuperTriggerCellImpl::
-createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
+createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const
 { 
 
 
@@ -334,7 +334,7 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
 
       if (!(tc.detId() & 1)) { //if even
         const auto & ctc = coarseTCs[getSuperTriggerCellId(tc.detId(),2)]; 
-        const auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
+        auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
         trigCellVecOutput.push_back( tc );
         ctc.assignEnergy(trigCellVecOutput.back(), "STC");      
         //        //reassign max id to the correct one;
