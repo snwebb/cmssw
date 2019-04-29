@@ -29,7 +29,8 @@ class HGCalConcentratorSuperTriggerCellImpl
     enum EnergyDivisionType{
       superTriggerCell,
       oneBitFraction,
-      equalShare
+      equalShare,
+      coarse2TriggerCell
     };
     EnergyDivisionType energyDivisionType_;
     std::string energyType_;
@@ -69,10 +70,9 @@ class HGCalConcentratorSuperTriggerCellImpl
         int sumHwPt_, maxHwPt_; 
         unsigned maxId_;
         std::vector<int> TClist_;
-        bool reject_;
 
     public:
-        SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0,reject_=false ;}
+        SuperTriggerCell(){  sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0 ;}
         void add(const l1t::HGCalTriggerCell &c) {
             sumPt_ += c.pt();
             sumMipPt_ += c.mipPt();
@@ -83,9 +83,6 @@ class HGCalConcentratorSuperTriggerCellImpl
             }
 
             TClist_.push_back( c.detId() );
-        }
-        void addToList(const l1t::HGCalTriggerCell &c) {
-          TClist_.push_back( c.detId() );
         }
         void getFractionSum(const l1t::HGCalTriggerCell &c) {
 
@@ -100,7 +97,6 @@ class HGCalConcentratorSuperTriggerCellImpl
             }
             fracsum_ += frac;
           }
-
 
         }
 
@@ -148,8 +144,6 @@ class HGCalConcentratorSuperTriggerCellImpl
         int GetMaxHwPt()const{return maxHwPt_;}
         unsigned GetNTCs()const{return TClist_.size();}
         const std::vector<int>& GetTCList()const{return TClist_;}
-        bool rejected()const{return reject_;}
-        void reject(){reject_ = true;}
 
     };
     void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
