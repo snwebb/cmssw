@@ -214,7 +214,7 @@ coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const 
         const auto & ctc = coarseTCs[getSuperTriggerCellId(tc.detId(),2)]; 
         auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
         trigCellVecOutput.push_back( tc );
-        ctc.assignEnergy(trigCellVecOutput.back(), "STC");      
+        ctc.assignEnergy(trigCellVecOutput.back(), superTriggerCell);      
         //        //reassign max id to the correct one;
         if ( trigCellVecOutput.back().hwPt() >= stc.GetMaxHwPt() ){
 
@@ -289,9 +289,11 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
 
         trigCellVecOutput.push_back( tc );
         
-        if (energyDivisionType_==coarse2TriggerCell || energyDivisionType_==superTriggerCell)  stc.assignEnergy(trigCellVecOutput.back(), "STC");        
-        if (energyDivisionType_==equalShare)  stc.assignEnergy(trigCellVecOutput.back(), "EqualShare");
-        if (energyDivisionType_==oneBitFraction)  stc.assignEnergy(trigCellVecOutput.back(), "1bit");
+	stc.assignEnergy(trigCellVecOutput.back(), energyDivisionType_);        
+
+        // if (energyDivisionType_==coarse2TriggerCell || energyDivisionType_==superTriggerCell)  
+        // if (energyDivisionType_==equalShare)  stc.assignEnergy(trigCellVecOutput.back(), "EqualShare");
+        // if (energyDivisionType_==oneBitFraction)  stc.assignEnergy(trigCellVecOutput.back(), "1bit");
         
       }
 

@@ -101,20 +101,19 @@ class HGCalConcentratorSuperTriggerCellImpl
 
         }
 
-        void assignEnergy(l1t::HGCalTriggerCell &c, std::string type) const {
+        void assignEnergy(l1t::HGCalTriggerCell &c, EnergyDivisionType energyDivisionType_) const {
 
-          if ( type == "STC" ){
+          if ( energyDivisionType_ == superTriggerCell || energyDivisionType_ == coarse2TriggerCell ){
             c.setHwPt(sumHwPt_);
             c.setMipPt(sumMipPt_);
             c.setPt( sumPt_ );
           }
-          if ( type == "EqualShare" ){
+	  else if ( energyDivisionType_ == equalShare ){
             c.setHwPt( sumHwPt_/4 );
             c.setMipPt( sumMipPt_/4 );
             c.setPt( sumPt_/4 );
           }
-
-          if ( type == "1bit" ){
+	  else if (  energyDivisionType_ == oneBitFraction ){
 
             double f = c.pt() / sumPt_ ;
             double frac = 0;
