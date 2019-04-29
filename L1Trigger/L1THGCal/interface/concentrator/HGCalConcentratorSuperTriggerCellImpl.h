@@ -34,12 +34,12 @@ class HGCalConcentratorSuperTriggerCellImpl
     };
     EnergyDivisionType energyDivisionType_;
     std::string energyType_;
-    bool fixedDataSize_;
 
     int getSuperTriggerCellId(int detid, int STCsize = -1) const ;
     static std::map<int,int> kSplit_;
     static std::map<int,int> kSplit_v9_;
     static const int kWafer_offset_ = 6;
+    static const int kSixBitMax_ = 63;
     static const int kSTCsizeCoarse_ = 16;
     static const int kSTCsizeMid_ = 8;
     static const int kSTCsizeFine_ = 4;
@@ -62,6 +62,7 @@ class HGCalConcentratorSuperTriggerCellImpl
     HGCalTriggerTools triggerTools_;
     HGCSiliconDetIdToROC detIdToROC_;
     std::vector<unsigned> stcSize_;
+    bool fixedDataSize_;
 
     class SuperTriggerCell {
   

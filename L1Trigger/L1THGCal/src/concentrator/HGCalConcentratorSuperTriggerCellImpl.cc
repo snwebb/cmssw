@@ -6,7 +6,8 @@
 HGCalConcentratorSuperTriggerCellImpl::
 HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
   : energyType_(conf.getParameter<string>("type_energy_division")),
-    stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize"))
+    stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize")),
+    fixedDataSize_(conf.getParameter<bool>("fixedDataSize"))
 {
 
     if ( stcSize_.size() != kNLayers_ ){
@@ -163,7 +164,7 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
       //Find and create missing TCs (for super TC 4)
       int thickness = triggerTools_.thicknessIndex(s.second.GetTCList().at(0),true);
       
-      int kSplitInv = ~(INT_MAX & kSplit_.at ( thickness ));
+      int kSplitInv = ~( (~kSixBitMax_) | kSplit_.at ( stcSize_.at(thickness) ) );
       int tc_base = s.second.GetTCList().at(0);
       for ( int i = 0; i < kSplitInv + 1 ; i++ ){
 	if (  (i & ~kSplitInv)!=i	 )  continue; 
@@ -177,13 +178,11 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 	l1t::HGCalTriggerCell triggerCell;
 	GlobalPoint point = triggerTools_.getTCPosition(newtc);
 	math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
-	
 	triggerCell.setPosition(point);
 	triggerCell.setP4(p4);
 	triggerCell.setDetId(newtc);
         
 	trigCellVecOutput.push_back ( triggerCell );
-        
 	
       }
     }
@@ -244,8 +243,6 @@ HGCalConcentratorSuperTriggerCellImpl::
 superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
 { 
 
-  fixedDataSize_ = true;
-
   std::unordered_map<unsigned,SuperTriggerCell> STCs;
   std::vector<l1t::HGCalTriggerCell> trigCellVecInputEnlarged;
 
@@ -255,24 +252,20 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     STCs[getSuperTriggerCellId(tc.detId())].add(tc);
   }
 
-
-  //The missing trigger cells are needed to be created both for coarsening the existing TC
+   //The missing trigger cells are needed to be created both for coarsening the existing TC
   // in the thick modules (for the fixed data size choice), or for any of the energy spread algorithms (except super TCs)
 
   createMissingTriggerCells( STCs, trigCellVecInputEnlarged);
-
 
   //Coarsen if needed
   std::vector<l1t::HGCalTriggerCell> trigCellVecInputCoarsened;
   if ( fixedDataSize_ == true ){
     coarsenTriggerCells( STCs, trigCellVecInputEnlarged, trigCellVecInputCoarsened);
-
   }
   else{
     trigCellVecInputCoarsened = trigCellVecInputEnlarged;
   }
 
-  
   if ( energyDivisionType_ == oneBitFraction ){
     //Get the 1 bit fractions. There should be exactly 4 TCs per STC
     for (const l1t::HGCalTriggerCell & tc : trigCellVecInputCoarsened) {
