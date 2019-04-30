@@ -68,7 +68,7 @@ class HGCalConcentratorSuperTriggerCellImpl
   
     private:
         float sumPt_, sumMipPt_, fracsum_;
-        int sumHwPt_, maxHwPt_; 
+        int sumHwPt_, maxHwPt_, stcId_; 
         unsigned maxId_;
         //        std::vector<int> TClist_;
         HGCalDetId STC_HGCalDetId;
