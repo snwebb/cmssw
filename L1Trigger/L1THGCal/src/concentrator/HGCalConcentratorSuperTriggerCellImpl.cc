@@ -168,7 +168,7 @@ HGCalConcentratorSuperTriggerCellImpl::
 createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const
 { 
 
-    for (auto& s: STCs){
+    for (const auto& s: STCs){
 
       //      bool satisfy = false;
       //Find and create missing TCs (for super TC 4)
