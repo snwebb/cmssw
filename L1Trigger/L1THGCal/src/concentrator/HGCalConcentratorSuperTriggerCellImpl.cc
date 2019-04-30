@@ -5,8 +5,7 @@
 
 HGCalConcentratorSuperTriggerCellImpl::
 HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
-  : energyType_(conf.getParameter<string>("type_energy_division")),
-    stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize")),
+  : stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize")),
     fixedDataSize_(conf.getParameter<bool>("fixedDataSize"))
 {
 
@@ -22,6 +21,8 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
               kSTCsizeMid_ << " or " << kSTCsizeCoarse_;
         }
     }
+
+    std::string energyType_(conf.getParameter<string>("type_energy_division"));
 
     if(energyType_=="superTriggerCell"){
       energyDivisionType_ = superTriggerCell;

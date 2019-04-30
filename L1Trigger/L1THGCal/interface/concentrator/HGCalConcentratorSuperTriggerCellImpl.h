@@ -33,7 +33,6 @@ class HGCalConcentratorSuperTriggerCellImpl
       coarse2TriggerCell
     };
     EnergyDivisionType energyDivisionType_;
-    std::string energyType_;
 
     int getSuperTriggerCellId(int detid, int STCsize = -1) const ;
     static std::map<int,int> kSplit_;
