@@ -91,10 +91,6 @@ HGCalConcentratorSuperTriggerCellImpl::getSuperTriggerCellId(int detid, int STCs
 
       detid =  (detid & ~(TC_idV8.kHGCalCellMask ) ) | TC_split;
 
-      //      TC_idV8(detid);
-
-      //      return TC_wafer<<kWafer_offset_ | TC_split;
-      //      return TC_split;
       return detid;
     }
 
@@ -261,9 +257,12 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
 
   // first pass, fill the "coarse" trigger cells
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-    if (tc.subdetId() == HGCHEB) continue;
+    if (tc.subdetId() == HGCHEB){
+      trigCellVecInputEnlarged.push_back( tc );
+      continue;
+    }
     int stcid = getSuperTriggerCellId(tc.detId());
-    STCs[getSuperTriggerCellId(tc.detId())].add(tc, stcid);
+    STCs[stcid].add(tc, stcid);
   }
 
    //The missing trigger cells are needed to be created both for coarsening the existing TC
@@ -296,18 +295,13 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     } else {
       const auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
     
-      if ( (energyDivisionType_!=superTriggerCell && energyDivisionType_!=coarse2TriggerCell) 
+      if ( (energyDivisionType_!=superTriggerCell && energyDivisionType_!=coarse2TriggerCell)
            || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
            || ( energyDivisionType_==coarse2TriggerCell && (!(tc.detId() & 1))  )
            )  {
 
         trigCellVecOutput.push_back( tc );
-        
         stc.assignEnergy(trigCellVecOutput.back(), energyDivisionType_);        
-
-        // if (energyDivisionType_==coarse2TriggerCell || energyDivisionType_==superTriggerCell)  
-        // if (energyDivisionType_==equalShare)  stc.assignEnergy(trigCellVecOutput.back(), "EqualShare");
-        // if (energyDivisionType_==oneBitFraction)  stc.assignEnergy(trigCellVecOutput.back(), "1bit");
         
       }
 

@@ -69,7 +69,6 @@ class HGCalConcentratorSuperTriggerCellImpl
         float sumPt_, sumMipPt_, fracsum_;
         int sumHwPt_, maxHwPt_, stcId_; 
         unsigned maxId_;
-        //        std::vector<int> TClist_;
         HGCalDetId STC_HGCalDetId;
         HGCalTriggerDetId STC_HGCalTriggerDetId;
 
@@ -85,9 +84,10 @@ class HGCalConcentratorSuperTriggerCellImpl
                 maxId_ = c.detId();
             }
             
-            if  ( stcId_ != 0 ){
+            if  ( stcId_ == 0 ){
               stcId_ = stcId;
             }
+
         }
         void getFractionSum(const l1t::HGCalTriggerCell &c) {
 
