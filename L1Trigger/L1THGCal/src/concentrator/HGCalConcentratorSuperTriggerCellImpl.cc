@@ -175,6 +175,13 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 
       for ( int i = 0; i < kSplitInv + 1 ; i++ ){
         if (  (i & kSplitInv)!=i         )  continue; 
+
+
+	if ( fixedDataSize_ ){
+	  if ( thickness > 0 ){
+	    if (i&1) continue;
+	  }
+	}
         
         int newtc = tc_base | i;
         
@@ -198,49 +205,30 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 
 void 
 HGCalConcentratorSuperTriggerCellImpl::
-coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
+coarsenTriggerCells(  std::vector<l1t::HGCalTriggerCell>& trigCellVecInput )
 { 
-  std::unordered_map<unsigned,SuperTriggerCell> coarseTCs;
 
-  for (const l1t::HGCalTriggerCell & tc : trigCellVecOutput) {
-    if (tc.subdetId() != HGCHEB) {
-      //      coarseTCs[getSuperTriggerCellId(tc.detId(),2)].add(tc,);
-      int stcid = getSuperTriggerCellId(tc.detId(),2);
-      coarseTCs[stcid].add(tc,stcid);
-    }
-    else{
-      trigCellVecOutput.push_back( tc );
-    }
-  }
-
-  for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
+  for  (l1t::HGCalTriggerCell & tc : trigCellVecInput) {
      if (tc.subdetId() == HGCHEB) continue;
 
      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-     if ( thickness > 0 ){
+     if ( thickness > 0 ) continue;
 
-      if (!(tc.detId() & 1)) { //if even
-        const auto & ctc = coarseTCs[getSuperTriggerCellId(tc.detId(),2)]; 
-        auto & stc = STCs[getSuperTriggerCellId(tc.detId())]; 
-        trigCellVecOutput.push_back( tc );
-        ctc.assignEnergy(trigCellVecOutput.back(), superTriggerCell);      
-        //        //reassign max id to the correct one;
-        if ( trigCellVecOutput.back().hwPt() >= stc.GetMaxHwPt() ){
+     int detid = tc.detId();
+     
+     if ( detid & 1) { //if even
+       std::cout << "NOT EVEN ? " << std::endl;
+     }
+   
+     int detid_odd = detid | 1;
+     GlobalPoint point_even = triggerTools_.getTCPosition(detid);
+     GlobalPoint point_odd = triggerTools_.getTCPosition(detid_odd);
+     GlobalPoint average_point  ( (point_even.x()+point_odd.x())/2,(point_even.y()+point_odd.y())/2,(point_even.z()+point_odd.z())/2  );     
+     
 
-          if ( stc.GetMaxId() != tc.detId() ){
-            stc.SetMaxTC( trigCellVecOutput.back() );
-          }
-
-        }
-      }
-
-    }
-    else{
-
-      trigCellVecOutput.push_back( tc );
-
-    }
-
+     math::PtEtaPhiMLorentzVector p4(tc.pt(), average_point.eta(), average_point.phi(), tc.mass());
+     tc.setPosition( average_point );
+     tc.setP4(p4);
 
   }
 
@@ -271,24 +259,20 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
   createMissingTriggerCells( STCs, trigCellVecInputEnlarged);
 
   //Coarsen if needed
-  std::vector<l1t::HGCalTriggerCell> trigCellVecInputCoarsened;
   if ( fixedDataSize_ == true ){
-    coarsenTriggerCells( STCs, trigCellVecInputEnlarged, trigCellVecInputCoarsened);
-  }
-  else{
-    trigCellVecInputCoarsened = trigCellVecInputEnlarged;
+    coarsenTriggerCells( trigCellVecInputEnlarged );
   }
 
   if ( energyDivisionType_ == oneBitFraction ){
     //Get the 1 bit fractions. There should be exactly 4 TCs per STC
-    for (const l1t::HGCalTriggerCell & tc : trigCellVecInputCoarsened) {
+    for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
       if (tc.subdetId() == HGCHEB) continue;
       STCs[getSuperTriggerCellId(tc.detId())].getFractionSum(tc);
     }
   }
 
   // second pass, write them out
-  for (const l1t::HGCalTriggerCell & tc : trigCellVecInputCoarsened) {
+  for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
     //If scintillator use a simple threshold cut
     if (tc.subdetId() == HGCHEB) {
       trigCellVecOutput.push_back( tc );

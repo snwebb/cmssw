@@ -150,7 +150,7 @@ class HGCalConcentratorSuperTriggerCellImpl
 
     };
     void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
-    void coarsenTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
+    void coarsenTriggerCells( std::vector<l1t::HGCalTriggerCell>& trigCellVecInput );
     
 };
 

@@ -4,6 +4,7 @@
 #include "L1Trigger/L1THGCal/interface/HGCalProcessorBase.h"
 #include "L1Trigger/L1THGCal/interface/concentrator/HGCalConcentratorSelectionImpl.h"
 #include "L1Trigger/L1THGCal/interface/concentrator/HGCalConcentratorSuperTriggerCellImpl.h"
+#include "L1Trigger/L1THGCal/interface/concentrator/HGCalConcentratorCoarsenerImpl.h"
 
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 #include "DataFormats/L1THGCal/interface/HGCalTriggerCell.h"
@@ -26,9 +27,11 @@ class HGCalConcentratorProcessorSelection : public HGCalConcentratorProcessorBas
 
   private:
     SelectionType selectionType_;
+    bool fixedDataSize_;
     
     std::unique_ptr<HGCalConcentratorSelectionImpl> concentratorProcImpl_;
     std::unique_ptr<HGCalConcentratorSuperTriggerCellImpl> concentratorSTCImpl_;
+    std::unique_ptr<HGCalConcentratorCoarsenerImpl> concentratorCoarsenerImpl_;
      
     HGCalTriggerTools triggerTools_;
 
