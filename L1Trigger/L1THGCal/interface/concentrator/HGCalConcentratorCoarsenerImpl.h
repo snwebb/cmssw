@@ -9,7 +9,7 @@
 #include "DataFormats/ForwardDetId/interface/HGCSiliconDetIdToROC.h"
 
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
-
+#include "L1Trigger/L1THGCal/interface/HGCalCoarseTriggerCellMapping.h"
 
       
 #include <array>
@@ -26,22 +26,20 @@ class HGCalConcentratorCoarsenerImpl
 
   private:
 
-    int getSuperTriggerCellId(int detid) const ;
-    static const int kSplit_v8_VeryFine_ = 0x3e;
-
     HGCalTriggerTools triggerTools_;
+    HGCalCoarseTriggerCellMapping coarseTCmapping_;
 
     class SuperTriggerCell {
   
     private:
-        float sumPt_, sumMipPt_, fracsum_;
-        int sumHwPt_, maxHwPt_, stcId_; 
+        float sumPt_, sumMipPt_;
+        int sumHwPt_, maxHwPt_; 
         unsigned maxId_;
 
     public:
         SuperTriggerCell(){  
-          sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0, stcId_ = 0; }
-        void add(const l1t::HGCalTriggerCell &c, int stcId) {
+          sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0; }
+        void add(const l1t::HGCalTriggerCell &c) {
             sumPt_ += c.pt();
             sumMipPt_ += c.mipPt();
             sumHwPt_ += c.hwPt();
@@ -50,10 +48,6 @@ class HGCalConcentratorCoarsenerImpl
                 maxId_ = c.detId();
             }
             
-            if  ( stcId_ == 0 ){
-              stcId_ = stcId;
-            }
-
         }
 
         void assignEnergy(l1t::HGCalTriggerCell &c) const {
@@ -63,12 +57,12 @@ class HGCalConcentratorCoarsenerImpl
             c.setPt( sumPt_ );
 
         }
+
         void setEvenDetId(l1t::HGCalTriggerCell &c) const {	  	  
 	  c.setDetId( c.detId() & ~1 );
         }
+
         unsigned GetMaxId()const{return maxId_;}
-        unsigned GetSTCId()const{return stcId_;}
-        int GetMaxHwPt()const{return maxHwPt_;}
 
     };
     

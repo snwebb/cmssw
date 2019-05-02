@@ -9,7 +9,7 @@
 #include "DataFormats/ForwardDetId/interface/HGCSiliconDetIdToROC.h"
 
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
-
+#include "L1Trigger/L1THGCal/interface/HGCalCoarseTriggerCellMapping.h"
 
       
 #include <array>
@@ -33,33 +33,9 @@ class HGCalConcentratorSuperTriggerCellImpl
       coarse2TriggerCell
     };
     EnergyDivisionType energyDivisionType_;
-
-    int getSuperTriggerCellId(int detid, int STCsize = -1) const ;
-    static std::map<int,int> kSplit_;
-    static std::map<int,int> kSplit_v9_;
-    static const int kWafer_offset_ = 6;
-    static const int kSixBitMax_ = 63;
-    static const int kSTCsizeCoarse_ = 16;
-    static const int kSTCsizeMid_ = 8;
-    static const int kSTCsizeFine_ = 4;
-    static const int kSTCsizeVeryFine_ = 2;
-    static const int kSplit_v8_Coarse_ = 0x30;
-    static const int kSplit_v8_Mid_ = 0x38;
-    static const int kSplit_v8_Fine_ = 0x3a;
-    static const int kSplit_v8_VeryFine_ = 0x3e;
     static const int kNLayers_ = 3;
-    static const int kSplit_v9_VeryFine_ = 0x37;
-    static const int kSplit_v9_Fine_ = 0x36;
-    static const int kSplit_v9_Mid_ = 0x26;
-
-
-    static const int kRocShift_ = 6;
-    static const int kRotate4_ = 4;
-    static const int kUShift_ = 3;
-
-
     HGCalTriggerTools triggerTools_;
-    HGCSiliconDetIdToROC detIdToROC_;
+    HGCalCoarseTriggerCellMapping coarseTCmapping_;
     std::vector<unsigned> stcSize_;
     bool fixedDataSize_;
 
@@ -69,8 +45,6 @@ class HGCalConcentratorSuperTriggerCellImpl
         float sumPt_, sumMipPt_, fracsum_;
         int sumHwPt_, maxHwPt_, stcId_; 
         unsigned maxId_;
-        HGCalDetId STC_HGCalDetId;
-        HGCalTriggerDetId STC_HGCalTriggerDetId;
 
     public:
         SuperTriggerCell(){  
@@ -150,7 +124,6 @@ class HGCalConcentratorSuperTriggerCellImpl
 
     };
     void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
-    void coarsenTriggerCells( std::vector<l1t::HGCalTriggerCell>& trigCellVecInput );
     
 };
 
