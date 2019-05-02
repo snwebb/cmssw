@@ -33,7 +33,7 @@ class HGCalConcentratorSuperTriggerCellImpl
       coarse2TriggerCell
     };
     EnergyDivisionType energyDivisionType_;
-    static const int kNLayers_ = 3;
+    static constexpr int kNLayers_ = 3;
     HGCalTriggerTools triggerTools_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
     std::vector<unsigned> stcSize_;
@@ -45,6 +45,7 @@ class HGCalConcentratorSuperTriggerCellImpl
         float sumPt_, sumMipPt_, fracsum_;
         int sumHwPt_, maxHwPt_, stcId_; 
         unsigned maxId_;
+	static constexpr float kEnergyShare_ = 4.;
 
     public:
         SuperTriggerCell(){  
@@ -87,9 +88,9 @@ class HGCalConcentratorSuperTriggerCellImpl
             c.setPt( sumPt_ );
           }
           else if ( energyDivisionType_ == equalShare ){
-            c.setHwPt( sumHwPt_/4 );
-            c.setMipPt( sumMipPt_/4 );
-            c.setPt( sumPt_/4 );
+            c.setHwPt( sumHwPt_/kEnergyShare_ );
+            c.setMipPt( sumMipPt_/kEnergyShare_ );
+            c.setPt( sumPt_/kEnergyShare_ );
           }
           else if (  energyDivisionType_ == oneBitFraction ){
 

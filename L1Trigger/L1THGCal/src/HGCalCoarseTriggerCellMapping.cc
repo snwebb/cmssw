@@ -8,7 +8,7 @@ HGCalCoarseTriggerCellMapping()
 }
 
 
-std::map<int,int> 
+const std::map<int,int> 
 HGCalCoarseTriggerCellMapping::kSplit_ = {
   {kCTCsizeVeryFine_, kSplit_v8_VeryFine_},
   {kCTCsizeFine_, kSplit_v8_Fine_},
@@ -16,7 +16,7 @@ HGCalCoarseTriggerCellMapping::kSplit_ = {
   {kCTCsizeCoarse_, kSplit_v8_Coarse_}
 };
 
-std::map<int,int> 
+const std::map<int,int> 
 HGCalCoarseTriggerCellMapping::kSplit_v9_ = {
   {kCTCsizeVeryFine_, kSplit_v9_VeryFine_},
   {kCTCsizeFine_, kSplit_v9_Fine_},
@@ -48,7 +48,7 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
     }
     else{
       int TC_split = (TC_idV8.cell() & kSplit_.at( ctcSize ) );
-      detid =  (detid & ~(TC_idV8.kHGCalCellMask ) ) | TC_split;
+      detid =  (detid & ~(HGCalDetId::kHGCalCellMask ) ) | TC_split;
       return detid;
     }
 
@@ -113,7 +113,7 @@ HGCalCoarseTriggerCellMapping::
 getConstituentTriggerCells( int ctcId, int ctcSize, std::vector<int> & output_ids ) const
 { 
   
-  int SplitInv = ~( (~kSixBitMax_) | kSplit_.at ( ctcSize ) );
+  int SplitInv = ~( (~kSTCidMask_) | kSplit_.at ( ctcSize ) );
 
   for ( int i = 0; i < SplitInv + 1 ; i++ ){
     if (  (i & SplitInv)!=i  )  continue; 

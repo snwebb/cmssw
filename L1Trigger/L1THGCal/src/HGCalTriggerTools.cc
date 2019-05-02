@@ -57,11 +57,6 @@ eventSetup(const edm::EventSetup& es)
 }
 
 bool HGCalTriggerTools::validTriggerCell(const DetId& id) const {
-  if(id.det() == DetId::Hcal || id.det()==DetId::HGCalEE) {
-    throw cms::Exception("hgcal::HGCalTriggerTools")
-      << "method getTCPosition called for DetId not belonging to a TC";
-  }
-
   return ( geom_->validTriggerCell(id) );
 }
 
