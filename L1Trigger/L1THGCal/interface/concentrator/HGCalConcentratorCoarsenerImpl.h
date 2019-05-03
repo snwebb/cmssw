@@ -29,42 +29,18 @@ class HGCalConcentratorCoarsenerImpl
     HGCalTriggerTools triggerTools_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
 
-    class SuperTriggerCell {
-  
-    private:
-        float sumPt_, sumMipPt_;
-        int sumHwPt_, maxHwPt_; 
-        unsigned maxId_;
+    std::unordered_map<int,float> coarseTCsumPt;
+    std::unordered_map<int,int> coarseTCsumHwPt;
+    std::unordered_map<int,int> coarseTCmaxHwPt;
+    std::unordered_map<int,float> coarseTCsumMipPt;
+    std::unordered_map<int,unsigned> coarseTCmaxId;
 
-    public:
-        SuperTriggerCell(){  
-          sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0; }
-        void add(const l1t::HGCalTriggerCell &c) {
-            sumPt_ += c.pt();
-            sumMipPt_ += c.mipPt();
-            sumHwPt_ += c.hwPt();
-            if (maxId_ == 0 || c.hwPt() > maxHwPt_) {
-                maxHwPt_ = c.hwPt();
-                maxId_ = c.detId();
-            }
-            
-        }
 
-        void assignEnergy(l1t::HGCalTriggerCell &c) const {
-
-            c.setHwPt(sumHwPt_);
-            c.setMipPt(sumMipPt_);
-            c.setPt( sumPt_ );
-
-        }
-
-        void setEvenDetId(l1t::HGCalTriggerCell &c) const {	  	  
-	  c.setDetId( c.detId() & ~1 );
-        }
-
-        unsigned GetMaxId()const{return maxId_;}
-
-    };
+    void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, int ctcid );
+    void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, int ctcid);
+    void setEvenDetId(l1t::HGCalTriggerCell &c) const {
+      c.setDetId( c.detId() & ~1 );
+    }
     
 };
 
