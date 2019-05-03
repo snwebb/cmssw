@@ -37,7 +37,7 @@ supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProce
                              Method = cms.string('superTriggerCellSelect'),
                              type_energy_division = cms.string('superTriggerCell'),# superTriggerCell,oneBitFraction,equalShare
                              stcSize = cms.vuint32(4,4,4),
-                             fixedDataSize = cms.bool(True)
+                             fixedDataSizePerHGCROC = cms.bool(True)
                              )
 
 
