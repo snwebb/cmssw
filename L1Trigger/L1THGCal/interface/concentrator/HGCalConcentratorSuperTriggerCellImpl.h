@@ -30,7 +30,6 @@ class HGCalConcentratorSuperTriggerCellImpl
       superTriggerCell,
       oneBitFraction,
       equalShare,
-      coarse2TriggerCell
     };
     EnergyDivisionType energyDivisionType_;
     static constexpr int kNLayers_ = 3;
