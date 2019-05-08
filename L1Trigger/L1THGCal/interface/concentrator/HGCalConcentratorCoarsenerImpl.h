@@ -28,6 +28,7 @@ class HGCalConcentratorCoarsenerImpl
 
     HGCalTriggerTools triggerTools_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
+    bool fixedDataSizePerHGCROC_;
 
     std::unordered_map<int,float> coarseTCsumPt;
     std::unordered_map<int,int> coarseTCsumHwPt;

@@ -53,7 +53,6 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
     for (const auto& s: STCs){
 
       int thickness = triggerTools_.thicknessIndex(s.second.GetSTCId(),true);
-      
       std::vector<int> output_ids;
       coarseTCmapping_.getConstituentTriggerCells( s.second.GetSTCId(), stcSize_.at(thickness), output_ids );
 
@@ -164,7 +163,10 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
   //Change coarse TC positions if needed
   if ( fixedDataSizePerHGCROC_ == true ){
     for  (l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
-      coarseTCmapping_.setCoarseTriggerCellPosition( tc );
+      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
+      if ( thickness > 0 ){
+	coarseTCmapping_.setCoarseTriggerCellPosition( tc );
+      }
     }
   }
 

@@ -5,6 +5,7 @@
 
 HGCalConcentratorCoarsenerImpl::
 HGCalConcentratorCoarsenerImpl(const edm::ParameterSet& conf)
+  : fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC"))
 {    
 }
 
@@ -40,6 +41,7 @@ coarseTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVe
   // first pass, fill the coarse trigger cell information
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
     if (tc.subdetId() == HGCHEB)  continue;
+
     int ctcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),2);
     updateCoarseTriggerCellMaps( tc, ctcid );
   }
@@ -49,12 +51,20 @@ coarseTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVe
       trigCellVecOutput.push_back( tc );
     } else {
       int ctcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),2);
-      
+      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
+
+      if ( fixedDataSizePerHGCROC_ && thickness == 0 ){
+	trigCellVecOutput.push_back( tc );
+	continue;
+      }      
+
       if ( tc.detId() == coarseTCmaxId[ctcid]){
-        trigCellVecOutput.push_back( tc );
+	trigCellVecOutput.push_back( tc );
 	assignCoarseTriggerCellEnergy( trigCellVecOutput.back(), ctcid );
 	setEvenDetId(trigCellVecOutput.back());        
+	coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back() );
       }
+
 
     }
   }

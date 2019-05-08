@@ -28,6 +28,7 @@ class HGCalConcentratorProcessorSelection : public HGCalConcentratorProcessorBas
   private:
     SelectionType selectionType_;
     bool fixedDataSizePerHGCROC_;
+    bool coarsenTriggerCells_;
     
     std::unique_ptr<HGCalConcentratorSelectionImpl> concentratorProcImpl_;
     std::unique_ptr<HGCalConcentratorSuperTriggerCellImpl> concentratorSTCImpl_;

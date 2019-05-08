@@ -9,7 +9,8 @@ DEFINE_EDM_PLUGIN(HGCalConcentratorFactory,
 
 HGCalConcentratorProcessorSelection::HGCalConcentratorProcessorSelection(const edm::ParameterSet& conf)  : 
   HGCalConcentratorProcessorBase(conf),
-  fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC"))
+  fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC")),
+  coarsenTriggerCells_(conf.getParameter<bool>("coarsenTriggerCells"))
 { 
   std::string selectionType(conf.getParameter<std::string>("Method"));
   if (selectionType == "thresholdSelect"){
@@ -23,14 +24,15 @@ HGCalConcentratorProcessorSelection::HGCalConcentratorProcessorSelection(const e
   else if (selectionType == "superTriggerCellSelect"){
     selectionType_ = superTriggerCellSelect;
     concentratorSTCImpl_ = std::make_unique<HGCalConcentratorSuperTriggerCellImpl>(conf);
-    if ( fixedDataSizePerHGCROC_ ) concentratorCoarsenerImpl_ = std::make_unique<HGCalConcentratorCoarsenerImpl>(conf);
   }
   else{
     throw cms::Exception("HGCTriggerParameterError")
       << "Unknown type of concentrator selection '" << selectionType << "'";
   }
 
-
+  if ( coarsenTriggerCells_ || fixedDataSizePerHGCROC_ ){   
+    concentratorCoarsenerImpl_ = std::make_unique<HGCalConcentratorCoarsenerImpl>(conf);
+  }
 
 }
 
@@ -47,10 +49,34 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
     tc_modules[module].push_back(trigCell);
   }
   if ( concentratorSTCImpl_) concentratorSTCImpl_->eventSetup(es);
+  if ( concentratorCoarsenerImpl_) concentratorCoarsenerImpl_->eventSetup(es);
 
   for( const auto& module_trigcell : tc_modules ) {
+
     std::vector<l1t::HGCalTriggerCell> trigCellVecOutput;
-    switch(selectionType_){
+    std::vector<l1t::HGCalTriggerCell> trigCellVecCoarsened;	  
+    if ( coarsenTriggerCells_ || fixedDataSizePerHGCROC_ ){
+      concentratorCoarsenerImpl_->coarseTriggerCellSelectImpl(module_trigcell.second,trigCellVecCoarsened);
+
+      switch(selectionType_){
+      case thresholdSelect:
+        concentratorProcImpl_->thresholdSelectImpl(trigCellVecCoarsened, trigCellVecOutput);
+        break;
+      case bestChoiceSelect:
+        concentratorProcImpl_->bestChoiceSelectImpl(trigCellVecCoarsened, trigCellVecOutput);     
+        break;
+      case superTriggerCellSelect:
+	concentratorSTCImpl_->superTriggerCellSelectImpl(trigCellVecCoarsened, trigCellVecOutput);
+        break;
+      default:
+        // Should not happen, selection type checked in constructor
+        break;
+      }
+
+    }
+    else{
+      
+      switch(selectionType_){
       case thresholdSelect:
         concentratorProcImpl_->thresholdSelectImpl(module_trigcell.second, trigCellVecOutput);
         break;
@@ -58,19 +84,18 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
         concentratorProcImpl_->bestChoiceSelectImpl(module_trigcell.second, trigCellVecOutput);     
         break;
       case superTriggerCellSelect:
-	if ( fixedDataSizePerHGCROC_ ){
-	  std::vector<l1t::HGCalTriggerCell> trigCellVecCoarsened;	  
-	  concentratorCoarsenerImpl_->coarseTriggerCellSelectImpl(module_trigcell.second,trigCellVecCoarsened);
-	  concentratorSTCImpl_->superTriggerCellSelectImpl(trigCellVecCoarsened, trigCellVecOutput);
-	}
-	else{
-	  concentratorSTCImpl_->superTriggerCellSelectImpl(module_trigcell.second, trigCellVecOutput);
-	}
+	concentratorSTCImpl_->superTriggerCellSelectImpl(module_trigcell.second, trigCellVecOutput);
         break;
       default:
         // Should not happen, selection type checked in constructor
         break;
+      }
+      
+      
+      
     }
+    
+    
     for( const auto& trigCell : trigCellVecOutput){
       triggerCellCollOutput.push_back(0, trigCell);     
     }
