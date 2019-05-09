@@ -35,8 +35,6 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
 
       nTriggerCellsForDivision_ = conf.getParameter<int>("nTriggerCellsForDivision");
 
-    }else if(energyType_=="coarse2TriggerCell"){
-      energyDivisionType_ = coarse2TriggerCell;
     }else {
       energyDivisionType_ = superTriggerCell;
     } 
@@ -85,7 +83,7 @@ void
 HGCalConcentratorSuperTriggerCellImpl::
  assignSuperTriggerCellEnergy(l1t::HGCalTriggerCell &c, const SuperTriggerCell &stc) const {
       
-  if ( energyDivisionType_ == superTriggerCell || energyDivisionType_ == coarse2TriggerCell ){
+  if ( energyDivisionType_ == superTriggerCell ){
     c.setHwPt(stc.GetSumHwPt());
     c.setMipPt(stc.GetSumMipPt());
     c.setPt(stc.GetSumPt());
@@ -194,11 +192,10 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
       int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
       const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
     
-      if ( (energyDivisionType_!=superTriggerCell && energyDivisionType_!=coarse2TriggerCell)
+      if ( (energyDivisionType_!=superTriggerCell)
            || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
-           || ( energyDivisionType_==coarse2TriggerCell && (!(tc.detId() & 1))  )
            )  {
-
+	
         trigCellVecOutput.push_back( tc );
         assignSuperTriggerCellEnergy(trigCellVecOutput.back(), stc);        
         

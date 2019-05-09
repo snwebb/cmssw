@@ -16,6 +16,7 @@ threshold_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorPro
                                TCThresholdBH_MIP = cms.double(0.),
                                triggercell_threshold_silicon = cms.double(2.), # MipT
                                triggercell_threshold_scintillator = cms.double(2.), # MipT
+                               coarsenTriggerCells = cms.bool(False)
                                )
 
 
@@ -30,6 +31,7 @@ best_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcesso
                           TCThresholdBH_MIP = cms.double(0.),
                           triggercell_threshold_silicon = cms.double(0.),
                           triggercell_threshold_scintillator = cms.double(0.),
+                          coarsenTriggerCells = cms.bool(False)
                           )
 
 
@@ -37,7 +39,8 @@ supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProce
                              Method = cms.string('superTriggerCellSelect'),
                              type_energy_division = cms.string('superTriggerCell'),# superTriggerCell,oneBitFraction,equalShare
                              stcSize = cms.vuint32(4,4,4),
-                             fixedDataSizePerHGCROC = cms.bool(True)
+                             fixedDataSizePerHGCROC = cms.bool(False)
+                             coarsenTriggerCells = cms.bool(False)
                              )
 
 
