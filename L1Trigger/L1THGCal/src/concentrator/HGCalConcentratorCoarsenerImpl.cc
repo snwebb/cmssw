@@ -13,14 +13,15 @@ HGCalConcentratorCoarsenerImpl(const edm::ParameterSet& conf)
 void 
 HGCalConcentratorCoarsenerImpl::
 updateCoarseTriggerCellMaps(const l1t::HGCalTriggerCell& tc, int ctcid){
+  
 
-  coarseTCsumPt[ctcid] += tc.pt();
-  coarseTCsumHwPt[ctcid] += tc.hwPt();
-  coarseTCsumMipPt[ctcid] += tc.mipPt();
+  coarseTCMap_[ctcid].sumPt += tc.pt();
+  coarseTCMap_[ctcid].sumHwPt += tc.hwPt();
+  coarseTCMap_[ctcid].sumMipPt += tc.mipPt();
 
-  if ( tc.hwPt() > coarseTCmaxHwPt[ctcid] ){
-    coarseTCmaxId[ctcid] = tc.detId();
-    coarseTCmaxHwPt[ctcid] = tc.hwPt();
+  if ( tc.hwPt() > coarseTCMap_[ctcid].sumHwPt ){
+    coarseTCMap_[ctcid].maxId = tc.detId();
+    coarseTCMap_[ctcid].maxHwPt = tc.hwPt();
   }
 
 }
@@ -28,9 +29,9 @@ updateCoarseTriggerCellMaps(const l1t::HGCalTriggerCell& tc, int ctcid){
 void
 HGCalConcentratorCoarsenerImpl::
 assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &tc, int ctcid){
-    tc.setHwPt(coarseTCsumHwPt[ctcid]);
-    tc.setMipPt(coarseTCsumMipPt[ctcid]);
-    tc.setPt(coarseTCsumPt[ctcid]);
+    tc.setHwPt(coarseTCMap_[ctcid].sumHwPt);
+    tc.setMipPt(coarseTCMap_[ctcid].sumMipPt);
+    tc.setPt(coarseTCMap_[ctcid].sumPt);
 }
 
 void 
@@ -58,7 +59,7 @@ coarseTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVe
 	continue;
       }      
 
-      if ( tc.detId() == coarseTCmaxId[ctcid]){
+      if ( tc.detId() == coarseTCMap_[ctcid].maxId){
 	trigCellVecOutput.push_back( tc );
 	assignCoarseTriggerCellEnergy( trigCellVecOutput.back(), ctcid );
 	setEvenDetId(trigCellVecOutput.back());        

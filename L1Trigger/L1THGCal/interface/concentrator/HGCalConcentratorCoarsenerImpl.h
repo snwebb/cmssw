@@ -30,12 +30,17 @@ class HGCalConcentratorCoarsenerImpl
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
     bool fixedDataSizePerHGCROC_;
 
-    std::unordered_map<int,float> coarseTCsumPt;
-    std::unordered_map<int,int> coarseTCsumHwPt;
-    std::unordered_map<int,int> coarseTCmaxHwPt;
-    std::unordered_map<int,float> coarseTCsumMipPt;
-    std::unordered_map<int,unsigned> coarseTCmaxId;
+    struct coarseTC{
 
+      float sumPt;
+      int sumHwPt;
+      int maxHwPt;
+      float sumMipPt;
+      unsigned maxId;
+
+    };
+
+    std::unordered_map<int,coarseTC> coarseTCMap_;
 
     void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, int ctcid );
     void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, int ctcid);
