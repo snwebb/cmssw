@@ -33,6 +33,9 @@ class HGCalConcentratorSuperTriggerCellImpl
     };
     EnergyDivisionType energyDivisionType_;
     static constexpr int kNLayers_ = 3;
+    static constexpr int kHighDensityThickness_ = 0;
+    static constexpr int kOddNumberMask_ = 1;
+
     HGCalTriggerTools triggerTools_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
     std::vector<unsigned> stcSize_;
@@ -76,7 +79,10 @@ class HGCalConcentratorSuperTriggerCellImpl
         }
 	void addToFractionSum(float frac){
 	  fracsum_ += frac;
-	  if ( fracsum_ > 1 ) fracsum_ = 1;
+	  if ( fracsum_ > 1 ){
+	    throw cms::Exception("HGCTriggerParameterError")
+	      << "Sum of Trigger Cell fractions should not be greater than 1" ;
+	  }
 	}
         unsigned GetMaxId()const{return maxId_;}
         unsigned GetSTCId()const{return stcId_;}
@@ -91,7 +97,7 @@ class HGCalConcentratorSuperTriggerCellImpl
     };
     void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
     void assignSuperTriggerCellEnergy(l1t::HGCalTriggerCell &c, const SuperTriggerCell &stc) const;
-    float getTriggerCellOneBitFraction( float tcPt, float sumPt );
+    float getTriggerCellOneBitFraction( float tcPt, float sumPt ) const;
 };
 
 #endif

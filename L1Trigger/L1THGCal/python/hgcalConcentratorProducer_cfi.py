@@ -43,6 +43,30 @@ supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProce
                              coarsenTriggerCells = cms.bool(False)
                              )
 
+typeenergydivision_onebitfraction_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
+                             Method = cms.string('superTriggerCellSelect'),
+                             type_energy_division = cms.string('oneBitFraction'),
+                             stcSize = cms.vuint32(4,8,8),
+                             fixedDataSizePerHGCROC = cms.bool(True),
+                             coarsenTriggerCells = cms.bool(False),
+                             oneBitFractionThreshold = 0.125,
+                             oneBitFractionLowValue = 0.0625,
+                             oneBitFractionHighValue = 0.25,
+                             )
+
+
+typeenergydivision_equalshare_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
+                             Method = cms.string('superTriggerCellSelect'),
+                             type_energy_division = cms.string('equalShare'),
+                             stcSize = cms.vuint32(4,8,8),
+                             fixedDataSizePerHGCROC = cms.bool(True),
+                             coarsenTriggerCells = cms.bool(False),
+                             nTriggerCellsForDivision = 4
+)
+
+
+
+
 
 from Configuration.Eras.Modifier_phase2_hgcalV9_cff import phase2_hgcalV9
 # V9 samples have a different defintiion of the dEdx calibrations. To account for it

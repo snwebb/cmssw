@@ -14,10 +14,15 @@ class HGCalCoarseTriggerCellMapping
 {
   public:
     HGCalCoarseTriggerCellMapping();
-    void getConstituentTriggerCells( int ctcId, int ctcSize, std::vector<int> & output_ids) const;
-    void setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc );
+    std::vector<int> getConstituentTriggerCells( int ctcId, int ctcSize) const;
+    void setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size ) const;
     int getCoarseTriggerCellId(int detid, int CTCsize = -1) const ;
     void checkSizeValidity(int CTCsize)const;
+
+    static constexpr int kCTCsizeCoarse_ = 16;
+    static constexpr int kCTCsizeMid_ = 8;
+    static constexpr int kCTCsizeFine_ = 4;
+    static constexpr int kCTCsizeVeryFine_ = 2;    
 
   private:
 
@@ -26,10 +31,6 @@ class HGCalCoarseTriggerCellMapping
     static const std::map<int,int> kSplit_v9_;
     static constexpr int kWafer_offset_ = 6;
     static constexpr int kSTCidMask_ = 63;
-    static constexpr int kCTCsizeCoarse_ = 16;
-    static constexpr int kCTCsizeMid_ = 8;
-    static constexpr int kCTCsizeFine_ = 4;
-    static constexpr int kCTCsizeVeryFine_ = 2;
     static constexpr int kSplit_v8_Coarse_ = 0x30;
     static constexpr int kSplit_v8_Mid_ = 0x38;
     static constexpr int kSplit_v8_Fine_ = 0x3a;

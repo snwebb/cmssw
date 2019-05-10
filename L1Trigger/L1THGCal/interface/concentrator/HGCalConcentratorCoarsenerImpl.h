@@ -29,6 +29,8 @@ class HGCalConcentratorCoarsenerImpl
     HGCalTriggerTools triggerTools_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
     bool fixedDataSizePerHGCROC_;
+    static constexpr int kCoarse2Size_ = 2;
+    static constexpr int kHighDensityThickness_ = 0;
 
     struct coarseTC{
 

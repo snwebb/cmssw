@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import SimCalorimetry.HGCalSimProducers.hgcalDigitizer_cfi as digiparam
-from L1Trigger.L1THGCal.hgcalConcentratorProducer_cfi import threshold_conc_proc, best_conc_proc, supertc_conc_proc
+from L1Trigger.L1THGCal.hgcalConcentratorProducer_cfi import threshold_conc_proc, best_conc_proc, supertc_conc_proc, typeenergydivision_onebitfraction_proc, typeenergydivision_equalshare_proc
 
 
 def custom_triggercellselect_supertriggercell(process,
@@ -39,14 +39,14 @@ def custom_triggercellselect_bestchoice(process,
 
 
 def custom_typeenergydivision_onebitfraction(process,
-                                             oneBitFractionThreshold = 0.125,
-                                             oneBitFractionLowValue = 0.0625,
-                                             oneBitFractionHighValue = 0.25,
+                                             oneBitFractionThreshold = typeenergydivision_onebitfraction_proc.oneBitFractionThreshold,
+                                             oneBitFractionLowValue = typeenergydivision_onebitfraction_proc.oneBitFractionLowValue,
+                                             oneBitFractionHighValue = typeenergydivision_onebitfraction_proc.oneBitFractionHighValue,
                                              ):
-    parameters = process.hgcalConcentratorProducer.ProcessorParameters = parameters
-    parameters.oneBitFractionThreshold = cms.double(oneBitFractionThreshold);
-    parameters.oneBitFractionLowValue = cms.double(oneBitFractionLowValue);
-    parameters.oneBitFractionHighValue = cms.double(oneBitFractionHighValue);
+    parameters = typeenergydivision_onebitfraction_proc.clone()
+    parameters.oneBitFractionThreshold = oneBitFractionThreshold;
+    parameters.oneBitFractionLowValue = oneBitFractionLowValue;
+    parameters.oneBitFractionHighValue = oneBitFractionHighValue;
 
     return process
 
@@ -56,7 +56,7 @@ def custom_typeenergydivision_onebitfraction(process,
 def custom_typeenergydivision_equalshare(process,
                                          nTriggerCellsForDivision = 4
                                          ):
-    parameters = process.hgcalConcentratorProducer.ProcessorParameters = parameters
-    parameters.nTriggerCellsForDivision = cms.int32(nTriggerCellsForDivision);
+    parameters = typeenergydivision_equalshare_proc.clone()
+    parameters.nTriggerCellsForDivision = nTriggerCellsForDivision;
 
     return process

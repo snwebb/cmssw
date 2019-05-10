@@ -108,11 +108,12 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
   
 }
 
-void 
+std::vector<int>
 HGCalCoarseTriggerCellMapping::
-getConstituentTriggerCells( int ctcId, int ctcSize, std::vector<int> & output_ids ) const
+getConstituentTriggerCells( int ctcId, int ctcSize) const
 { 
   
+  std::vector<int> output_ids;
   int SplitInv = ~( (~kSTCidMask_) | kSplit_.at ( ctcSize ) );
 
   for ( int i = 0; i < SplitInv + 1 ; i++ ){
@@ -121,22 +122,37 @@ getConstituentTriggerCells( int ctcId, int ctcSize, std::vector<int> & output_id
     output_ids.emplace_back( ctcId | i );
 
   }
+  return output_ids;
 
 }
 
 
 void 
 HGCalCoarseTriggerCellMapping::
-setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc )
+setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size ) const
 { 
 
      if (tc.subdetId() == HGCHEB) return;
 
-     int detid = tc.detId();        
-     int detid_odd = detid | 1;
-     GlobalPoint point_even = triggerTools_.getTCPosition(detid);
-     GlobalPoint point_odd = triggerTools_.getTCPosition(detid_odd);
-     GlobalPoint average_point  ( (point_even.x()+point_odd.x())/2,(point_even.y()+point_odd.y())/2,(point_even.z()+point_odd.z())/2  );     
+     std::vector<int> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId(tc.detId(), coarse_size ), coarse_size );
+     
+     double xsum = 0;
+     double ysum = 0;
+     double zsum = 0;
+
+     for ( const auto tc_id : constituentTCs ){
+       
+       GlobalPoint point = triggerTools_.getTCPosition(tc_id);
+       xsum += point.x();
+       ysum += point.y();
+       zsum += point.z();
+
+     }
+     xsum /= (double) coarse_size;
+     ysum /= (double) coarse_size;
+     zsum /= (double) coarse_size;
+
+     GlobalPoint average_point  ( xsum, ysum, zsum  );     
 
      math::PtEtaPhiMLorentzVector p4(tc.pt(), average_point.eta(), average_point.phi(), tc.mass());
      tc.setPosition( average_point );
