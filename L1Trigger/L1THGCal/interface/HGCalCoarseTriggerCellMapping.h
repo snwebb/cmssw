@@ -39,10 +39,22 @@ class HGCalCoarseTriggerCellMapping
     static constexpr int kSplit_v9_VeryFine_ = 0x37;
     static constexpr int kSplit_v9_Fine_ = 0x36;
     static constexpr int kSplit_v9_Mid_ = 0x26;
+    static constexpr int kSplit_v9_Coarse_ = 0x24;
 
+    //For coarse TCs
     static constexpr int kRocShift_ = 6;
+    static constexpr int kRocMask_ = 0xC0;
     static constexpr int kRotate4_ = 4;
     static constexpr int kUShift_ = 3;
+    static constexpr int kVShift_ = 0;
+    static constexpr int kUMask_ = 0x38;
+    static constexpr int kVMask_ = 0x7;
+
+    //For original cells 
+    static constexpr int kHGCalCellUOffset_      = 0;
+    static constexpr int kHGCalCellUMask_        = 0xF;
+    static constexpr int kHGCalCellVOffset_      = 4;
+    static constexpr int kHGCalCellVMask_        = 0xF;
 
     HGCalTriggerTools triggerTools_;
     HGCSiliconDetIdToROC detIdToROC_;
