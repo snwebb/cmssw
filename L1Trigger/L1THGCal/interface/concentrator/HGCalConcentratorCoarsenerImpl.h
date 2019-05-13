@@ -46,9 +46,9 @@ class HGCalConcentratorCoarsenerImpl
 
     void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, int ctcid );
     void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, int ctcid);
-    void setEvenDetId(l1t::HGCalTriggerCell &c) const {
-      c.setDetId( c.detId() & ~1 );
-    }
+    //    void setEvenDetId(l1t::HGCalTriggerCell &c) const {
+    //  c.setDetId( c.detId() & ~1 );
+    //    }
     
 };
 

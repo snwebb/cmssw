@@ -62,7 +62,7 @@ coarseTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVe
       if ( tc.detId() == coarseTCMap_[ctcid].maxId){
 	trigCellVecOutput.push_back( tc );
 	assignCoarseTriggerCellEnergy( trigCellVecOutput.back(), ctcid );
-	setEvenDetId(trigCellVecOutput.back());        
+	coarseTCmapping_.setEvenDetId(trigCellVecOutput.back());        
 	coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back(), kCoarse2Size_ );
       }
 
