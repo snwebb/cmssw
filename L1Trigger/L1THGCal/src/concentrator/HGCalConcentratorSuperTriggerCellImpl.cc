@@ -5,20 +5,20 @@
 
 HGCalConcentratorSuperTriggerCellImpl::
 HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
-  : stcSize_(conf.getParameter< std::vector<unsigned> >("stcSize")),
-    fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC"))
+  : fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC")),
+    coarseTCmapping_(conf)
 {
 
-    if ( stcSize_.size() != kNLayers_ ){
-        throw cms::Exception("HGCTriggerParameterError")
-            << "Inconsistent size of super trigger cell size vector" << stcSize_.size() ;
-    }
-    for(auto stc : stcSize_) {
+    // if ( stcSize_.size() != kNLayers_ ){
+    //     throw cms::Exception("HGCTriggerParameterError")
+    //         << "Inconsistent size of super trigger cell size vector" << stcSize_.size() ;
+    // }
+    // for(auto stc : stcSize_) {
 
-      coarseTCmapping_.checkSizeValidity(stc);
+    //   coarseTCmapping_.checkSizeValidity(stc);
 
-    }
-
+    // }
+  //    coarseTCmapping_(conf);
     std::string energyType(conf.getParameter<string>("type_energy_division"));
 
     if( energyType == "superTriggerCell" ){
@@ -51,7 +51,7 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
     for (auto& s: STCs){
 
       int thickness = triggerTools_.thicknessIndex(s.second.GetSTCId(),true);
-      std::vector<uint32_t> output_ids = coarseTCmapping_.getConstituentTriggerCells( s.second.GetSTCId(), stcSize_.at(thickness) );
+      std::vector<uint32_t> output_ids = coarseTCmapping_.getConstituentTriggerCellsByThickness( s.second.GetSTCId(), thickness );
 
       for (const auto& id: output_ids){
 
@@ -100,7 +100,8 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
     for (const  l1t::HGCalTriggerCell & tc : trigCellVecOutput){
       
       int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
+      //      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
+      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellIdByThickness(tc.detId(),thickness)]; 
     
       if ( (energyDivisionType_!=superTriggerCell)
            || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
@@ -189,7 +190,8 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
       continue;
     }
     int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-    int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness));
+    //    int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness));
+    int stcid = coarseTCmapping_.getCoarseTriggerCellIdByThickness(tc.detId(),thickness);
     STCs[stcid].add(tc, stcid);
   }
 
@@ -199,7 +201,8 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
       if (tc.subdetId() == HGCHEB) continue;
       int thickness = triggerTools_.thicknessIndex(tc.detId(),true);      
-      int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness)); 
+      //      int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness)); 
+      int stcid = coarseTCmapping_.getCoarseTriggerCellIdByThickness(tc.detId(),thickness); 
 
       if ( tc.detId() != STCs[stcid].GetMaxId() ){
 

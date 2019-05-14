@@ -27,8 +27,8 @@ class HGCalConcentratorCoarsenerImpl
   private:
 
     HGCalTriggerTools triggerTools_;
-    HGCalCoarseTriggerCellMapping coarseTCmapping_;
     bool fixedDataSizePerHGCROC_;
+    HGCalCoarseTriggerCellMapping coarseTCmapping_;
     static constexpr int kCoarse2Size_ = 2;
     static constexpr int kHighDensityThickness_ = 0;
 
@@ -46,9 +46,6 @@ class HGCalConcentratorCoarsenerImpl
 
     void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, int ctcid );
     void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, int ctcid);
-    //    void setEvenDetId(l1t::HGCalTriggerCell &c) const {
-    //  c.setDetId( c.detId() & ~1 );
-    //    }
     
 };
 

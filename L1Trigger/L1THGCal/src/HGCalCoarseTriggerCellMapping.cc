@@ -3,8 +3,17 @@
 
 
 HGCalCoarseTriggerCellMapping::
-HGCalCoarseTriggerCellMapping()
+HGCalCoarseTriggerCellMapping(const edm::ParameterSet& conf)
+  :  stcSize_(conf.existsAs<std::vector<unsigned>>("stcSize") ? conf.getParameter<std::vector<unsigned>>("stcSize") : 
+	      std::vector<unsigned>{2,2,2})
 {
+      if ( stcSize_.size() != kNLayers_ ){
+        throw cms::Exception("HGCTriggerParameterError")
+            << "Inconsistent size of coarse trigger cell size vector" << stcSize_.size() ;
+    }
+
+    for(auto stc : stcSize_) checkSizeValidity(stc);
+
 }
 
 
@@ -75,6 +84,11 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(int tcid) const {
   }
 
   return evenid;
+}
+
+int
+HGCalCoarseTriggerCellMapping::getCoarseTriggerCellIdByThickness(int detid, int thickness) const {
+  return getCoarseTriggerCellId( detid, stcSize_.at(thickness) );
 }
 
 int
@@ -149,9 +163,17 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
 
 std::vector<uint32_t>
 HGCalCoarseTriggerCellMapping::
+getConstituentTriggerCellsByThickness( int ctcId, int thickness) const
+{ 
+  return getConstituentTriggerCells( ctcId, stcSize_.at(thickness));
+}
+
+
+std::vector<uint32_t>
+HGCalCoarseTriggerCellMapping::
 getConstituentTriggerCells( int ctcId, int ctcSize) const
 { 
-
+  
   std::vector<uint32_t> output_ids;
   DetId TC_id( ctcId );
 

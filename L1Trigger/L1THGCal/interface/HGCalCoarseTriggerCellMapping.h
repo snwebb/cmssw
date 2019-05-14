@@ -13,12 +13,14 @@
 class HGCalCoarseTriggerCellMapping
 {
   public:
-    HGCalCoarseTriggerCellMapping();
+    HGCalCoarseTriggerCellMapping(const edm::ParameterSet& conf);
     void setEvenDetId(l1t::HGCalTriggerCell &c) const;
     uint32_t getEvenDetId(int tcid) const;
+    std::vector<uint32_t> getConstituentTriggerCellsByThickness( int ctcId, int thickness) const;
     std::vector<uint32_t> getConstituentTriggerCells( int ctcId, int ctcSize) const;
     void setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size ) const;
     int getCoarseTriggerCellId(int detid, int CTCsize = -1) const ;
+    int getCoarseTriggerCellIdByThickness(int detid, int thickness) const ;
     void checkSizeValidity(int CTCsize)const;
 
     static constexpr int kCTCsizeCoarse_ = 16;
@@ -61,7 +63,8 @@ class HGCalCoarseTriggerCellMapping
 
     HGCalTriggerTools triggerTools_;
     HGCSiliconDetIdToROC detIdToROC_;
-    
+    std::vector<unsigned> stcSize_;
+
 };
 
 #endif

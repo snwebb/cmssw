@@ -32,14 +32,12 @@ class HGCalConcentratorSuperTriggerCellImpl
       equalShare,
     };
     EnergyDivisionType energyDivisionType_;
-    static constexpr int kNLayers_ = 3;
     static constexpr int kHighDensityThickness_ = 0;
     static constexpr int kOddNumberMask_ = 1;
 
     HGCalTriggerTools triggerTools_;
-    HGCalCoarseTriggerCellMapping coarseTCmapping_;
-    std::vector<unsigned> stcSize_;
     bool fixedDataSizePerHGCROC_;
+    HGCalCoarseTriggerCellMapping coarseTCmapping_;
 
     //Parameters for energyDivisionType_ = oneBitFraction
     double oneBitFractionThreshold_;

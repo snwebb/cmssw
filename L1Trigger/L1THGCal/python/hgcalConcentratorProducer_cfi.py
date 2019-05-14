@@ -40,7 +40,7 @@ supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProce
                              type_energy_division = cms.string('superTriggerCell'),# superTriggerCell,oneBitFraction,equalShare
                              stcSize = cms.vuint32(4,4,4),
                              fixedDataSizePerHGCROC = cms.bool(False),
-                             coarsenTriggerCells = cms.bool(False)
+                             coarsenTriggerCells = cms.bool(False),
                              )
 
 typeenergydivision_onebitfraction_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
@@ -49,9 +49,9 @@ typeenergydivision_onebitfraction_proc = cms.PSet(ProcessorName  = cms.string('H
                              stcSize = cms.vuint32(4,8,8),
                              fixedDataSizePerHGCROC = cms.bool(True),
                              coarsenTriggerCells = cms.bool(False),
-                             oneBitFractionThreshold = 0.125,
-                             oneBitFractionLowValue = 0.0625,
-                             oneBitFractionHighValue = 0.25,
+                             oneBitFractionThreshold = cms.double(0.125),
+                             oneBitFractionLowValue = cms.double(0.0625),
+                             oneBitFractionHighValue = cms.double(0.25)
                              )
 
 
@@ -61,7 +61,7 @@ typeenergydivision_equalshare_proc = cms.PSet(ProcessorName  = cms.string('HGCal
                              stcSize = cms.vuint32(4,8,8),
                              fixedDataSizePerHGCROC = cms.bool(True),
                              coarsenTriggerCells = cms.bool(False),
-                             nTriggerCellsForDivision = 4
+                             nTriggerCellsForDivision = cms.vuint32(4),
 )
 
 

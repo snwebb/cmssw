@@ -5,7 +5,8 @@
 
 HGCalConcentratorCoarsenerImpl::
 HGCalConcentratorCoarsenerImpl(const edm::ParameterSet& conf)
-  : fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC"))
+  : fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC")),
+    coarseTCmapping_(conf)
 {    
 }
 
@@ -42,7 +43,6 @@ coarseTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVe
   // first pass, fill the coarse trigger cell information
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
     if (tc.subdetId() == HGCHEB)  continue;
-
     int ctcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),kCoarse2Size_);
     updateCoarseTriggerCellMaps( tc, ctcid );
   }
