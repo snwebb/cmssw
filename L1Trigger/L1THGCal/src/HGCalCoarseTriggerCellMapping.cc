@@ -58,21 +58,19 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(int tcid) const {
       newV = TC_idV9.triggerCellV() - TC_idV9.triggerCellU() + newU;
     }
     else if ( rocnum == 2 ){
-      Uprime = TC_idV9.triggerCellU()-TC_idV9.triggerCellV()-1;
+      Uprime = TC_idV9.triggerCellU() - TC_idV9.triggerCellV()-1;
       newU = ( Uprime&~1 ) + TC_idV9.triggerCellV()+1;
       newV = TC_idV9.triggerCellV();
     }
-    else if ( rocnum == 3 ){
-      Uprime = TC_idV9.triggerCellU()-kRotate4_;
-      newU = ( Uprime&~1 ) + kRotate4_;
-      newV = TC_idV9.triggerCellV();
+    else if ( rocnum == 3 ){      
+      Uprime = TC_idV9.triggerCellV() - kRotate4_;      
+      newU = TC_idV9.triggerCellU();
+      newV = ( Uprime&~1 ) + kRotate4_;
     }
 
     evenid = tcid & ~(HGCalDetId::kHGCalCellMask);
     evenid |= ( ((newU & kHGCalCellUMask_) << kHGCalCellUOffset_ ) |
 	       ((newV & kHGCalCellVMask_) << kHGCalCellVOffset_ ));
-
-    //c.setDetId( newid );
 
   }
 
@@ -129,19 +127,12 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
       }
       else if ( rocnum == 3 ){
 
-          Uprime = TC_idV9.triggerCellU()-kRotate4_;
-          Vprime = TC_idV9.triggerCellV()-kRotate4_;
+          Uprime = TC_idV9.triggerCellV() - kRotate4_;
+          Vprime = kRotate7_ - TC_idV9.triggerCellU();
 
       }
 
-      //      int TC_split = -1;
-
-      // if (ctcSize == kCTCsizeCoarse_){
-      // 	TC_split =  rocnum;
-      // }
-      // else{
       int TC_split =  (rocnum << kRocShift_) | ( (Uprime << kUShift_ | Vprime) & kSplit_v9_.at( ctcSize ) );
-      //      }
 
       detid =  (detid & ~(HGCalDetId::kHGCalCellMask ) ) | TC_split;
 
@@ -197,8 +188,8 @@ getConstituentTriggerCells( int ctcId, int ctcSize) const
 	V = Vprime;
       }    
       else if ( rocnum == 3 ){
-	U = Uprime + kRotate4_;
-	V = Vprime + kRotate4_;
+	U = kRotate7_ - Vprime;
+	V = Uprime + kRotate4_;
       }
       
       ctcId &= ~(HGCalDetId::kHGCalCellMask);
