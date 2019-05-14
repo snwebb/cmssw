@@ -35,16 +35,22 @@ HGCalCoarseTriggerCellMapping::checkSizeValidity(int ctcSize )const{
 
 void
 HGCalCoarseTriggerCellMapping:: setEvenDetId(l1t::HGCalTriggerCell &c) const {
+  c.setDetId( getEvenDetId( c.detId() ) );
+}
+
+uint32_t
+HGCalCoarseTriggerCellMapping:: getEvenDetId(int tcid) const {
   
-  DetId TC_id( c.detId() );
+  int evenid = -1;
+  DetId TC_id( tcid );
   if ( TC_id.det() == DetId::Forward ){//V8
-    c.setDetId( c.detId() & ~1 );
+    evenid = tcid & ~1;
   }
   else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
     int Uprime = 0;
     int newU = 0;
     int newV = 0;
-    HGCalTriggerDetId TC_idV9(c.detId());  
+    HGCalTriggerDetId TC_idV9(tcid);  
     int rocnum = detIdToROC_.getROCNumber( TC_idV9.triggerCellU() , TC_idV9.triggerCellV(), 1 );
     if ( rocnum == 1 ){
       Uprime = TC_idV9.triggerCellU();
@@ -62,13 +68,15 @@ HGCalCoarseTriggerCellMapping:: setEvenDetId(l1t::HGCalTriggerCell &c) const {
       newV = TC_idV9.triggerCellV();
     }
 
-    int newid = c.detId() & ~(HGCalDetId::kHGCalCellMask);
-    newid |= ( ((newU & kHGCalCellUMask_) << kHGCalCellUOffset_ ) |
+    evenid = tcid & ~(HGCalDetId::kHGCalCellMask);
+    evenid |= ( ((newU & kHGCalCellUMask_) << kHGCalCellUOffset_ ) |
 	       ((newV & kHGCalCellVMask_) << kHGCalCellVOffset_ ));
 
-    c.setDetId( newid );
+    //c.setDetId( newid );
 
   }
+
+  return evenid;
 }
 
 int

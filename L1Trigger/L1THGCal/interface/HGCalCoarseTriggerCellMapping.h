@@ -15,6 +15,7 @@ class HGCalCoarseTriggerCellMapping
   public:
     HGCalCoarseTriggerCellMapping();
     void setEvenDetId(l1t::HGCalTriggerCell &c) const;
+    uint32_t getEvenDetId(int tcid) const;
     std::vector<uint32_t> getConstituentTriggerCells( int ctcId, int ctcSize) const;
     void setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size ) const;
     int getCoarseTriggerCellId(int detid, int CTCsize = -1) const ;
