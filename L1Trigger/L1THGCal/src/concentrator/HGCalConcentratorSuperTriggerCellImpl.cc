@@ -45,18 +45,18 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
 
 void 
 HGCalConcentratorSuperTriggerCellImpl::
-createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const
+createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const
 { 
 
     for (auto& s: STCs){
 
       int thickness = triggerTools_.thicknessIndex(s.second.GetSTCId(),true);
-      std::vector<int> output_ids = coarseTCmapping_.getConstituentTriggerCells( s.second.GetSTCId(), stcSize_.at(thickness) );
+      std::vector<uint32_t> output_ids = coarseTCmapping_.getConstituentTriggerCells( s.second.GetSTCId(), stcSize_.at(thickness) );
 
       for (const auto& id: output_ids){
 
 	if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id&kOddNumberMask_) {
-	  continue;
+	  continue;//fixv9
 	}
 
         if ( !triggerTools_.validTriggerCell(id) ) {
@@ -74,15 +74,15 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
         
 	//Change coarse TC positions if needed
 	if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
-	  //	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back(), HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_ );
-	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back(), 2);
+	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back(), HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_ );
 	}
 
 
 
 	if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
-	  float tc_fraction = getTriggerCellOneBitFraction( triggerCell.pt() , s.second.GetSumPt() );
-	  if ( triggerCell.detId() != s.second.GetMaxId() ){
+
+	  if ( id != s.second.GetMaxId() ){
+	    float tc_fraction = getTriggerCellOneBitFraction( s.second.GetTCpt(id) , s.second.GetSumPt() );
 	    (s.second).addToFractionSum(tc_fraction);
 	  }
 	}
@@ -90,7 +90,32 @@ createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, 
 
 
       }
+
     }
+
+
+
+
+    // assign energy
+    for (const  l1t::HGCalTriggerCell & tc : trigCellVecOutput){
+      
+      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
+      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
+    
+      if ( (energyDivisionType_!=superTriggerCell)
+           || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
+           )  {
+	
+        trigCellVecOutput.push_back( tc );
+        assignSuperTriggerCellEnergy(trigCellVecOutput.back(), stc);        
+        
+      }
+    
+    }      
+
+
+
+
 
 }
 
@@ -155,12 +180,12 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
 { 
 
   std::unordered_map<unsigned,SuperTriggerCell> STCs;
-  std::vector<l1t::HGCalTriggerCell> trigCellVecInputEnlarged;
+  //  std::vector<l1t::HGCalTriggerCell> trigCellVecInputEnlarged;
 
   // first pass, fill the "coarse" trigger cells
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
     if (tc.subdetId() == HGCHEB){
-      trigCellVecInputEnlarged.push_back( tc );
+      trigCellVecOutput.push_back( tc );
       continue;
     }
     int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
@@ -168,49 +193,51 @@ superTriggerCellSelectImpl(const std::vector<l1t::HGCalTriggerCell>& trigCellVec
     STCs[stcid].add(tc, stcid);
   }
 
-   //The missing trigger cells are needed to be created both for coarsening the existing TC
-  // in the thick modules (for the fixed data size choice), or for any of the energy spread algorithms (except super TCs)
 
-  createMissingTriggerCells( STCs, trigCellVecInputEnlarged);
+  if ( energyDivisionType_ == oneBitFraction ){
+    //Get the 1 bit fractions. There should be exactly 4 TCs per STC
+    for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
+      if (tc.subdetId() == HGCHEB) continue;
+      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);      
+      int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness)); 
 
-  // if ( energyDivisionType_ == oneBitFraction ){
-  //   //Get the 1 bit fractions. There should be exactly 4 TCs per STC
-  //   for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
-  //     if (tc.subdetId() == HGCHEB) continue;
-  //     int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-      
-  //     int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness)); 
-  //     float stc_sumpt = STCs[stcid].GetSumPt();
-  //     float tc_fraction = getTriggerCellOneBitFraction( tc.pt() , stc_sumpt );
-  //     if ( tc.detId() != STCs[stcid].GetMaxId() ){
-  // 	STCs[stcid].addToFractionSum(tc_fraction);
-  //     }
-  //   }
-  // }
- 
-  // second pass, write them out
-  for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
-    //If scintillator use a simple threshold cut
-    if (tc.subdetId() == HGCHEB) {
-      trigCellVecOutput.push_back( tc );
-    } else {
-      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
-    
-      if ( (energyDivisionType_!=superTriggerCell)
-           || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
-           )  {
-	
-        trigCellVecOutput.push_back( tc );
-        assignSuperTriggerCellEnergy(trigCellVecOutput.back(), stc);        
-        
+      if ( tc.detId() != STCs[stcid].GetMaxId() ){
+
+	float stc_sumpt = STCs[stcid].GetSumPt();
+	float tc_fraction = getTriggerCellOneBitFraction( tc.pt() , stc_sumpt );
+  	STCs[stcid].addToFractionSum(tc_fraction);
+
       }
+    }
+  }
+
+
+  createAllTriggerCells( STCs, trigCellVecOutput);
+
+ 
+  // // second pass, write them out
+  // for (const l1t::HGCalTriggerCell & tc : trigCellVecInputEnlarged) {
+  //   // //If scintillator use a simple threshold cut
+  //   // if (tc.subdetId() == HGCHEB) {
+  //   //   trigCellVecOutput.push_back( tc );
+  //   // } else {
+  //     int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
+  //     const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
+    
+  //     if ( (energyDivisionType_!=superTriggerCell)
+  //          || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
+  //          )  {
+	
+  //       trigCellVecOutput.push_back( tc );
+  //       assignSuperTriggerCellEnergy(trigCellVecOutput.back(), stc);        
+        
+  //     }
 
 
             
-    }
+  //     //    }
     
-  }
+  // }
 
 
 }

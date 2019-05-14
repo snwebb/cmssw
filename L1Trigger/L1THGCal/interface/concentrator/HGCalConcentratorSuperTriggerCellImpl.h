@@ -55,6 +55,7 @@ class HGCalConcentratorSuperTriggerCellImpl
         float sumPt_, sumMipPt_, fracsum_;
         int sumHwPt_, maxHwPt_, stcId_; 
         unsigned maxId_;
+	std::map<int,float> tc_pts_;
 
     public:
         SuperTriggerCell(){  
@@ -71,6 +72,7 @@ class HGCalConcentratorSuperTriggerCellImpl
             if  ( stcId_ == 0 ){
               stcId_ = stcId;
             }
+	    tc_pts_[c.detId()] = c.pt();
 
         }
         void SetMaxTC(const l1t::HGCalTriggerCell &c){
@@ -93,9 +95,14 @@ class HGCalConcentratorSuperTriggerCellImpl
         int GetFractionSum()const{
 	  return fracsum_;
 	}
+	float GetTCpt(int tcid ){
+	  if ( tc_pts_.count(tcid) > 0 ) return tc_pts_[tcid];
+	  else return 0;
+	}
+
 
     };
-    void createMissingTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
+    void createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
     void assignSuperTriggerCellEnergy(l1t::HGCalTriggerCell &c, const SuperTriggerCell &stc) const;
     float getTriggerCellOneBitFraction( float tcPt, float sumPt ) const;
 };

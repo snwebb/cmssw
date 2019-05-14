@@ -148,12 +148,12 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
   
 }
 
-std::vector<int>
+std::vector<uint32_t>
 HGCalCoarseTriggerCellMapping::
 getConstituentTriggerCells( int ctcId, int ctcSize) const
 { 
 
-  std::vector<int> output_ids;
+  std::vector<uint32_t> output_ids;
   DetId TC_id( ctcId );
 
   if ( TC_id.det() == DetId::Forward ){//V8  
@@ -214,7 +214,7 @@ setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size )
 
      if (tc.subdetId() == HGCHEB) return;
 
-     std::vector<int> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId(tc.detId(), coarse_size ), coarse_size );
+     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId(tc.detId(), coarse_size ), coarse_size );
      
      double xsum = 0;
      double ysum = 0;
