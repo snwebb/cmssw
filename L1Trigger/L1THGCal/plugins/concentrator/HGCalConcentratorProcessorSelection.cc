@@ -30,7 +30,9 @@ HGCalConcentratorProcessorSelection::HGCalConcentratorProcessorSelection(const e
       << "Unknown type of concentrator selection '" << selectionType << "'";
   }
 
-  if ( coarsenTriggerCells_ || fixedDataSizePerHGCROC_ ){   
+  if ( fixedDataSizePerHGCROC_) coarsenTriggerCells_ = true;
+
+  if ( coarsenTriggerCells_ ){   
     concentratorCoarsenerImpl_ = std::make_unique<HGCalConcentratorCoarsenerImpl>(conf);
   }
 
@@ -55,7 +57,7 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
 
     std::vector<l1t::HGCalTriggerCell> trigCellVecOutput;
     std::vector<l1t::HGCalTriggerCell> trigCellVecCoarsened;	  
-    if ( coarsenTriggerCells_ || fixedDataSizePerHGCROC_ ){
+    if ( coarsenTriggerCells_ ){
       concentratorCoarsenerImpl_->coarseTriggerCellSelectImpl(module_trigcell.second,trigCellVecCoarsened);
 
       switch(selectionType_){
