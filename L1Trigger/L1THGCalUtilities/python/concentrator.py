@@ -4,11 +4,15 @@ from L1Trigger.L1THGCal.hgcalConcentratorProducer_cfi import threshold_conc_proc
 
 
 def create_supertriggercell(process, inputs,
-                            stcSize=supertc_conc_proc.stcSize
+                            stcSize=supertc_conc_proc.stcSize,
+                            type_energy_division=supertc_conc_proc.type_energy_division,
+                            fixedDataSizePerHGCROC=supertc_conc_proc.fixedDataSizePerHGCROC
                             ):
     producer = process.hgcalConcentratorProducer.clone()
     producer.ProcessorParameters = supertc_conc_proc.clone()
     producer.ProcessorParameters.stcSize = stcSize
+    producer.ProcessorParameters.type_energy_division = type_energy_division
+    producer.ProcessorParameters.fixedDataSizePerHGCROC = fixedDataSizePerHGCROC
     producer.InputTriggerCells = cms.InputTag('{}:HGCalVFEProcessorSums'.format(inputs))
     producer.InputTriggerSums = cms.InputTag('{}:HGCalVFEProcessorSums'.format(inputs))
     return producer
