@@ -38,6 +38,7 @@ public:
 
   void eventSetup(const edm::EventSetup&);
   GlobalPoint getTCPosition(const DetId& id) const;
+  bool validTriggerCell(const DetId& id) const;
   unsigned layers(ForwardSubdetector type) const;
   unsigned layers(DetId::Detector type) const;
   unsigned layer(const DetId&) const;
