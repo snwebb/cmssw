@@ -1,12 +1,10 @@
 #include "L1Trigger/L1THGCal/interface/concentrator/HGCalConcentratorSuperTriggerCellImpl.h"
-#include "DataFormats/ForwardDetId/interface/HGCalTriggerDetId.h"
-
-#include <unordered_map>
 
 HGCalConcentratorSuperTriggerCellImpl::
 HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
   : fixedDataSizePerHGCROC_(conf.getParameter<bool>("fixedDataSizePerHGCROC")),
-    coarseTCmapping_(conf)
+    coarseTCmapping_(std::vector<unsigned>{HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_,HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_,HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_,HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_}),
+    superTCmapping_(conf.getParameter<std::vector<unsigned>>("stcSize"))
 {
 
     std::string energyType(conf.getParameter<string>("type_energy_division"));
@@ -23,8 +21,6 @@ HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf)
     }else if( energyType == "equalShare" ){
       energyDivisionType_ = equalShare;
 
-      nTriggerCellsForDivision_ = conf.getParameter<int>("nTriggerCellsForDivision");
-
     }else {
       energyDivisionType_ = superTriggerCell;
     } 
@@ -40,12 +36,19 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 
     for (auto& s: STCs){
 
-      int thickness = triggerTools_.thicknessIndex(s.second.GetSTCId(),true);
-      std::vector<uint32_t> output_ids = coarseTCmapping_.getConstituentTriggerCellsByThickness( s.second.GetSTCId(), thickness );
+      int thickness = 0;
+      if ( triggerTools_.isSilicon(s.second.getSTCId() ) ){
+	thickness = triggerTools_.thicknessIndex(s.second.getSTCId(),true);
+      }else if ( triggerTools_.isScintillator(s.second.getSTCId()) ){
+	thickness = 3;
+      }
+
+    //      int thickness = triggerTools_.thicknessIndex(s.second.getSTCId(),true);
+      std::vector<uint32_t> output_ids = superTCmapping_.getConstituentTriggerCells( s.second.getSTCId() );
 
       for (const auto& id: output_ids){
 
-	if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id!=coarseTCmapping_.getEvenDetId(id)) {
+	if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id!=superTCmapping_.getEvenDetId(id)) {
 	  continue;
 	}
 
@@ -64,37 +67,30 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
         
 	//Change coarse TC positions if needed
 	if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
-	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back(), HGCalCoarseTriggerCellMapping::kCTCsizeVeryFine_ );
+	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back() );
 	}
 
 
 
 	if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
 
-	  if ( id != s.second.GetMaxId() ){
-	    float tc_fraction = getTriggerCellOneBitFraction( s.second.GetTCpt(id) , s.second.GetSumPt() );
-	    (s.second).addToFractionSum(tc_fraction);
+	  if ( id != s.second.getMaxId() ){
+	    float tc_fraction = getTriggerCellOneBitFraction( s.second.getTCpt(id) , s.second.getSumPt() );
+	    s.second.addToFractionSum(tc_fraction);
 	  }
 	}
 
-
-
       }
-
     }
-
-
 
 
     // assign energy
     for (const  l1t::HGCalTriggerCell & tc : trigCellVecOutput){
       
-      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-      //      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness))]; 
-      const auto & stc = STCs[coarseTCmapping_.getCoarseTriggerCellIdByThickness(tc.detId(),thickness)]; 
+      const auto & stc = STCs[superTCmapping_.getCoarseTriggerCellId(tc.detId())]; 
     
       if ( (energyDivisionType_!=superTriggerCell)
-           || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.GetMaxId()) )
+           || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.getMaxId()) )
            )  {
 	
         trigCellVecOutput.push_back( tc );
@@ -115,35 +111,32 @@ HGCalConcentratorSuperTriggerCellImpl::
  assignSuperTriggerCellEnergy(l1t::HGCalTriggerCell &c, const SuperTriggerCell &stc) const {
       
   if ( energyDivisionType_ == superTriggerCell ){
-    c.setHwPt(stc.GetSumHwPt());
-    c.setMipPt(stc.GetSumMipPt());
-    c.setPt(stc.GetSumPt());
+    c.setHwPt(stc.getSumHwPt());
+    c.setMipPt(stc.getSumMipPt());
+    c.setPt(stc.getSumPt());
   }
   else if ( energyDivisionType_ == equalShare ){
-    c.setHwPt( stc.GetSumHwPt() / double(nTriggerCellsForDivision_) );
-    c.setMipPt( stc.GetSumMipPt() / double(nTriggerCellsForDivision_) );
-    c.setPt( stc.GetSumPt() /double(nTriggerCellsForDivision_) );
+
+    double denominator =  fixedDataSizePerHGCROC_ ? double(kTriggerCellsForDivision_) : double(stc.size());
+
+    c.setHwPt( stc.getSumHwPt() / denominator );
+    c.setMipPt( stc.getSumMipPt() / denominator );
+    c.setPt( stc.getSumPt() /denominator );
   }
   else if (  energyDivisionType_ == oneBitFraction ){
     
-    double f = c.pt() / stc.GetSumPt() ;
     double frac = 0;
     
-    if ( c.detId() != stc.GetMaxId() ){
-      if ( f < oneBitFractionThreshold_ ){
-	frac = oneBitFractionLowValue_;
-      }
-      else{
-	frac = oneBitFractionHighValue_;
-      }
+    if ( c.detId() != stc.getMaxId() ){
+      frac = getTriggerCellOneBitFraction( c.pt(), stc.getSumPt() );
     }
     else{
-      frac = 1-stc.GetFractionSum();
+      frac = 1-stc.getFractionSum();
     }
     
-    c.setHwPt( stc.GetSumHwPt() * frac );
-    c.setMipPt( stc.GetSumMipPt() * frac );
-    c.setPt( stc.GetSumPt() * frac );
+    c.setHwPt( stc.getSumHwPt() * frac );
+    c.setMipPt( stc.getSumMipPt() * frac );
+    c.setPt( stc.getSumPt() * frac );
   }
   
 }
@@ -171,49 +164,20 @@ select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l
 { 
 
   std::unordered_map<unsigned,SuperTriggerCell> STCs;
-  //  std::vector<l1t::HGCalTriggerCell> trigCellVecInputEnlarged;
-  std::cout <<     "Before Everything" << std::endl;
   // first pass, fill the "coarse" trigger cells
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-
-
 
     // if (tc.subdetId() == HGCHEB){
     //   trigCellVecOutput.push_back( tc );
     //   continue;
     // }
 
-
-
-
-    int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
-    //    int stcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId(),stcSize_.at(thickness));
-    int stcid = coarseTCmapping_.getCoarseTriggerCellIdByThickness(tc.detId(),thickness);
+    uint32_t stcid = superTCmapping_.getCoarseTriggerCellId(tc.detId());
 
     STCs[stcid].add(tc, stcid);
 
   }
 
-
-  if ( energyDivisionType_ == oneBitFraction ){
-    //Get the 1 bit fractions. There should be exactly 4 TCs per STC
-    for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-      if (tc.subdetId() == HGCHEB) continue;
-      int thickness = triggerTools_.thicknessIndex(tc.detId(),true);      
-      int stcid = coarseTCmapping_.getCoarseTriggerCellIdByThickness(tc.detId(),thickness); 
-
-      if ( tc.detId() != STCs[stcid].GetMaxId() ){
-
-	float stc_sumpt = STCs[stcid].GetSumPt();
-	float tc_fraction = getTriggerCellOneBitFraction( tc.pt() , stc_sumpt );
-  	STCs[stcid].addToFractionSum(tc_fraction);
-
-      }
-    }
-  }
-
-
   createAllTriggerCells( STCs, trigCellVecOutput);
-
 
 }

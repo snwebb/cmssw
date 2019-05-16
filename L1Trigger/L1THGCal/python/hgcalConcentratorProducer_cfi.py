@@ -11,6 +11,7 @@ threshold_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorPro
                                threshold_silicon = cms.double(2.), # MipT
                                threshold_scintillator = cms.double(2.), # MipT
                                coarsenTriggerCells = cms.bool(False),
+                               fixedDataSizePerHGCROC = cms.bool(False),
                                )
 
 
@@ -31,6 +32,7 @@ best_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcesso
                                0,  0,  0,  0,   0,   0, 0, 0,
                               ),
                           coarsenTriggerCells = cms.bool(False),
+                          fixedDataSizePerHGCROC = cms.bool(False),
                           )
 
 
@@ -42,7 +44,7 @@ supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProce
                              coarsenTriggerCells = cms.bool(False),
                              )
 
-typeenergydivision_onebitfraction_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
+coarsetc_onebitfraction_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
                              Method = cms.string('superTriggerCellSelect'),
                              type_energy_division = cms.string('oneBitFraction'),
                              stcSize = cms.vuint32(4,8,8),
@@ -54,7 +56,7 @@ typeenergydivision_onebitfraction_proc = cms.PSet(ProcessorName  = cms.string('H
                              )
 
 
-typeenergydivision_equalshare_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
+coarsetc_equalshare_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
                              Method = cms.string('superTriggerCellSelect'),
                              type_energy_division = cms.string('equalShare'),
                              stcSize = cms.vuint32(4,8,8),

@@ -3,9 +3,9 @@
 
 
 HGCalCoarseTriggerCellMapping::
-HGCalCoarseTriggerCellMapping(const edm::ParameterSet& conf)
-  :  stcSize_(conf.existsAs<std::vector<unsigned>>("stcSize") ? conf.getParameter<std::vector<unsigned>>("stcSize") : 
-	      std::vector<unsigned>{2,2,2})
+HGCalCoarseTriggerCellMapping(std::vector<unsigned> stcSize )
+  :  stcSize_(stcSize.size()!=0 ? stcSize : 
+	      std::vector<unsigned>{2,2,2,2})
 {
       if ( stcSize_.size() != kNLayers_ ){
         throw cms::Exception("HGCTriggerParameterError")
@@ -48,14 +48,14 @@ HGCalCoarseTriggerCellMapping:: setEvenDetId(l1t::HGCalTriggerCell &c) const {
 }
 
 uint32_t
-HGCalCoarseTriggerCellMapping:: getEvenDetId(int tcid) const {
+HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
   
-  int evenid = -1;
+  uint32_t evenid = 0;
   DetId TC_id( tcid );
   if ( TC_id.det() == DetId::Forward ){//V8
     evenid = tcid & ~1;
   }
-  else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
+  else if ( TC_id.det() == DetId::HGCalTrigger ){//V9, currently only for silicon
     int Uprime = 0;
     int newU = 0;
     int newV = 0;
@@ -77,31 +77,29 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(int tcid) const {
       newV = ( Uprime&~1 ) + kRotate4_;
     }
 
-    evenid = tcid & ~(HGCalDetId::kHGCalCellMask);
+    evenid = tcid & ~(kHGCalCellMask_);
     evenid |= ( ((newU & kHGCalCellUMask_) << kHGCalCellUOffset_ ) |
-	       ((newV & kHGCalCellVMask_) << kHGCalCellVOffset_ ));
+		((newV & kHGCalCellVMask_) << kHGCalCellVOffset_ ));
 
   }
 
   return evenid;
 }
 
-int
-HGCalCoarseTriggerCellMapping::getCoarseTriggerCellIdByThickness(int detid, int thickness) const {
-  return getCoarseTriggerCellId( detid, stcSize_.at(thickness) );
-}
+uint32_t
+HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(uint32_t detid) const {
 
-int
-HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) const {
+  int thickness = 0;
+  if ( triggerTools_.isSilicon(detid)){
+    thickness = triggerTools_.thicknessIndex(detid,true);
+  }else if ( triggerTools_.isScintillator(detid)){
+    thickness = 3;
+  }
 
-  checkSizeValidity (ctcSize);
+  int ctcSize = stcSize_.at(thickness);
 
   DetId TC_id( detid );
-
-  std::cout << "TCid dets =  " << TC_id.det() << std::endl;
-
   if ( TC_id.det() == DetId::Forward ){//V8
-    std::cout << "isv8?" << std::endl;
 
     HGCalDetId TC_idV8(detid);
 
@@ -116,20 +114,13 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
 
   }
 
-  else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
-    std::cout << "isv9" << std::endl;
-    
+  else if ( TC_id.det() == DetId::HGCalTrigger || TC_id.det() == DetId::HGCalHSc ){//V9
     if( triggerTools_.isScintillator(detid) ){
-    std::cout << "isscint" << std::endl;
       HGCScintillatorDetId TC_idV9(detid);
-      std::cout << TC_idV9.ietaAbs() << " - " << TC_idV9.iphi() << std::endl;
       return TC_idV9.ietaAbs() << HGCScintillatorDetId::kHGCalPhiOffset | TC_idV9.iphi(); //scintillator
-
     }
     else {
       HGCalTriggerDetId TC_idV9(detid);
-    std::cout << "issil" << std::endl;
-      //      int TC_wafer = TC_idV9.waferU() << kWafer_offset_ | TC_idV9.waferV() ;
 
       int Uprime = 0;
       int Vprime = 0;
@@ -156,7 +147,7 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
 
       int TC_split =  (rocnum << kRocShift_) | ( (Uprime << kUShift_ | Vprime) & kSplit_v9_.at( ctcSize ) );
 
-      detid =  (detid & ~(HGCalDetId::kHGCalCellMask ) ) | TC_split;
+      detid =  (detid & ~( kHGCalCellMask_ ) ) | TC_split;
 
       return detid;
       
@@ -164,24 +155,24 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(int detid, int ctcSize) co
         
   }
   else{
-    return -1;
+    return 0;
   }
   
 }
 
 std::vector<uint32_t>
 HGCalCoarseTriggerCellMapping::
-getConstituentTriggerCellsByThickness( int ctcId, int thickness) const
+getConstituentTriggerCells( uint32_t ctcId ) const
 { 
-  return getConstituentTriggerCells( ctcId, stcSize_.at(thickness));
-}
 
+  int thickness = 0;
+  if ( triggerTools_.isSilicon(ctcId)){
+    thickness = triggerTools_.thicknessIndex(ctcId,true);
+  }else if ( triggerTools_.isScintillator(ctcId)){
+    thickness = 3;
+  }
+  int ctcSize = stcSize_.at(thickness);
 
-std::vector<uint32_t>
-HGCalCoarseTriggerCellMapping::
-getConstituentTriggerCells( int ctcId, int ctcSize) const
-{ 
-  
   std::vector<uint32_t> output_ids;
   DetId TC_id( ctcId );
 
@@ -197,7 +188,7 @@ getConstituentTriggerCells( int ctcId, int ctcSize) const
     }
 
   }
-  else if ( TC_id.det() == DetId::HGCalTrigger ){//V9
+  else if ( TC_id.det() == DetId::HGCalTrigger ){//V9 silicon
 
     int SplitInv = ~( (~kSTCidMask_) | kSplit_v9_.at ( ctcSize ) );
     for ( int i = 0; i < SplitInv + 1 ; i++ ){
@@ -222,7 +213,7 @@ getConstituentTriggerCells( int ctcId, int ctcSize) const
 	V = Uprime + kRotate4_;
       }
       
-      ctcId &= ~(HGCalDetId::kHGCalCellMask);
+      ctcId &= ~(kHGCalCellMask_);
       ctcId |= ( ((U & kHGCalCellUMask_) << kHGCalCellUOffset_ ) |
 		 ((V & kHGCalCellVMask_) << kHGCalCellVOffset_ ));
 
@@ -238,31 +229,20 @@ getConstituentTriggerCells( int ctcId, int ctcSize) const
 
 void 
 HGCalCoarseTriggerCellMapping::
-setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size ) const
+setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc ) const
 { 
 
      if (tc.subdetId() == HGCHEB) return;
 
-     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId(tc.detId(), coarse_size ), coarse_size );
-     
-     double xsum = 0;
-     double ysum = 0;
-     double zsum = 0;
+     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId(tc.detId() ));
+     Basic3DVector<float> average_vector(0., 0., 0.);
 
      for ( const auto tc_id : constituentTCs ){
-       
-       GlobalPoint point = triggerTools_.getTCPosition(tc_id);
-       xsum += point.x();
-       ysum += point.y();
-       zsum += point.z();
-
+       average_vector += triggerTools_.getTCPosition(tc_id).basicVector();
      }
-     xsum /= (double) coarse_size;
-     ysum /= (double) coarse_size;
-     zsum /= (double) coarse_size;
 
-     GlobalPoint average_point  ( xsum, ysum, zsum  );     
-
+     GlobalPoint average_point( average_vector / constituentTCs.size() ) ;     
+    
      math::PtEtaPhiMLorentzVector p4(tc.pt(), average_point.eta(), average_point.phi(), tc.mass());
      tc.setPosition( average_point );
      tc.setP4(p4);

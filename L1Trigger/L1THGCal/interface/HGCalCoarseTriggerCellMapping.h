@@ -2,26 +2,21 @@
 #define __L1Trigger_L1THGCal_HGCalCoarseTriggerCellMapping_h__
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
-
 #include "DataFormats/L1THGCal/interface/HGCalTriggerCell.h"
-#include "DataFormats/L1THGCal/interface/HGCalTriggerSums.h"
 #include "DataFormats/ForwardDetId/interface/HGCSiliconDetIdToROC.h"
-
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
       
 class HGCalCoarseTriggerCellMapping
 {
   public:
-    HGCalCoarseTriggerCellMapping(const edm::ParameterSet& conf);
+  HGCalCoarseTriggerCellMapping(std::vector<unsigned> stcSize);
     void setEvenDetId(l1t::HGCalTriggerCell &c) const;
-    uint32_t getEvenDetId(int tcid) const;
-    std::vector<uint32_t> getConstituentTriggerCellsByThickness( int ctcId, int thickness) const;
-    std::vector<uint32_t> getConstituentTriggerCells( int ctcId, int ctcSize) const;
-    void setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc, const int coarse_size ) const;
-    int getCoarseTriggerCellId(int detid, int CTCsize = -1) const ;
-    int getCoarseTriggerCellIdByThickness(int detid, int thickness) const ;
+    uint32_t getEvenDetId(uint32_t tcid) const;
+    std::vector<uint32_t> getConstituentTriggerCells( uint32_t ctcId ) const;
+    void setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc ) const;
+    uint32_t getCoarseTriggerCellId(uint32_t detid) const ;
     void checkSizeValidity(int CTCsize)const;
+    void eventSetup(const edm::EventSetup& es) {triggerTools_.eventSetup(es);}
 
     static constexpr int kCTCsizeCoarse_ = 16;
     static constexpr int kCTCsizeMid_ = 8;
@@ -39,18 +34,19 @@ class HGCalCoarseTriggerCellMapping
     static constexpr int kSplit_v8_Mid_ = 0x38;
     static constexpr int kSplit_v8_Fine_ = 0x3a;
     static constexpr int kSplit_v8_VeryFine_ = 0x3e;
-    static constexpr int kNLayers_ = 3;
+    //    static constexpr int kNLayers_ = 3;
+    static constexpr int kNLayers_ = 4;
     static constexpr int kSplit_v9_VeryFine_ = 0x37;
     static constexpr int kSplit_v9_Fine_ = 0x36;
     static constexpr int kSplit_v9_Mid_ = 0x26;
     static constexpr int kSplit_v9_Coarse_ = 0x24;
 
     //For coarse TCs
-    static constexpr int kRocShift_ = 6;
+    static constexpr int kRocShift_ = 4;
     static constexpr int kRocMask_ = 0xC0;
     static constexpr int kRotate4_ = 4;
     static constexpr int kRotate7_ = 7;
-    static constexpr int kUShift_ = 3;
+    static constexpr int kUShift_ = 2;
     static constexpr int kVShift_ = 0;
     static constexpr int kUMask_ = 0x38;
     static constexpr int kVMask_ = 0x7;
@@ -60,6 +56,7 @@ class HGCalCoarseTriggerCellMapping
     static constexpr int kHGCalCellUMask_        = 0xF;
     static constexpr int kHGCalCellVOffset_      = 4;
     static constexpr int kHGCalCellVMask_        = 0xF;
+    static constexpr int kHGCalCellMask_        = 0xff;
 
     HGCalTriggerTools triggerTools_;
     HGCSiliconDetIdToROC detIdToROC_;

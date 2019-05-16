@@ -2,12 +2,6 @@
 #define __L1Trigger_L1THGCal_HGCalConcentratorSuperTriggerCellImpl_h__
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
-
-#include "DataFormats/L1THGCal/interface/HGCalTriggerCell.h"
-#include "DataFormats/L1THGCal/interface/HGCalTriggerSums.h"
-#include "DataFormats/ForwardDetId/interface/HGCSiliconDetIdToROC.h"
-
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 #include "L1Trigger/L1THGCal/interface/HGCalCoarseTriggerCellMapping.h"
 
@@ -21,7 +15,11 @@ class HGCalConcentratorSuperTriggerCellImpl
     HGCalConcentratorSuperTriggerCellImpl(const edm::ParameterSet& conf);
 
     void select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
-    void eventSetup(const edm::EventSetup& es) {triggerTools_.eventSetup(es);}
+    void eventSetup(const edm::EventSetup& es) {
+      triggerTools_.eventSetup(es);
+      coarseTCmapping_.eventSetup(es);
+      superTCmapping_.eventSetup(es);
+    }
 
 
   private:
@@ -38,6 +36,7 @@ class HGCalConcentratorSuperTriggerCellImpl
     HGCalTriggerTools triggerTools_;
     bool fixedDataSizePerHGCROC_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
+    HGCalCoarseTriggerCellMapping superTCmapping_;
 
     //Parameters for energyDivisionType_ = oneBitFraction
     double oneBitFractionThreshold_;
@@ -45,25 +44,28 @@ class HGCalConcentratorSuperTriggerCellImpl
     double oneBitFractionHighValue_;
 
     //Parameters for energyDivisionType_ = equalShare
-    int nTriggerCellsForDivision_;
+    static constexpr int kTriggerCellsForDivision_ = 4;
 
     class SuperTriggerCell {
   
     private:
-        float sumPt_, sumMipPt_, fracsum_;
-        int sumHwPt_, maxHwPt_, stcId_; 
-        unsigned maxId_;
-	std::map<int,float> tc_pts_;
+        float sumPt_, sumMipPt_, maxMipPt_, fracsum_;
+        int sumHwPt_, maxHwPt_; 
+        uint32_t maxId_, stcId_;
+	std::map<uint32_t,float> tc_pts_;
 
     public:
-        SuperTriggerCell(){  
-          sumPt_=0, sumMipPt_=0, sumHwPt_=0, maxHwPt_=0, maxId_=0, fracsum_ = 0, stcId_ = 0; }
-        void add(const l1t::HGCalTriggerCell &c, int stcId) {
+    SuperTriggerCell()
+      :    sumPt_(0), sumMipPt_(0), maxMipPt_(0), fracsum_(0), sumHwPt_(0), maxHwPt_(0), maxId_(0), stcId_(0) 
+	  {};
+
+        void add(const l1t::HGCalTriggerCell &c, uint32_t stcId) {
             sumPt_ += c.pt();
             sumMipPt_ += c.mipPt();
             sumHwPt_ += c.hwPt();
-            if (maxId_ == 0 || c.hwPt() > maxHwPt_) {
+            if (maxId_ == 0 || c.mipPt() > maxMipPt_) {
                 maxHwPt_ = c.hwPt();
+                maxMipPt_ = c.mipPt();
                 maxId_ = c.detId();
             }
             
@@ -84,20 +86,20 @@ class HGCalConcentratorSuperTriggerCellImpl
 	      << "Sum of Trigger Cell fractions should not be greater than 1" ;
 	  }
 	}
-        unsigned GetMaxId()const{return maxId_;}
-        unsigned GetSTCId()const{return stcId_;}
-        int GetMaxHwPt()const{return maxHwPt_;}
-        int GetSumMipPt()const{return sumMipPt_;}
-        int GetSumHwPt()const{return sumHwPt_;}
-        int GetSumPt()const{return sumPt_;}
-        int GetFractionSum()const{
+        uint32_t getMaxId()const{return maxId_;}
+        uint32_t getSTCId()const{return stcId_;}
+        float getMaxHwPt()const{return maxHwPt_;}
+        float getSumMipPt()const{return sumMipPt_;}
+        int getSumHwPt()const{return sumHwPt_;}
+        float getSumPt()const{return sumPt_;}
+        float getFractionSum()const{
 	  return fracsum_;
 	}
-	float GetTCpt(int tcid ){
-	  if ( tc_pts_.count(tcid) > 0 ) return tc_pts_[tcid];
-	  else return 0;
+	float getTCpt(uint32_t tcid )const{
+	  const auto pt = tc_pts_.find(tcid);
+	  return (pt==tc_pts_.end() ? 0 : pt->second);
 	}
-
+	int size()const{return tc_pts_.size();}
 
     };
     void createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;

@@ -2,18 +2,8 @@
 #define __L1Trigger_L1THGCal_HGCalConcentratorCoarsenerImpl_h__
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
-
-#include "DataFormats/L1THGCal/interface/HGCalTriggerCell.h"
-#include "DataFormats/L1THGCal/interface/HGCalTriggerSums.h"
-#include "DataFormats/ForwardDetId/interface/HGCSiliconDetIdToROC.h"
-
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 #include "L1Trigger/L1THGCal/interface/HGCalCoarseTriggerCellMapping.h"
-
-      
-#include <array>
-#include <vector>
 
 class HGCalConcentratorCoarsenerImpl
 {
@@ -21,20 +11,22 @@ class HGCalConcentratorCoarsenerImpl
     HGCalConcentratorCoarsenerImpl(const edm::ParameterSet& conf);
 
     void select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
-    void eventSetup(const edm::EventSetup& es) {triggerTools_.eventSetup(es);}
-
-
+    void eventSetup(const edm::EventSetup& es) {
+	triggerTools_.eventSetup(es);
+	coarseTCmapping_.eventSetup(es);
+      }
+    
   private:
 
     HGCalTriggerTools triggerTools_;
     bool fixedDataSizePerHGCROC_;
     HGCalCoarseTriggerCellMapping coarseTCmapping_;
-    static constexpr int kCoarse2Size_ = 2;
     static constexpr int kHighDensityThickness_ = 0;
 
-    struct coarseTC{
+    struct CoarseTC{
 
       float sumPt;
+      float maxMipPt;
       int sumHwPt;
       int maxHwPt;
       float sumMipPt;
@@ -42,10 +34,10 @@ class HGCalConcentratorCoarsenerImpl
 
     };
 
-    std::unordered_map<int,coarseTC> coarseTCMap_;
+    std::unordered_map<uint32_t,CoarseTC> coarseTCs_;
 
-    void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, int ctcid );
-    void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, int ctcid);
+    void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, uint32_t ctcid );
+    void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, uint32_t ctcid);
     
 };
 
