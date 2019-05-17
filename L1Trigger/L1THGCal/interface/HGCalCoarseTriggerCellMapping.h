@@ -22,6 +22,7 @@ class HGCalCoarseTriggerCellMapping
     static constexpr int kCTCsizeMid_ = 8;
     static constexpr int kCTCsizeFine_ = 4;
     static constexpr int kCTCsizeVeryFine_ = 2;    
+    static constexpr int kCTCsizeIndividual_ = 1;    
 
   private:
 
@@ -36,17 +37,20 @@ class HGCalCoarseTriggerCellMapping
     static constexpr int kSplit_v8_Mid_ = 0x38;
     static constexpr int kSplit_v8_Fine_ = 0x3a;
     static constexpr int kSplit_v8_VeryFine_ = 0x3e;
+    static constexpr int kSplit_v8_Individual_ = 0x3f;
     //    static constexpr int kNLayers_ = 3;
     static constexpr int kNLayers_ = 4;
     static constexpr int kSplit_v9_Coarse_ = 0;
     static constexpr int kSplit_v9_Mid_ = 0x2;
     static constexpr int kSplit_v9_Fine_ = 0xa;
     static constexpr int kSplit_v9_VeryFine_ = 0xb;
+    static constexpr int kSplit_v9_Individual_ = 0xf;
 
     static constexpr int kSplit_v9_Scin_Coarse_ = 0x1f9fc;
     static constexpr int kSplit_v9_Scin_Mid_ = 0x1fdfc;
     static constexpr int kSplit_v9_Scin_Fine_ = 0x1fdfe;
     static constexpr int kSplit_v9_Scin_VeryFine_ = 0x1fffe;
+    static constexpr int kSplit_v9_Scin_Individual_ = 0x1ffff;
 
     //For coarse TCs
     static constexpr int kRocShift_ = 4;

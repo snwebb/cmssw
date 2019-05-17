@@ -19,6 +19,7 @@ HGCalCoarseTriggerCellMapping(std::vector<unsigned> stcSize )
 
 const std::map<int,int> 
 HGCalCoarseTriggerCellMapping::kSplit_ = {
+  {kCTCsizeIndividual_, kSplit_v8_Individual_},
   {kCTCsizeVeryFine_, kSplit_v8_VeryFine_},
   {kCTCsizeFine_, kSplit_v8_Fine_},
   {kCTCsizeMid_, kSplit_v8_Mid_},
@@ -27,6 +28,7 @@ HGCalCoarseTriggerCellMapping::kSplit_ = {
 
 const std::map<int,int> 
 HGCalCoarseTriggerCellMapping::kSplit_v9_ = {
+  {kCTCsizeIndividual_, kSplit_v9_Individual_},
   {kCTCsizeVeryFine_, kSplit_v9_VeryFine_},
   {kCTCsizeFine_, kSplit_v9_Fine_},
   {kCTCsizeMid_, kSplit_v9_Mid_},
@@ -35,6 +37,7 @@ HGCalCoarseTriggerCellMapping::kSplit_v9_ = {
 
 const std::map<int,int> 
 HGCalCoarseTriggerCellMapping::kSplit_v9_Scin_ = {
+  {kCTCsizeIndividual_, kSplit_v9_Scin_Individual_},
   {kCTCsizeVeryFine_, kSplit_v9_Scin_VeryFine_},
   {kCTCsizeFine_, kSplit_v9_Scin_Fine_},
   {kCTCsizeMid_, kSplit_v9_Scin_Mid_},
@@ -43,11 +46,11 @@ HGCalCoarseTriggerCellMapping::kSplit_v9_Scin_ = {
 
 void
 HGCalCoarseTriggerCellMapping::checkSizeValidity(int ctcSize )const{
-  if ( ctcSize!=kCTCsizeFine_ && ctcSize!=kCTCsizeCoarse_ && ctcSize!=kCTCsizeMid_ && ctcSize!=kCTCsizeVeryFine_){
+  if ( ctcSize!=kCTCsizeFine_ && ctcSize!=kCTCsizeCoarse_ && ctcSize!=kCTCsizeMid_ && ctcSize!=kCTCsizeVeryFine_ && ctcSize!=kCTCsizeIndividual_){
     throw cms::Exception("HGCTriggerParameterError")
       << "Coarse Trigger Cell should be of size "<<
-      kCTCsizeVeryFine_ << " or " << kCTCsizeFine_ <<
-      kCTCsizeMid_ << " or " << kCTCsizeCoarse_;
+      kCTCsizeIndividual_ << " or " << kCTCsizeVeryFine_ << " or " << kCTCsizeFine_ << 
+      " or " << kCTCsizeMid_ << " or " << kCTCsizeCoarse_;
   }
 }
 
