@@ -43,7 +43,6 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 	thickness = 3;
       }
 
-    //      int thickness = triggerTools_.thicknessIndex(s.second.getSTCId(),true);
       std::vector<uint32_t> output_ids = superTCmapping_.getConstituentTriggerCells( s.second.getSTCId() );
 
       for (const auto& id: output_ids){
@@ -69,8 +68,6 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 	if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
 	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back() );
 	}
-
-
 
 	if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
 
@@ -167,13 +164,7 @@ select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l
   // first pass, fill the "coarse" trigger cells
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
 
-    // if (tc.subdetId() == HGCHEB){
-    //   trigCellVecOutput.push_back( tc );
-    //   continue;
-    // }
-
     uint32_t stcid = superTCmapping_.getCoarseTriggerCellId(tc.detId());
-
     STCs[stcid].add(tc, stcid);
 
   }

@@ -40,15 +40,12 @@ select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l
 
   // first pass, fill the coarse trigger cell information
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-    if (tc.subdetId() == HGCHEB)  continue;
     uint32_t ctcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId());
     updateCoarseTriggerCellMaps( tc, ctcid );
   }
 
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-    if (tc.subdetId() == HGCHEB) {
-      trigCellVecOutput.push_back( tc );
-    } else {
+
       uint32_t ctcid = coarseTCmapping_.getCoarseTriggerCellId(tc.detId());
       int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
 
@@ -64,8 +61,6 @@ select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l
 	coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back() );
       }
 
-
-    }
   }
 
 
