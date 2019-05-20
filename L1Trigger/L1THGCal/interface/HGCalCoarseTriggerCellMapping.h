@@ -54,7 +54,8 @@ class HGCalCoarseTriggerCellMapping
 
     //For coarse TCs
     static constexpr int kRocShift_ = 4;
-    static constexpr int kRocMask_ = 0xC0;
+    //    static constexpr int kRocMask_ = 0xC0;
+    static constexpr int kRocMask_ = 0xf0;
     static constexpr int kRotate4_ = 4;
     static constexpr int kRotate7_ = 7;
     static constexpr int kUShift_ = 2;
