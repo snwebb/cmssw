@@ -36,14 +36,15 @@ def custom_triggercellselect_bestchoice(process,
 
 
 def custom_coarsetc_onebitfraction(process,
-                                             oneBitFractionThreshold = coarsetc_onebitfraction_proc.oneBitFractionThreshold,
-                                             oneBitFractionLowValue = coarsetc_onebitfraction_proc.oneBitFractionLowValue,
-                                             oneBitFractionHighValue = coarsetc_onebitfraction_proc.oneBitFractionHighValue,
-                                             ):
-    parameters = coarsetc_onebitfraction_proc.clone()
-    parameters.oneBitFractionThreshold = oneBitFractionThreshold;
-    parameters.oneBitFractionLowValue = oneBitFractionLowValue;
-    parameters.oneBitFractionHighValue = oneBitFractionHighValue;
+                                   oneBitFractionThreshold = coarsetc_onebitfraction_proc.oneBitFractionThreshold,
+                                   oneBitFractionLowValue = coarsetc_onebitfraction_proc.oneBitFractionLowValue,
+                                   oneBitFractionHighValue = coarsetc_onebitfraction_proc.oneBitFractionHighValue,
+                                   ):
+    parameters = coarsetc_onebitfraction_proc.clone(
+        oneBitFractionThreshold = oneBitFractionThreshold,
+        oneBitFractionLowValue = oneBitFractionLowValue,
+        oneBitFractionHighValue = oneBitFractionHighValue,
+    )
 
     return process
 
@@ -51,10 +52,8 @@ def custom_coarsetc_onebitfraction(process,
 
 
 def custom_coarsetc_equalshare(process,
-                                         nTriggerCellsForDivision = 4
-                                         ):
+                               ):
     parameters = coarsetc_equalshare_proc.clone()
-    parameters.nTriggerCellsForDivision = nTriggerCellsForDivision;
 
     return process
     

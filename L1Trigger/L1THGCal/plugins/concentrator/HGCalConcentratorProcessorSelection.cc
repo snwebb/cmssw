@@ -57,7 +57,7 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
     std::vector<l1t::HGCalTriggerCell> trigCellVecOutput;
     std::vector<l1t::HGCalTriggerCell> trigCellVecCoarsened;  
     if ( coarsenTriggerCells_ ){
-      coarsenerImpl_->select(module_trigcell.second,trigCellVecCoarsened);
+      coarsenerImpl_->coarsen(module_trigcell.second,trigCellVecCoarsened);
       
       switch(selectionType_){
       case thresholdSelect:
