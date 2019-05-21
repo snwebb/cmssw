@@ -126,19 +126,15 @@ lheInfoTable = cms.EDProducer("LHETablesProducer",
 l1bits=cms.EDProducer("L1TriggerResultsConverter", src=cms.InputTag("gtStage2Digis"), legacyL1=cms.bool(False))
 
 nanoSequenceCommon = cms.Sequence(
-        nanoMetadata + jetSequence + muonSequence + tauSequence + electronSequence+photonSequence+vertexSequence+
-        isoTrackSequence + # must be after all the leptons 
-        linkedObjects  +
-        jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + isoTrackTables
+        nanoMetadata
         )
-nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectTables + l1bits)
 
-nanoSequence = cms.Sequence(nanoSequenceCommon + nanoSequenceOnlyFullSim)
+nanoSequenceMC = cms.Sequence(
+    
+#    nanoMetadata + genParticleSequence + particleLevelSequence + nanoSequenceCommon + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable 
+    nanoMetadata + genParticleSequence + particleLevelSequence + nanoSequenceCommon + jetGenMC + genParticleTables + particleLevelTables + lheInfoTable 
 
-nanoSequenceFS = cms.Sequence(genParticleSequence + particleLevelSequence + nanoSequenceCommon + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + btagWeightTable + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
-
-nanoSequenceMC = nanoSequenceFS.copy()
-nanoSequenceMC.insert(nanoSequenceFS.index(nanoSequenceCommon)+1,nanoSequenceOnlyFullSim)
+)
 
 # modify extraFlagsTable to store ecalBadCalibFilter decision which is re-run with updated bad crystal list for 2017 and 2018 samples
 for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2, run2_nanoAOD_102Xv1:
@@ -176,15 +172,8 @@ def nanoAOD_addDeepInfo(process,addDeepBTag,addDeepFlavour):
     return process
 
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-#from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 def nanoAOD_recalibrateMETs(process,isData):
     runMetCorAndUncFromMiniAOD(process,isData=isData)
-    process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(jetSequence),cms.Sequence(process.fullPatMetSequence))
-#    makePuppiesFromMiniAOD(process,True) # call this before in the global customizer otherwise it would reset photon IDs in VID
-#    runMetCorAndUncFromMiniAOD(process,isData=isData,metType="Puppi",postfix="Puppi",jetFlavor="AK4PFPuppi")
-#    process.puppiNoLep.useExistingWeights = False
-#    process.puppi.useExistingWeights = False
-#    process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(jetSequence),cms.Sequence(process.puppiMETSequence+process.fullPatMetSequencePuppi))
     return process
 
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
@@ -238,7 +227,7 @@ def nanoAOD_runMETfixEE2017(process,isData):
                                fixEE2017 = True,
                                fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold': 3.139},
                                postfix = "FixEE2017")
-    process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(jetSequence),process.fullPatMetSequenceFixEE2017)
+#    process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(jetSequence),process.fullPatMetSequenceFixEE2017)
 
 def nanoAOD_customizeCommon(process):
 #    makePuppiesFromMiniAOD(process,True) # call this here as it calls switchOnVIDPhotonIdProducer
@@ -285,19 +274,19 @@ def nanoAOD_customizeMC(process):
 
 ### Era dependent customization
 _80x_sequence = nanoSequenceCommon.copy()
-#remove stuff 
-_80x_sequence.remove(isoTrackTables)
-_80x_sequence.remove(isoTrackSequence)
-#add stuff
-_80x_sequence.insert(_80x_sequence.index(jetSequence), extraFlagsProducers)
-_80x_sequence.insert(_80x_sequence.index(simpleCleanerTable)+1, extraFlagsTable)
+# #remove stuff 
+# _80x_sequence.remove(isoTrackTables)
+# _80x_sequence.remove(isoTrackSequence)
+# #add stuff
+# _80x_sequence.insert(_80x_sequence.index(jetSequence), extraFlagsProducers)
+# _80x_sequence.insert(_80x_sequence.index(simpleCleanerTable)+1, extraFlagsTable)
 
-run2_miniAOD_80XLegacy.toReplaceWith( nanoSequenceCommon, _80x_sequence)
+# run2_miniAOD_80XLegacy.toReplaceWith( nanoSequenceCommon, _80x_sequence)
 
 _102x_sequence = nanoSequenceCommon.copy()
 #add stuff
-_102x_sequence.insert(_102x_sequence.index(jetSequence),extraFlagsProducers102x)
-_102x_sequence.insert(_102x_sequence.index(simpleCleanerTable)+1,extraFlagsTable)
+# _102x_sequence.insert(_102x_sequence.index(jetSequence),extraFlagsProducers102x)
+# _102x_sequence.insert(_102x_sequence.index(simpleCleanerTable)+1,extraFlagsTable)
 
 for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2, run2_nanoAOD_102Xv1:
     modifier.toReplaceWith(nanoSequenceCommon, _102x_sequence)
