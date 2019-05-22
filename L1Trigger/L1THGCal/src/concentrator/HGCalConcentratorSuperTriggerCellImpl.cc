@@ -56,18 +56,19 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
         }
         
         l1t::HGCalTriggerCell triggerCell;
-        GlobalPoint point = triggerTools_.getTCPosition(id);
+
+        GlobalPoint point;
+	if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
+	  point = coarseTCmapping_.getCoarseTriggerCellPosition( id );
+	}
+	else{
+	  point = triggerTools_.getTCPosition(id);
+	}
         math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
         triggerCell.setPosition(point);
         triggerCell.setP4(p4);
         triggerCell.setDetId(id);
-        
-        trigCellVecOutput.push_back ( triggerCell );
-        
-	//Change coarse TC positions if needed
-	if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
-	  coarseTCmapping_.setCoarseTriggerCellPosition( trigCellVecOutput.back() );
-	}
+	trigCellVecOutput.push_back ( triggerCell );
 
 	if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
 
@@ -82,23 +83,10 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 
 
     // assign energy
-    for (const  l1t::HGCalTriggerCell & tc : trigCellVecOutput){
+    for ( l1t::HGCalTriggerCell & tc : trigCellVecOutput){
       const auto & stc = STCs[superTCmapping_.getCoarseTriggerCellId(tc.detId())]; 
-    
-      if ( (energyDivisionType_!=superTriggerCell)
-           || ( energyDivisionType_==superTriggerCell && (tc.detId() == stc.getMaxId()) )
-           )  {
-	
-        trigCellVecOutput.push_back( tc );
-        assignSuperTriggerCellEnergy(trigCellVecOutput.back(), stc);        
-        
-      }
-    
+      assignSuperTriggerCellEnergy(tc, stc);        
     }      
-
-
-
-
 
 }
 
@@ -107,9 +95,16 @@ HGCalConcentratorSuperTriggerCellImpl::
  assignSuperTriggerCellEnergy(l1t::HGCalTriggerCell &c, const SuperTriggerCell &stc) const {
       
   if ( energyDivisionType_ == superTriggerCell ){
-    c.setHwPt(stc.getSumHwPt());
-    c.setMipPt(stc.getSumMipPt());
-    c.setPt(stc.getSumPt());
+    if ( c.detId() == stc.getMaxId() ){
+      c.setHwPt(stc.getSumHwPt());
+      c.setMipPt(stc.getSumMipPt());
+      c.setPt(stc.getSumPt());
+    }
+    else if ( c.detId() != stc.getMaxId() ){
+      c.setHwPt(0);
+      c.setMipPt(0);
+      c.setPt(0);
+    }
   }
   else if ( energyDivisionType_ == equalShare ){
 

@@ -10,7 +10,7 @@ class HGCalConcentratorCoarsenerImpl
   public:
     HGCalConcentratorCoarsenerImpl(const edm::ParameterSet& conf);
 
-    void select(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
+    void coarsen(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput);
     void eventSetup(const edm::EventSetup& es) {
 	triggerTools_.eventSetup(es);
 	coarseTCmapping_.eventSetup(es);
@@ -28,7 +28,6 @@ class HGCalConcentratorCoarsenerImpl
       float sumPt;
       float maxMipPt;
       int sumHwPt;
-      int maxHwPt;
       float sumMipPt;
       unsigned maxId;
 

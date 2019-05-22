@@ -50,13 +50,13 @@ class HGCalConcentratorSuperTriggerCellImpl
   
     private:
         float sumPt_, sumMipPt_, maxMipPt_, fracsum_;
-        int sumHwPt_, maxHwPt_; 
+        int sumHwPt_; 
         uint32_t maxId_, stcId_;
 	std::map<uint32_t,float> tc_pts_;
 
     public:
     SuperTriggerCell()
-      :    sumPt_(0), sumMipPt_(0), maxMipPt_(0), fracsum_(0), sumHwPt_(0), maxHwPt_(0), maxId_(0), stcId_(0) 
+      :    sumPt_(0), sumMipPt_(0), maxMipPt_(0), fracsum_(0), sumHwPt_(0), maxId_(0), stcId_(0) 
 	  {};
 
         void add(const l1t::HGCalTriggerCell &c, uint32_t stcId) {
@@ -64,7 +64,6 @@ class HGCalConcentratorSuperTriggerCellImpl
             sumMipPt_ += c.mipPt();
             sumHwPt_ += c.hwPt();
             if (maxId_ == 0 || c.mipPt() > maxMipPt_) {
-                maxHwPt_ = c.hwPt();
                 maxMipPt_ = c.mipPt();
                 maxId_ = c.detId();
             }
@@ -72,12 +71,8 @@ class HGCalConcentratorSuperTriggerCellImpl
             if  ( stcId_ == 0 ){
               stcId_ = stcId;
             }
-	    tc_pts_[c.detId()] = c.pt();
+	    tc_pts_[c.detId()] = c.mipPt();
 
-        }
-        void SetMaxTC(const l1t::HGCalTriggerCell &c){
-          maxId_ = c.detId();
-          maxHwPt_ = c.hwPt();
         }
 	void addToFractionSum(float frac){
 	  fracsum_ += frac;
@@ -88,7 +83,6 @@ class HGCalConcentratorSuperTriggerCellImpl
 	}
         uint32_t getMaxId()const{return maxId_;}
         uint32_t getSTCId()const{return stcId_;}
-        float getMaxHwPt()const{return maxHwPt_;}
         float getSumMipPt()const{return sumMipPt_;}
         int getSumHwPt()const{return sumHwPt_;}
         float getSumPt()const{return sumPt_;}

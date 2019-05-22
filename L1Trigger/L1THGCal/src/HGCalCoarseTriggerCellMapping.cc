@@ -3,7 +3,7 @@
 
 
 HGCalCoarseTriggerCellMapping::
-HGCalCoarseTriggerCellMapping(std::vector<unsigned> ctcSize )
+HGCalCoarseTriggerCellMapping(const std::vector<unsigned>& ctcSize )
   :  ctcSize_(ctcSize.size()!=0 ? ctcSize : 
 	      std::vector<unsigned>{2,2,2,2})
 {
@@ -72,7 +72,7 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
     if( triggerTools_.isScintillator(tcid) ){
 
       HGCScintillatorDetId tc_IdV9(tcid);
-      int newPhi = tc_IdV9.iphi() & ~1;
+      uint32_t newPhi = tc_IdV9.iphi() & ~1;
       evenid = tcid & ~(kHGCalScinCellMask_);
       evenid |= ( ((tc_IdV9.ietaAbs()& HGCScintillatorDetId::kHGCalRadiusMask) << HGCScintillatorDetId::kHGCalRadiusOffset ) |
 		  ((newPhi & HGCScintillatorDetId::kHGCalPhiMask) << HGCScintillatorDetId::kHGCalPhiOffset ));
@@ -271,23 +271,21 @@ getConstituentTriggerCells( uint32_t ctcId ) const
 }
 
 
-void 
+GlobalPoint
 HGCalCoarseTriggerCellMapping::
-setCoarseTriggerCellPosition( l1t::HGCalTriggerCell& tc ) const
+getCoarseTriggerCellPosition( uint32_t tcid ) const
 { 
 
-     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId(tc.detId() ));
+     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId( tcid ) );
      Basic3DVector<float> average_vector(0., 0., 0.);
 
-     for ( const auto tc_id : constituentTCs ){
-       average_vector += triggerTools_.getTCPosition(tc_id).basicVector();
+     for ( const auto constituent : constituentTCs ){
+       average_vector += triggerTools_.getTCPosition(constituent).basicVector();
      }
 
      GlobalPoint average_point( average_vector / constituentTCs.size() ) ;     
-    
-     math::PtEtaPhiMLorentzVector p4(tc.pt(), average_point.eta(), average_point.phi(), tc.mass());
-     tc.setPosition( average_point );
-     tc.setP4(p4);
+
+     return average_point;
 
 }
 
