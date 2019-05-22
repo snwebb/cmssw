@@ -132,7 +132,7 @@ nanoSequenceCommon = cms.Sequence(
 nanoSequenceMC = cms.Sequence(
     
 #    nanoMetadata + genParticleSequence + particleLevelSequence + nanoSequenceCommon + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable 
-    nanoMetadata + genParticleSequence + particleLevelSequence + nanoSequenceCommon + jetGenMC + genParticleTables + particleLevelTables + lheInfoTable 
+    nanoMetadata + genParticleSequence + particleLevelSequence + nanoSequenceCommon + jetGenMC + genWeightsTable + genParticleTables + particleLevelTables + lheInfoTable 
 
 )
 
