@@ -205,15 +205,19 @@ getConstituentTriggerCells( uint32_t ctcId ) const
 
   if ( tc_Id.det() == DetId::Forward ){//V8  
 
-    int SplitInv = ~( (~kSTCidMask_) | kSplit_.at ( ctcSize ) );
-
-    for ( int i = 0; i < SplitInv + 1 ; i++ ){
-      if (  (i & SplitInv)!=i  )  continue; 
-
-      output_ids.emplace_back( ctcId | i );
-
+    if( triggerTools_.isScintillator( ctcId ) ){
+      output_ids.emplace_back( ctcId ); //stc not available in scintillator for v8
     }
-
+    else{
+      int SplitInv = ~( (~kSTCidMask_) | kSplit_.at ( ctcSize ) );
+      
+      for ( int i = 0; i < SplitInv + 1 ; i++ ){
+	if (  (i & SplitInv)!=i  )  continue; 
+	
+	output_ids.emplace_back( ctcId | i );
+	
+      }
+    }
   }
   else if ( tc_Id.det() == DetId::HGCalTrigger || tc_Id.det() == DetId::HGCalHSc ){//V9
 
