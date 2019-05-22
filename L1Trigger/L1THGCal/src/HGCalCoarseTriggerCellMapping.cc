@@ -54,18 +54,18 @@ HGCalCoarseTriggerCellMapping::checkSizeValidity(int ctcSize )const{
   }
 }
 
-void
-HGCalCoarseTriggerCellMapping:: setEvenDetId(l1t::HGCalTriggerCell &c) const {
-  c.setDetId( getEvenDetId( c.detId() ) );
-}
-
 uint32_t
 HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
   
   uint32_t evenid = 0;
   DetId tc_Id( tcid );
   if ( tc_Id.det() == DetId::Forward ){//V8
-    evenid = tcid & ~1;
+    if( triggerTools_.isScintillator(tcid) ){
+      evenid = tcid; //stc not available in scintillator for v8
+    }
+    else{
+      evenid = tcid & ~1;
+    }
   }
   else if ( tc_Id.det() == DetId::HGCalTrigger || tc_Id.det() == DetId::HGCalHSc ){//V9
 
@@ -108,7 +108,12 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
   
   }
 
-  return evenid;
+  if ( triggerTools_.validTriggerCell(evenid) ) {
+    return evenid;
+  }
+  else{
+    return tcid;
+  }
 }
 
 uint32_t

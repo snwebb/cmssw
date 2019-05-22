@@ -38,10 +38,10 @@ void
 HGCalConcentratorCoarsenerImpl::
 coarsen(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput)
 { 
+  coarseTCs_.clear();
 
   // first pass, fill the coarse trigger cell information
   for (const l1t::HGCalTriggerCell & tc : trigCellVecInput) {
-
     int thickness = triggerTools_.thicknessIndex(tc.detId(),true);
     if ( fixedDataSizePerHGCROC_ && thickness == kHighDensityThickness_ ){
       trigCellVecOutput.push_back( tc );
@@ -55,13 +55,13 @@ coarsen(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<
   for (auto & ctc : coarseTCs_){
    l1t::HGCalTriggerCell triggerCell;   
    assignCoarseTriggerCellEnergy( triggerCell, ctc.first );
-   coarseTCmapping_.setEvenDetId( triggerCell );        
-   GlobalPoint point = coarseTCmapping_.getCoarseTriggerCellPosition( trigCellVecOutput.back().detId() );
+   uint32_t evenId =  coarseTCmapping_.getEvenDetId( ctc.first );        
+   GlobalPoint point = coarseTCmapping_.getCoarseTriggerCellPosition( triggerCell.detId() );
    math::PtEtaPhiMLorentzVector p4( triggerCell.pt(), point.eta(), point.phi(), triggerCell.mass());
+   triggerCell.setDetId(evenId);
    triggerCell.setPosition(point);
    triggerCell.setP4(p4);
    trigCellVecOutput.push_back( triggerCell );
   }
-
 
 }

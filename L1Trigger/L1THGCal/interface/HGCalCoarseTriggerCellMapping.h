@@ -10,7 +10,6 @@ class HGCalCoarseTriggerCellMapping
 {
   public:
   HGCalCoarseTriggerCellMapping(const std::vector<unsigned>& ctcSize);
-    void setEvenDetId(l1t::HGCalTriggerCell &c) const;
     uint32_t getEvenDetId(uint32_t tcid) const;
     std::vector<uint32_t> getConstituentTriggerCells( uint32_t ctcId ) const;
     GlobalPoint getCoarseTriggerCellPosition( uint32_t tcid ) const;
