@@ -4,7 +4,7 @@
 
 HGCalCoarseTriggerCellMapping::
 HGCalCoarseTriggerCellMapping(const std::vector<unsigned>& ctcSize )
-  :  ctcSize_(ctcSize.size()!=0 ? ctcSize : 
+  :  ctcSize_(!ctcSize.empty() ? ctcSize : 
 	      std::vector<unsigned>{2,2,2,2})
 {
       if ( ctcSize_.size() != kNLayers_ ){

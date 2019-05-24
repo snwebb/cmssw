@@ -81,7 +81,6 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
       }
     }
 
-
     // assign energy
     for ( l1t::HGCalTriggerCell & tc : trigCellVecOutput){
       const auto & stc = STCs[superTCmapping_.getCoarseTriggerCellId(tc.detId())]; 
