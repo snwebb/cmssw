@@ -281,10 +281,10 @@ getConstituentTriggerCells( uint32_t ctcId ) const
 
 GlobalPoint
 HGCalCoarseTriggerCellMapping::
-getCoarseTriggerCellPosition( uint32_t tcid ) const
+getCoarseTriggerCellPosition( uint32_t ctcId ) const
 { 
 
-     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( getCoarseTriggerCellId( tcid ) );
+     std::vector<uint32_t> constituentTCs = getConstituentTriggerCells ( ctcId );
      Basic3DVector<float> average_vector(0., 0., 0.);
 
      for ( const auto constituent : constituentTCs ){

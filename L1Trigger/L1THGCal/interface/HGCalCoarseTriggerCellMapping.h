@@ -12,7 +12,7 @@ class HGCalCoarseTriggerCellMapping
   HGCalCoarseTriggerCellMapping(const std::vector<unsigned>& ctcSize);
     uint32_t getEvenDetId(uint32_t tcid) const;
     std::vector<uint32_t> getConstituentTriggerCells( uint32_t ctcId ) const;
-    GlobalPoint getCoarseTriggerCellPosition( uint32_t tcid ) const;
+    GlobalPoint getCoarseTriggerCellPosition( uint32_t ctcId ) const;
     uint32_t getCoarseTriggerCellId(uint32_t detid) const ;
     void checkSizeValidity(int ctcSize)const;
     void eventSetup(const edm::EventSetup& es) {triggerTools_.eventSetup(es);}

@@ -59,7 +59,7 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 
         GlobalPoint point;
         if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
-          point = coarseTCmapping_.getCoarseTriggerCellPosition( id );
+          point = coarseTCmapping_.getCoarseTriggerCellPosition( coarseTCmapping_.getCoarseTriggerCellId(id) );
         }
         else{
           point = triggerTools_.getTCPosition(id);

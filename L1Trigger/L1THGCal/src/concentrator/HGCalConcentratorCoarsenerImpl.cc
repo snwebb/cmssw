@@ -62,7 +62,7 @@ coarsen(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<
    assignCoarseTriggerCellEnergy( triggerCell, ctc.second );
    uint32_t evenId =  coarseTCmapping_.getEvenDetId( ctc.second.maxId );       
    triggerCell.setDetId(evenId);
-   GlobalPoint point = coarseTCmapping_.getCoarseTriggerCellPosition( triggerCell.detId() );
+   GlobalPoint point = coarseTCmapping_.getCoarseTriggerCellPosition( ctc.first );
    math::PtEtaPhiMLorentzVector p4( triggerCell.pt(), point.eta(), point.phi(), triggerCell.mass());
    triggerCell.setPosition(point);
    triggerCell.setP4(p4);
