@@ -60,10 +60,6 @@ class HGCalCoarseTriggerCellMapping
     static constexpr int kVMask_ = 0x3;
     static constexpr int kHGCalCellMaskV9_         = 0xff;
     static constexpr int kHGCalScinCellMask_     = 0x1ffff;
-    static constexpr int kHGCalCellUOffset = 0;
-    static constexpr int kHGCalCellUMask = 0xF;
-    static constexpr int kHGCalCellVOffset = 4;
-    static constexpr int kHGCalCellVMask = 0xF;
 
     HGCalTriggerTools triggerTools_;
     HGCSiliconDetIdToROC detIdToROC_;

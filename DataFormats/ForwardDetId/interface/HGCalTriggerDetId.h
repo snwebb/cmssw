@@ -86,8 +86,6 @@ public:
   
   static const HGCalTriggerDetId Undefined;
 
-  private:
-
   static const int kHGCalCellUOffset      = 0;
   static const int kHGCalCellUMask        = 0xF;
   static const int kHGCalCellVOffset      = 4;
@@ -108,6 +106,9 @@ public:
   static const int kHGCalZsideMask        = 0x1;
   static const int kHGCalSubdetOffset     = 25;
   static const int kHGCalSubdetMask       = 0x3;
+
+  private:
+
 };
   
 std::ostream& operator<<(std::ostream&,const HGCalTriggerDetId& id);

@@ -101,8 +101,8 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
       }
       
       evenid = tcid & ~(kHGCalCellMaskV9_);
-      evenid |= ( ((newU & kHGCalCellUMask) << kHGCalCellUOffset ) |
-                  ((newV & kHGCalCellVMask) << kHGCalCellVOffset ));
+      evenid |= ( ((newU & HGCalTriggerDetId::kHGCalCellUMask) << HGCalTriggerDetId::kHGCalCellUOffset ) |
+                  ((newV & HGCalTriggerDetId::kHGCalCellVMask) << HGCalTriggerDetId::kHGCalCellVOffset ));
 
     }
   
@@ -265,8 +265,8 @@ getConstituentTriggerCells( uint32_t ctcId ) const
         }
         
         uint32_t outid = ctcId & ~(kHGCalCellMaskV9_);
-        outid |= ( ((u & kHGCalCellUMask) << kHGCalCellUOffset ) |
-                   ((v & kHGCalCellVMask) << kHGCalCellVOffset ));
+        outid |= ( ((u & HGCalTriggerDetId::kHGCalCellUMask) << HGCalTriggerDetId::kHGCalCellUOffset ) |
+                   ((v & HGCalTriggerDetId::kHGCalCellVMask) << HGCalTriggerDetId::kHGCalCellVOffset ));
         
         output_ids.emplace_back( outid );
         
