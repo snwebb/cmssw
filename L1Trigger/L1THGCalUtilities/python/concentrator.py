@@ -49,8 +49,8 @@ def create_bestchoice(process, inputs,
 
 
 def create_onebitfraction(process, inputs,
-                            stcSize=coarsetc_onebitfraction.stcSize,
-                            fixedDataSizePerHGCROC=coarsetc_onebitfraction.fixedDataSizePerHGCROC
+                            stcSize=coarsetc_onebitfraction_proc.stcSize,
+                            fixedDataSizePerHGCROC=coarsetc_onebitfraction_proc.fixedDataSizePerHGCROC
                             ):
     producer = process.hgcalConcentratorProducer.clone(
             InputTriggerCells = cms.InputTag('{}:HGCalVFEProcessorSums'.format(inputs)),
