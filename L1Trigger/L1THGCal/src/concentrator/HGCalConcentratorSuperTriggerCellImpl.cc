@@ -68,6 +68,9 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
         triggerCell.setPosition(point);
         triggerCell.setP4(p4);
         triggerCell.setDetId(id);
+	if ( energyDivisionType_ == superTriggerCell && id != s.second.getMaxId() ){
+	  continue;
+	}
         trigCellVecOutput.push_back ( triggerCell );
 
         if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
