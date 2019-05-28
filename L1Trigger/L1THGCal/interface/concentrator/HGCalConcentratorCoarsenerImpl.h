@@ -36,7 +36,7 @@ class HGCalConcentratorCoarsenerImpl
     std::unordered_map<uint32_t,CoarseTC> coarseTCs_;
 
     void updateCoarseTriggerCellMaps( const l1t::HGCalTriggerCell& tc, uint32_t ctcid );
-    void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, uint32_t ctcid);
+    void assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &c, const CoarseTC & ctc) const;
     
 };
 

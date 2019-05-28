@@ -38,18 +38,18 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 
       int thickness = 0;
       if ( triggerTools_.isSilicon(s.second.getSTCId() ) ){
-	thickness = triggerTools_.thicknessIndex(s.second.getSTCId(),true);
+        thickness = triggerTools_.thicknessIndex(s.second.getSTCId(),true);
       }else if ( triggerTools_.isScintillator(s.second.getSTCId()) ){
-	thickness = 3;
+        thickness = 3;
       }
 
       std::vector<uint32_t> output_ids = superTCmapping_.getConstituentTriggerCells( s.second.getSTCId() );
 
       for (const auto& id: output_ids){
 
-	if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id!=superTCmapping_.getEvenDetId(id)) {
-	  continue;
-	}
+        if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id!=superTCmapping_.getEvenDetId(id)) {
+          continue;
+        }
 
         if ( !triggerTools_.validTriggerCell(id) ) {
           continue;
@@ -58,25 +58,25 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
         l1t::HGCalTriggerCell triggerCell;
 
         GlobalPoint point;
-	if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
-	  point = coarseTCmapping_.getCoarseTriggerCellPosition( id );
-	}
-	else{
-	  point = triggerTools_.getTCPosition(id);
-	}
+        if ( fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_ ){
+          point = coarseTCmapping_.getCoarseTriggerCellPosition( id );
+        }
+        else{
+          point = triggerTools_.getTCPosition(id);
+        }
         math::PtEtaPhiMLorentzVector p4(0, point.eta(), point.phi(), 0.);
         triggerCell.setPosition(point);
         triggerCell.setP4(p4);
         triggerCell.setDetId(id);
-	trigCellVecOutput.push_back ( triggerCell );
+        trigCellVecOutput.push_back ( triggerCell );
 
-	if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
+        if ( energyDivisionType_ == oneBitFraction ){ //Get the 1 bit fractions
 
-	  if ( id != s.second.getMaxId() ){
-	    float tc_fraction = getTriggerCellOneBitFraction( s.second.getTCpt(id) , s.second.getSumPt() );
-	    s.second.addToFractionSum(tc_fraction);
-	  }
-	}
+          if ( id != s.second.getMaxId() ){
+            float tc_fraction = getTriggerCellOneBitFraction( s.second.getTCpt(id) , s.second.getSumPt() );
+            s.second.addToFractionSum(tc_fraction);
+          }
+        }
 
       }
     }
@@ -99,7 +99,7 @@ HGCalConcentratorSuperTriggerCellImpl::
       c.setMipPt(stc.getSumMipPt());
       c.setPt(stc.getSumPt());
     }
-    else if ( c.detId() != stc.getMaxId() ){
+    else {
       c.setHwPt(0);
       c.setMipPt(0);
       c.setPt(0);

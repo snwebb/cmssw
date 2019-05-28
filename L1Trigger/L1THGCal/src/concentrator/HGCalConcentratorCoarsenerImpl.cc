@@ -18,7 +18,7 @@ updateCoarseTriggerCellMaps(const l1t::HGCalTriggerCell& tc, uint32_t ctcid){
   ctc.sumHwPt += tc.hwPt();
   ctc.sumMipPt += tc.mipPt();
 
-  if ( tc.mipPt() > coarseTCs_[ctcid].maxMipPt ){
+  if ( tc.mipPt() > ctc.maxMipPt ){
     ctc.maxId = tc.detId();
     ctc.maxMipPt = tc.mipPt();
   }
@@ -27,8 +27,7 @@ updateCoarseTriggerCellMaps(const l1t::HGCalTriggerCell& tc, uint32_t ctcid){
 
 void
 HGCalConcentratorCoarsenerImpl::
-assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &tc, uint32_t ctcid){
-  auto & ctc = coarseTCs_[ctcid];
+assignCoarseTriggerCellEnergy(l1t::HGCalTriggerCell &tc, const CoarseTC & ctc) const {
   tc.setHwPt(ctc.sumHwPt);
   tc.setMipPt(ctc.sumMipPt);
   tc.setPt(ctc.sumPt);
@@ -58,13 +57,13 @@ coarsen(const std::vector<l1t::HGCalTriggerCell>& trigCellVecInput, std::vector<
     updateCoarseTriggerCellMaps( tc, ctcid );
   }
 
-  for (auto & ctc : coarseTCs_){
+  for (const auto & ctc : coarseTCs_){
    l1t::HGCalTriggerCell triggerCell;   
-   assignCoarseTriggerCellEnergy( triggerCell, ctc.first );
+   assignCoarseTriggerCellEnergy( triggerCell, ctc.second );
    uint32_t evenId =  coarseTCmapping_.getEvenDetId( ctc.second.maxId );       
+   triggerCell.setDetId(evenId);
    GlobalPoint point = coarseTCmapping_.getCoarseTriggerCellPosition( triggerCell.detId() );
    math::PtEtaPhiMLorentzVector p4( triggerCell.pt(), point.eta(), point.phi(), triggerCell.mass());
-   triggerCell.setDetId(evenId);
    triggerCell.setPosition(point);
    triggerCell.setP4(p4);
    trigCellVecOutput.push_back( triggerCell );

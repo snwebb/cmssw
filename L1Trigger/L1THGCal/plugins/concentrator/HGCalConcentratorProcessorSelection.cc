@@ -70,13 +70,13 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
                                 trigCellVecOutput);
         break;
       case superTriggerCellSelect:
-	superTriggerCellImpl_->select(trigCellVecCoarsened, trigCellVecOutput);
+        superTriggerCellImpl_->select(trigCellVecCoarsened, trigCellVecOutput);
         break;
       default:
         // Should not happen, selection type checked in constructor
         break;
       }
-
+      
     }
     else{
 
