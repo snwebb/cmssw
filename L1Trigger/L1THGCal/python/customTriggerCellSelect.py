@@ -39,7 +39,6 @@ def custom_triggercellselect_bestchoice(process,
 
 def custom_coarsetc_onebitfraction(process,
                                    stcSize=coarsetc_onebitfraction_proc.stcSize,
-                                   type_energy_division=coarsetc_onebitfraction_proc.type_energy_division,
                                    fixedDataSizePerHGCROC=coarsetc_onebitfraction_proc.fixedDataSizePerHGCROC,
                                    oneBitFractionThreshold = coarsetc_onebitfraction_proc.oneBitFractionThreshold,
                                    oneBitFractionLowValue = coarsetc_onebitfraction_proc.oneBitFractionLowValue,
@@ -47,7 +46,6 @@ def custom_coarsetc_onebitfraction(process,
                                    ):
     parameters = coarsetc_onebitfraction_proc.clone(
         stcSize = stcSize,    
-        type_energy_division = type_energy_division,
         fixedDataSizePerHGCROC = fixedDataSizePerHGCROC, 
         oneBitFractionThreshold = oneBitFractionThreshold,
         oneBitFractionLowValue = oneBitFractionLowValue,
@@ -61,12 +59,10 @@ def custom_coarsetc_onebitfraction(process,
 
 def custom_coarsetc_equalshare(process,
                                stcSize=coarsetc_equalshare_proc.stcSize,
-                               type_energy_division=coarsetc_equalshare_proc.type_energy_division,
                                fixedDataSizePerHGCROC=coarsetc_equalshare_proc.fixedDataSizePerHGCROC,
                                ):
     parameters = coarsetc_equalshare_proc.clone(
         stcSize = stcSize,    
-        type_energy_division = type_energy_division,
         fixedDataSizePerHGCROC = fixedDataSizePerHGCROC, 
     )
 
