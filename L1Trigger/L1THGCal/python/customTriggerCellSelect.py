@@ -51,7 +51,7 @@ def custom_coarsetc_onebitfraction(process,
         oneBitFractionLowValue = oneBitFractionLowValue,
         oneBitFractionHighValue = oneBitFractionHighValue,
     )
-
+    process.hgcalConcentratorProducer.ProcessorParameters = parameters
     return process
 
 
@@ -65,6 +65,6 @@ def custom_coarsetc_equalshare(process,
         stcSize = stcSize,    
         fixedDataSizePerHGCROC = fixedDataSizePerHGCROC, 
     )
-
+    process.hgcalConcentratorProducer.ProcessorParameters = parameters
     return process
     
