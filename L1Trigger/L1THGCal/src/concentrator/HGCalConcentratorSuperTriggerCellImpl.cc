@@ -47,7 +47,7 @@ createAllTriggerCells( std::unordered_map<unsigned,SuperTriggerCell>& STCs, std:
 
       for (const auto& id: output_ids){
 
-        if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id!=superTCmapping_.getEvenDetId(id)) {
+        if ( fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_ && id!=superTCmapping_.getRepresentativeDetId(id)) {
           continue;
         }
 

@@ -55,16 +55,16 @@ HGCalCoarseTriggerCellMapping::checkSizeValidity(int ctcSize )const{
 }
 
 uint32_t
-HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
+HGCalCoarseTriggerCellMapping:: getRepresentativeDetId(uint32_t tcid) const {
   
-  uint32_t evenid = 0;
+  uint32_t representativeid = 0;
   DetId tc_Id( tcid );
   if ( tc_Id.det() == DetId::Forward ){//V8
     if( triggerTools_.isScintillator(tcid) ){
-      evenid = tcid; //stc not available in scintillator for v8
+      representativeid = tcid; //stc not available in scintillator for v8
     }
     else{
-      evenid = tcid & ~1;
+      representativeid = tcid & ~1;
     }
   }
   else if ( tc_Id.det() == DetId::HGCalTrigger || tc_Id.det() == DetId::HGCalHSc ){//V9
@@ -73,8 +73,8 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
 
       HGCScintillatorDetId tc_IdV9(tcid);
       uint32_t newPhi = tc_IdV9.iphi() & ~1;
-      evenid = tcid & ~(kHGCalScinCellMask_);
-      evenid |= ( ((tc_IdV9.ietaAbs()& HGCScintillatorDetId::kHGCalRadiusMask) << HGCScintillatorDetId::kHGCalRadiusOffset ) |
+      representativeid = tcid & ~(kHGCalScinCellMask_);
+      representativeid |= ( ((tc_IdV9.ietaAbs()& HGCScintillatorDetId::kHGCalRadiusMask) << HGCScintillatorDetId::kHGCalRadiusOffset ) |
                   ((newPhi & HGCScintillatorDetId::kHGCalPhiMask) << HGCScintillatorDetId::kHGCalPhiOffset ));
 
     }
@@ -100,16 +100,16 @@ HGCalCoarseTriggerCellMapping:: getEvenDetId(uint32_t tcid) const {
         newV = ( uPrime&~1 ) + kRotate4_;
       }
       
-      evenid = tcid & ~(kHGCalCellMaskV9_);
-      evenid |= ( ((newU & HGCalTriggerDetId::kHGCalCellUMask) << HGCalTriggerDetId::kHGCalCellUOffset ) |
+      representativeid = tcid & ~(kHGCalCellMaskV9_);
+      representativeid |= ( ((newU & HGCalTriggerDetId::kHGCalCellUMask) << HGCalTriggerDetId::kHGCalCellUOffset ) |
                   ((newV & HGCalTriggerDetId::kHGCalCellVMask) << HGCalTriggerDetId::kHGCalCellVOffset ));
 
     }
   
   }
 
-  if ( triggerTools_.validTriggerCell(evenid) ) {
-    return evenid;
+  if ( triggerTools_.validTriggerCell(representativeid) ) {
+    return representativeid;
   }
   else{
     return tcid;

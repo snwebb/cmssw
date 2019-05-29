@@ -25,9 +25,7 @@ HGCalConcentratorProcessorSelection::HGCalConcentratorProcessorSelection(const e
         << "Unknown type of concentrator selection '" << selectionType << "'";
   }
 
-  if ( fixedDataSizePerHGCROC_) coarsenTriggerCells_ = true;
-
-  if ( coarsenTriggerCells_ ){   
+  if ( coarsenTriggerCells_ || fixedDataSizePerHGCROC_ ){   
     coarsenerImpl_ = std::make_unique<HGCalConcentratorCoarsenerImpl>(conf);
   }
 
@@ -44,7 +42,8 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
     superTriggerCellImpl_->eventSetup(es);
   if (coarsenerImpl_)
     coarsenerImpl_->eventSetup(es);
-  
+  triggerTools_.eventSetup(es);
+
   const l1t::HGCalTriggerCellBxCollection& collInput = *triggerCellCollInput;
 
   std::unordered_map<uint32_t, std::vector<l1t::HGCalTriggerCell>> tc_modules;
@@ -56,7 +55,16 @@ void HGCalConcentratorProcessorSelection::run(const edm::Handle<l1t::HGCalTrigge
   for (const auto& module_trigcell : tc_modules) {
     std::vector<l1t::HGCalTriggerCell> trigCellVecOutput;
     std::vector<l1t::HGCalTriggerCell> trigCellVecCoarsened;  
-    if ( coarsenTriggerCells_ ){
+
+
+    int thickness = 0;
+    if ( triggerTools_.isSilicon( module_trigcell.second.at(0).detId() ) ){
+      thickness = triggerTools_.thicknessIndex( module_trigcell.second.at(0).detId() ,true);
+    }else if ( triggerTools_.isScintillator( module_trigcell.second.at(0).detId() ) ){
+      thickness = 3;
+    }
+
+    if ( coarsenTriggerCells_ || (fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_) ){
       coarsenerImpl_->coarsen(module_trigcell.second,trigCellVecCoarsened);
       
       switch(selectionType_){

@@ -26,6 +26,7 @@ private:
   SelectionType selectionType_;
   bool fixedDataSizePerHGCROC_;
   bool coarsenTriggerCells_;
+  static constexpr int kHighDensityThickness_ = 0;
 
   std::unique_ptr<HGCalConcentratorThresholdImpl> thresholdImpl_;
   std::unique_ptr<HGCalConcentratorBestChoiceImpl> bestChoiceImpl_;
