@@ -46,9 +46,7 @@ void HGCalTriggerTools::eventSetup(const edm::EventSetup& es) {
   }
 }
 
-bool HGCalTriggerTools::validTriggerCell(const DetId& id) const {
-  return ( geom_->validTriggerCell(id) );
-}
+bool HGCalTriggerTools::validTriggerCell(const DetId& id) const { return (geom_->validTriggerCell(id)); }
 
 GlobalPoint HGCalTriggerTools::getTCPosition(const DetId& id) const {
   if (id.det() == DetId::Hcal || id.det() == DetId::HGCalEE) {
