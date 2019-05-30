@@ -73,7 +73,7 @@ HGCalCoarseTriggerCellMapping:: getRepresentativeDetId(uint32_t tcid) const {
 
       HGCScintillatorDetId tc_IdV9(tcid);
       uint32_t newPhi = tc_IdV9.iphi() & ~1;
-      representativeid = tcid & ~(kHGCalScinCellMask_);
+      representativeid = tcid & kHGCalScinCellMaskInv_;
       representativeid |= ( ((tc_IdV9.ietaAbs()& HGCScintillatorDetId::kHGCalRadiusMask) << HGCScintillatorDetId::kHGCalRadiusOffset ) |
                   ((newPhi & HGCScintillatorDetId::kHGCalPhiMask) << HGCScintillatorDetId::kHGCalPhiOffset ));
 
@@ -100,7 +100,7 @@ HGCalCoarseTriggerCellMapping:: getRepresentativeDetId(uint32_t tcid) const {
         newV = ( uPrime&~1 ) + kRotate4_;
       }
       
-      representativeid = tcid & ~(kHGCalCellMaskV9_);
+      representativeid = tcid & kHGCalCellMaskV9Inv_;
       representativeid |= ( ((newU & HGCalTriggerDetId::kHGCalCellUMask) << HGCalTriggerDetId::kHGCalCellUOffset ) |
                   ((newV & HGCalTriggerDetId::kHGCalCellVMask) << HGCalTriggerDetId::kHGCalCellVOffset ));
 
@@ -148,7 +148,7 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(uint32_t detid) const {
       HGCScintillatorDetId tc_IdV9(detid);
 
       int tcSplit = ((tc_IdV9.ietaAbs() << HGCScintillatorDetId::kHGCalRadiusOffset) | tc_IdV9.iphi()) & kSplit_v9_Scin_.at( ctcSize );
-      detid =  (detid & ~( kHGCalScinCellMask_ ) ) | tcSplit;
+      detid =  (detid & kHGCalScinCellMaskInv_ ) | tcSplit;
 
       return detid;
 
@@ -180,7 +180,7 @@ HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(uint32_t detid) const {
       }
 
       int tcSplit =  (rocnum << kRocShift_) | ( (uPrime << kUShift_ | vPrime) & kSplit_v9_.at( ctcSize ) );
-      detid =  (detid & ~( kHGCalCellMaskV9_ ) ) | tcSplit;
+      detid =  (detid & kHGCalCellMaskV9Inv_ ) | tcSplit;
       return detid;
       
     }
@@ -214,10 +214,10 @@ getConstituentTriggerCells( uint32_t ctcId ) const
       output_ids.emplace_back( ctcId ); //stc not available in scintillator for v8
     }
     else{
-      int SplitInv = ~( (~kSTCidMask_) | kSplit_.at ( ctcSize ) );
+      int splitInv = ~( (~kSTCidMask_) | kSplit_.at ( ctcSize ) );
       
-      for ( int i = 0; i < SplitInv + 1 ; i++ ){
-        if (  (i & SplitInv)!=i  )  continue; 
+      for ( int i = 0; i < splitInv + 1 ; i++ ){
+        if (  (i & splitInv)!=i  )  continue; 
         
         output_ids.emplace_back( ctcId | i );
         
@@ -229,9 +229,9 @@ getConstituentTriggerCells( uint32_t ctcId ) const
 
     if( triggerTools_.isScintillator( ctcId ) ){
 
-      int SplitInv = ~( (~kHGCalScinCellMask_) | kSplit_v9_Scin_.at ( ctcSize ) );
-      for ( int i = 0; i < SplitInv + 1 ; i++ ){
-        if (  (i & SplitInv)!=i  )  continue; 
+      int splitInv = ~( kHGCalScinCellMaskInv_ | kSplit_v9_Scin_.at ( ctcSize ) );
+      for ( int i = 0; i < splitInv + 1 ; i++ ){
+        if (  (i & splitInv)!=i  )  continue; 
 
         output_ids.emplace_back( ctcId | i );
 
@@ -240,10 +240,10 @@ getConstituentTriggerCells( uint32_t ctcId ) const
     }
     else{
     
-      int SplitInv = ~( (~kSTCidMask_v9_) | kSplit_v9_.at ( ctcSize ) );
-      for ( int i = 0; i < SplitInv + 1 ; i++ ){
+      int splitInv = ~( (~kSTCidMask_v9_) | kSplit_v9_.at ( ctcSize ) );
+      for ( int i = 0; i < splitInv + 1 ; i++ ){
 
-        if (  (i & SplitInv)!=i  )  continue; 
+        if (  (i & splitInv)!=i  )  continue; 
         int uPrime = ((ctcId|i) >> kUShift_) & kUMask_; 
         int vPrime = ((ctcId|i) >> kVShift_) & kVMask_;
         int rocnum = (ctcId >> kRocShift_) & kRocShift_;
@@ -264,7 +264,7 @@ getConstituentTriggerCells( uint32_t ctcId ) const
           v = uPrime + kRotate4_;
         }
         
-        uint32_t outid = ctcId & ~(kHGCalCellMaskV9_);
+        uint32_t outid = ctcId & kHGCalCellMaskV9Inv_;
         outid |= ( ((u & HGCalTriggerDetId::kHGCalCellUMask) << HGCalTriggerDetId::kHGCalCellUOffset ) |
                    ((v & HGCalTriggerDetId::kHGCalCellVMask) << HGCalTriggerDetId::kHGCalCellVOffset ));
         

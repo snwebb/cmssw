@@ -107,8 +107,6 @@ public:
   static const int kHGCalSubdetOffset     = 25;
   static const int kHGCalSubdetMask       = 0x3;
 
-  private:
-
 };
   
 std::ostream& operator<<(std::ostream&,const HGCalTriggerDetId& id);

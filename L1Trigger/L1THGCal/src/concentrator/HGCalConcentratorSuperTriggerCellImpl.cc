@@ -103,9 +103,7 @@ HGCalConcentratorSuperTriggerCellImpl::
       c.setPt(stc.getSumPt());
     }
     else {
-      c.setHwPt(0);
-      c.setMipPt(0);
-      c.setPt(0);
+      throw cms::Exception("NonMaxIdSuperTriggerCell") << "Trigger Cell with detId not equal to the maximum of the superTriggerCell found" ;
     }
   }
   else if ( energyDivisionType_ == equalShare ){

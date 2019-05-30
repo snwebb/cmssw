@@ -77,7 +77,7 @@ class HGCalConcentratorSuperTriggerCellImpl
         void addToFractionSum(float frac){
           fracsum_ += frac;
           if ( fracsum_ > 1 ){
-            throw cms::Exception("HGCTriggerParameterError")
+            throw cms::Exception("HGCalConcentratorSuperTriggerCellError")
               << "Sum of Trigger Cell fractions should not be greater than 1" ;
           }
         }
