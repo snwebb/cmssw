@@ -88,7 +88,7 @@ private:
   };
   void createAllTriggerCells(std::unordered_map<unsigned, SuperTriggerCell>& STCs,
                              std::vector<l1t::HGCalTriggerCell>& trigCellVecOutput) const;
-  void assignSuperTriggerCellEnergy(l1t::HGCalTriggerCell& c, const SuperTriggerCell& stc) const;
+  void assignSuperTriggerCellEnergyAndPosition(l1t::HGCalTriggerCell& c, const SuperTriggerCell& stc) const;
   float getTriggerCellOneBitFraction(float tcPt, float sumPt) const;
 };
 

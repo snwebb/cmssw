@@ -176,8 +176,7 @@ std::vector<uint32_t> HGCalCoarseTriggerCellMapping::getConstituentTriggerCells(
     if (triggerTools_.isScintillator(ctcId)) {
       output_ids.emplace_back(ctcId);  //stc not available in scintillator for v8
     } else {
-      int splitInv = ~((~kSTCidMask_) | kSplit_.at(ctcSize));
-
+      int splitInv = ~(kSTCidMaskInv_ | kSplit_.at(ctcSize));
       for (int i = 0; i < splitInv + 1; i++) {
         if ((i & splitInv) != i)
           continue;
@@ -197,7 +196,7 @@ std::vector<uint32_t> HGCalCoarseTriggerCellMapping::getConstituentTriggerCells(
       }
 
     } else {
-      int splitInv = ~((~kSTCidMask_v9_) | kSplit_v9_.at(ctcSize));
+      int splitInv = ~(kSTCidMaskInv_v9_ | kSplit_v9_.at(ctcSize));
       for (int i = 0; i < splitInv + 1; i++) {
         if ((i & splitInv) != i)
           continue;

@@ -26,8 +26,8 @@ private:
   static const std::map<int, int> kSplit_;
   static const std::map<int, int> kSplit_v9_;
   static const std::map<int, int> kSplit_v9_Scin_;
-  static constexpr int kSTCidMask_ = 0x3f;
-  static constexpr int kSTCidMask_v9_ = 0xf;
+  static constexpr int kSTCidMaskInv_ = 0xffffffc0;
+  static constexpr int kSTCidMaskInv_v9_ = 0xfffffff0;
   static constexpr int kSplit_v8_Coarse_ = 0x30;
   static constexpr int kSplit_v8_Mid_ = 0x38;
   static constexpr int kSplit_v8_Fine_ = 0x3a;
