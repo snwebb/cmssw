@@ -308,7 +308,3 @@ int HGCalTriggerTools::sensorCellThicknessV8(const DetId& id) const {
   };
   return thickness;
 }
-
-bool HGCalTriggerTools::isV9Geometry() const{
-  return geom_->isV9Geometry();
-}
