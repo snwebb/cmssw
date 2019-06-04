@@ -82,6 +82,7 @@ public:
 
   DetId simToReco(const DetId&, const HGCalTopology&) const;
   DetId simToReco(const DetId&, const HcalTopology&) const;
+  bool isV9Geometry() const;
 
 private:
   const HGCalTriggerGeometryBase* geom_;
