@@ -61,7 +61,7 @@ void HGCalConcentratorSuperTriggerCellImpl::createAllTriggerCells(
       //This is a small effect, but in principle energy might
       //be lost.
       if (superTCmapping_.getCoarseTriggerCellId(id) != s.second.getSTCId()) {
-        if (_triggerTools->isV9Geometry()) {
+        if (triggerTools_->isV9Geometry()) {
           throw cms::Exception("NonExistingCoarseTC")
               << "The coarse trigger cell correponsing to the nominal trigger cell does not exist";
         } else {
