@@ -27,7 +27,7 @@ class HGCTriggerDetId : public DetId {
   const inline int getMaskedId(const uint32_t &shift, const uint32_t &mask) const  { return (id_ >> shift) & mask ; }
   inline void setMaskedId( const uint32_t value, const uint32_t &shift, const uint32_t &mask ){ id_|= ((value & mask ) <<shift ); }
 
- public:
+public:
   // undefined cell, for module det id
   const static uint32_t UndefinedCell() { return cell_mask ; }
 
