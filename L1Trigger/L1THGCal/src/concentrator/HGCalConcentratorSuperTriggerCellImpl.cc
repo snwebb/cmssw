@@ -123,7 +123,7 @@ void HGCalConcentratorSuperTriggerCellImpl::assignSuperTriggerCellEnergyAndPosit
   }
 
   GlobalPoint point;
-  if (fixedDataSizePerHGCROC && thickness > kHighDensityThickness_) {
+  if (fixedDataSizePerHGCROC_ && thickness > kHighDensityThickness_) {
     point = coarseTCmapping_.getCoarseTriggerCellPosition(coarseTCmapping_.getCoarseTriggerCellId(c.detId()));
   } else {
     point = triggerTools_.getTCPosition(c.detId());
