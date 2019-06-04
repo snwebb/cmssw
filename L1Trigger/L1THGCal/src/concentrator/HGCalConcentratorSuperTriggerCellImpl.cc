@@ -54,10 +54,17 @@ void HGCalConcentratorSuperTriggerCellImpl::createAllTriggerCells(
         continue;
       }
 
-      //To guard against the case in v8 geometry where 
-      //there might be different thicknesses within a module 
-      if ( superTCmapping_.getCoarseTriggerCellId(id)!=s.second.getSTCId() ){
-	continue;
+      DetId tc_Id(id);
+      if (tc_Id.det() == DetId::Forward) {  //V8
+	//To guard against the case in v8 geometry where 
+	//there might be different thicknesses within a module 
+	if ( superTCmapping_.getCoarseTriggerCellId(id)!=s.second.getSTCId() ){
+	  continue;
+	}
+      }
+      else{
+      throw cms::Exception("NonExistingCoarseTC")
+          << "The coarse trigger cell correponsing to the nominal trigger cell does not exist";
       }
 
      trigCellVecOutput.push_back(triggerCell);
@@ -117,7 +124,7 @@ void HGCalConcentratorSuperTriggerCellImpl::assignSuperTriggerCellEnergyAndPosit
   }
   
   GlobalPoint point;
-  if (fixedDataSizePerHGCROC_ == true && thickness > kHighDensityThickness_) {
+  if (fixedDataSizePerHGCROC && thickness > kHighDensityThickness_) {
     point = coarseTCmapping_.getCoarseTriggerCellPosition(coarseTCmapping_.getCoarseTriggerCellId(c.detId()));
   } else {
     point = triggerTools_.getTCPosition(c.detId());

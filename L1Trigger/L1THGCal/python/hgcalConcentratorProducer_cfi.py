@@ -39,7 +39,7 @@ best_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcesso
 supertc_conc_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentratorProcessorSelection'),
                              Method = cms.string('superTriggerCellSelect'),
                              type_energy_division = cms.string('superTriggerCell'),# superTriggerCell,oneBitFraction,equalShare
-                             stcSize = cms.vuint32(4,4,4,4),
+                             stcSize = cms.vuint32(4,16,16,16),
                              fixedDataSizePerHGCROC = cms.bool(False),
                              coarsenTriggerCells = cms.bool(False),
                              )
@@ -60,7 +60,7 @@ coarsetc_equalshare_proc = cms.PSet(ProcessorName  = cms.string('HGCalConcentrat
                              Method = cms.string('superTriggerCellSelect'),
                              type_energy_division = cms.string('equalShare'),
                              stcSize = cms.vuint32(4,8,8,8),
-                             fixedDataSizePerHGCROC = cms.bool(False),
+                             fixedDataSizePerHGCROC = cms.bool(True),
                              coarsenTriggerCells = cms.bool(False),
 )
 

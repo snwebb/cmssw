@@ -26,8 +26,8 @@ private:
   static const std::map<int, int> kSplit_;
   static const std::map<int, int> kSplit_v9_;
   static const std::map<int, int> kSplit_v9_Scin_;
-  static constexpr int kSTCidMaskInv_ = 0xffffffc0;
-  static constexpr int kSTCidMaskInv_v9_ = 0xfffffff0;
+  static constexpr int kSTCidMaskInv_ = ~0x3f;
+  static constexpr int kSTCidMaskInv_v9_ = ~0xf;
   static constexpr int kSplit_v8_Coarse_ = 0x30;
   static constexpr int kSplit_v8_Mid_ = 0x38;
   static constexpr int kSplit_v8_Fine_ = 0x3a;
@@ -55,8 +55,8 @@ private:
   static constexpr int kVShift_ = 0;
   static constexpr int kUMask_ = 0x3;
   static constexpr int kVMask_ = 0x3;
-  static constexpr int kHGCalCellMaskV9Inv_ = 0xffffff00;
-  static constexpr int kHGCalScinCellMaskInv_ = 0xfffe0000;
+  static constexpr int kHGCalCellMaskV9Inv_ = ~0xff;
+  static constexpr int kHGCalScinCellMaskInv_ = ~0x1ffff;
 
   HGCalTriggerTools triggerTools_;
   HGCSiliconDetIdToROC detIdToROC_;
