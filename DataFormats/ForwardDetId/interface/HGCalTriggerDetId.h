@@ -35,7 +35,7 @@ public:
   HGCalTriggerDetId(uint32_t rawid);
   /** Constructor from subdetector, zplus, layer, module, cell numbers */
   HGCalTriggerDetId(int subdet, int zp, int type, int layer, 
-                  int waferU, int waferV, int cellU, int cellV);
+                    int waferU, int waferV, int cellU, int cellV);
   /** Constructor from a generic cell id */
   HGCalTriggerDetId(const DetId& id);
   /** Assignment from a generic cell id */
@@ -79,7 +79,7 @@ public:
   std::vector<int> cellV() const;
   std::vector<std::pair<int,int> > cellUV() const;
 
-   /// consistency check : no bits left => no overhead
+    /// consistency check : no bits left => no overhead
   bool isEE()       const { return (subdet() == HGCalEETrigger); }
   bool isHSilicon() const { return (subdet() == HGCalHSiTrigger); }
   bool isForward()  const { return true; }
