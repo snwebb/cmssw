@@ -56,18 +56,17 @@ void HGCalConcentratorSuperTriggerCellImpl::createAllTriggerCells(
 
       DetId tc_Id(id);
       if (tc_Id.det() == DetId::Forward) {  //V8
-	//To guard against the case in v8 geometry where 
-	//there might be different thicknesses within a module 
-	if ( superTCmapping_.getCoarseTriggerCellId(id)!=s.second.getSTCId() ){
-	  continue;
-	}
-      }
-      else{
-      throw cms::Exception("NonExistingCoarseTC")
-          << "The coarse trigger cell correponsing to the nominal trigger cell does not exist";
+        //To guard against the case in v8 geometry where
+        //there might be different thicknesses within a module
+        if (superTCmapping_.getCoarseTriggerCellId(id) != s.second.getSTCId()) {
+          continue;
+        }
+      } else {
+        throw cms::Exception("NonExistingCoarseTC")
+            << "The coarse trigger cell correponsing to the nominal trigger cell does not exist";
       }
 
-     trigCellVecOutput.push_back(triggerCell);
+      trigCellVecOutput.push_back(triggerCell);
 
       if (energyDivisionType_ == oneBitFraction) {  //Get the 1 bit fractions
 
@@ -87,7 +86,7 @@ void HGCalConcentratorSuperTriggerCellImpl::createAllTriggerCells(
 }
 
 void HGCalConcentratorSuperTriggerCellImpl::assignSuperTriggerCellEnergyAndPosition(l1t::HGCalTriggerCell& c,
-                                                                         const SuperTriggerCell& stc) const {
+                                                                                    const SuperTriggerCell& stc) const {
   if (energyDivisionType_ == superTriggerCell) {
     if (c.detId() == stc.getMaxId()) {
       c.setHwPt(stc.getSumHwPt());
@@ -122,7 +121,7 @@ void HGCalConcentratorSuperTriggerCellImpl::assignSuperTriggerCellEnergyAndPosit
   } else if (triggerTools_.isScintillator(c.detId())) {
     thickness = 3;
   }
-  
+
   GlobalPoint point;
   if (fixedDataSizePerHGCROC && thickness > kHighDensityThickness_) {
     point = coarseTCmapping_.getCoarseTriggerCellPosition(coarseTCmapping_.getCoarseTriggerCellId(c.detId()));
@@ -132,7 +131,6 @@ void HGCalConcentratorSuperTriggerCellImpl::assignSuperTriggerCellEnergyAndPosit
   math::PtEtaPhiMLorentzVector p4(c.pt(), point.eta(), point.phi(), 0.);
   c.setPosition(point);
   c.setP4(p4);
-  
 }
 
 float HGCalConcentratorSuperTriggerCellImpl::getTriggerCellOneBitFraction(float tcPt, float sumPt) const {
@@ -157,5 +155,4 @@ void HGCalConcentratorSuperTriggerCellImpl::select(const std::vector<l1t::HGCalT
   }
 
   createAllTriggerCells(STCs, trigCellVecOutput);
-
 }
