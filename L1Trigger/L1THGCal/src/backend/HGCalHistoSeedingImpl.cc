@@ -5,7 +5,7 @@
 #include <numeric>
 
 HGCalHistoSeedingImpl::HGCalHistoSeedingImpl(const edm::ParameterSet& conf)
-    : seedingAlgoType_(conf.getParameter<std::string>("type_multicluster")),
+  : seedingAlgoType_(conf.getParameter<string>("type_histoalgo")),
       nBins1_(conf.getParameter<unsigned>("nBins_X1_histo_multicluster")),
       nBins2_(conf.getParameter<unsigned>("nBins_X2_histo_multicluster")),
       binsSumsHisto_(conf.getParameter<std::vector<unsigned>>("binSumsHisto")),
@@ -13,6 +13,7 @@ HGCalHistoSeedingImpl::HGCalHistoSeedingImpl(const edm::ParameterSet& conf)
       neighbour_weights_(conf.getParameter<std::vector<double>>("neighbour_weights")),
       smoothing_ecal_(conf.getParameter<std::vector<double>>("seed_smoothing_ecal")),
       smoothing_hcal_(conf.getParameter<std::vector<double>>("seed_smoothing_hcal")) {
+
   if (seedingAlgoType_ == "HistoMaxC3d") {
     seedingType_ = HistoMaxC3d;
   } else if (seedingAlgoType_ == "HistoSecondaryMaxC3d") {
@@ -24,7 +25,15 @@ HGCalHistoSeedingImpl::HGCalHistoSeedingImpl(const edm::ParameterSet& conf)
   } else {
     throw cms::Exception("HGCTriggerParameterError") << "Unknown Multiclustering type '" << seedingAlgoType_;
   }
-
+  
+  if (conf.getParameter<string>("seed_position") == "BinCentre") {
+    seedingPosition_ = BinCentre;
+  } else if (conf.getParameter<string>("seed_position") == "TCWeighted") {
+    seedingPosition_ = TCWeighted;
+  } else {
+    throw cms::Exception("HGCTriggerParameterError")
+      << "Unknown Seed Position option '" << conf.getParameter<string>("seed_position");
+  }
   if (conf.getParameter<std::string>("seeding_space") == "RPhi") {
     seedingSpace_ = RPhi;
     navigator_ = Navigator(nBins1_, Navigator::AxisType::Bounded, nBins2_, Navigator::AxisType::Circular);
@@ -35,16 +44,7 @@ HGCalHistoSeedingImpl::HGCalHistoSeedingImpl(const edm::ParameterSet& conf)
     throw cms::Exception("HGCTriggerParameterError")
         << "Unknown seeding space  '" << conf.getParameter<std::string>("seeding_space");
   }
-
-  if (conf.getParameter<std::string>("seed_position") == "BinCentre") {
-    seedingPosition_ = BinCentre;
-  } else if (conf.getParameter<std::string>("seed_position") == "TCWeighted") {
-    seedingPosition_ = TCWeighted;
-  } else {
-    throw cms::Exception("HGCTriggerParameterError")
-        << "Unknown Seed Position option '" << conf.getParameter<std::string>("seed_position");
-  }
-
+  
   edm::LogInfo("HGCalMulticlusterParameters")
       << "\nMulticluster number of X1-bins for the histo algorithm: " << nBins1_
       << "\nMulticluster number of X2-bins for the histo algorithm: " << nBins2_
@@ -65,7 +65,7 @@ HGCalHistoSeedingImpl::HGCalHistoSeedingImpl(const edm::ParameterSet& conf)
   }
 }
 
-HGCalHistoSeedingImpl::Histogram HGCalHistoSeedingImpl::fillHistoClusters(
+  HGCalHistoSeedingImpl::Histogram HGCalHistoSeedingImpl::fillHistoClusters(
     const std::vector<edm::Ptr<l1t::HGCalCluster>>& clustersPtrs) {
   Histogram histoClusters(nBins1_, nBins2_);
   std::array<double, 4> bounds = boundaries();

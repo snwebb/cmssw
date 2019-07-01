@@ -4,7 +4,7 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 
 HGCalHistoClusteringImpl::HGCalHistoClusteringImpl(const edm::ParameterSet& conf)
-    : dr_(conf.getParameter<double>("dR_multicluster")),
+  : dr_(conf.getParameter<double>("dR_multicluster")),
       dr_byLayer_coefficientA_(conf.existsAs<std::vector<double>>("dR_multicluster_byLayer_coefficientA")
                                    ? conf.getParameter<std::vector<double>>("dR_multicluster_byLayer_coefficientA")
                                    : std::vector<double>()),
