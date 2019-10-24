@@ -3,15 +3,17 @@
 
 HGCalCoarseTriggerCellMapping::HGCalCoarseTriggerCellMapping(const std::vector<unsigned>& ctcSize)
     : ctcSize_(!ctcSize.empty() ? ctcSize
-                                : std::vector<unsigned>{
-                                      kCTCsizeVeryFine_, kCTCsizeVeryFine_, kCTCsizeVeryFine_, kCTCsizeVeryFine_}) {
-  if (ctcSize_.size() != kNLayers_) {
+	       : std::vector<unsigned>{ kNHGCalLayers_ * kNLayers_, kCTCsizeVeryFine_} ){
+  
+  if (ctcSize_.size() != kNHGCalLayers_ * kNLayers_){ 
     throw cms::Exception("HGCTriggerParameterError")
-        << "Inconsistent size of coarse trigger cell size vector" << ctcSize_.size();
+      << "Inconsistent size of coarse trigger cell size vector" << ctcSize_.size();
   }
-
+  
   for (auto ctc : ctcSize_)
     checkSizeValidity(ctc);
+
+
 }
 
 const std::map<int, int> HGCalCoarseTriggerCellMapping::kSplit_ = {{kCTCsizeIndividual_, kSplit_v8_Individual_},
@@ -60,12 +62,14 @@ uint32_t HGCalCoarseTriggerCellMapping::getRepresentativeDetId(uint32_t tcid) co
 
 uint32_t HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(uint32_t detid) const {
   int thickness = 0;
+  unsigned int layer = triggerTools_.layer(detid);
   if (triggerTools_.isSilicon(detid)) {
     thickness = triggerTools_.thicknessIndex(detid, true);
   } else if (triggerTools_.isScintillator(detid)) {
     thickness = HGCalTriggerTools::kScintillatorPseudoThicknessIndex_;
   }
-  int ctcSize = ctcSize_.at(thickness);
+
+  int ctcSize = ctcSize_.at(thickness*kNHGCalLayers_ + layer);
 
   DetId tc_Id(detid);
   if (tc_Id.det() == DetId::Forward) {  //V8
@@ -125,12 +129,13 @@ uint32_t HGCalCoarseTriggerCellMapping::getCoarseTriggerCellId(uint32_t detid) c
 
 std::vector<uint32_t> HGCalCoarseTriggerCellMapping::getConstituentTriggerCells(uint32_t ctcId) const {
   int thickness = 0;
+  unsigned int layer = triggerTools_.layer(ctcId);
   if (triggerTools_.isSilicon(ctcId)) {
     thickness = triggerTools_.thicknessIndex(ctcId, true);
   } else if (triggerTools_.isScintillator(ctcId)) {
     thickness = HGCalTriggerTools::kScintillatorPseudoThicknessIndex_;
   }
-  int ctcSize = ctcSize_.at(thickness);
+  int ctcSize = ctcSize_.at(thickness*kNHGCalLayers_ + layer);
 
   std::vector<uint32_t> output_ids;
   DetId tc_Id(ctcId);
