@@ -173,10 +173,19 @@ std::vector<std::pair<GlobalPoint, double > > HGCalHistoSeedingImpl::computeMaxS
                 float MIPT_S = bin_R<(int(nBinsRHisto_)-1) ? histoClusters.at({{z_side,bin_R+1,bin_phi}}) : 0;
                 float MIPT_N = bin_R>0 ? histoClusters.at({{z_side,bin_R-1,bin_phi}}) : 0;
 
+		float MIPT_SS = bin_R<(int(nBinsRHisto_)-2) ? histoClusters.at({{z_side,bin_R+2,bin_phi}}) : 0;
+		float MIPT_NN = bin_R>1 ? histoClusters.at({{z_side,bin_R-2,bin_phi}}) : 0;
+
                 int binLeft = bin_phi - 1;
                 if( binLeft<0 ) binLeft += nBinsPhiHisto_;
                 int binRight = bin_phi + 1;
                 if( binRight>=int(nBinsPhiHisto_) ) binRight -= nBinsPhiHisto_;
+
+                int binLeftLeft = bin_phi - 2;
+                if( binLeftLeft<0 ) binLeftLeft += nBinsPhiHisto_;
+                int binRightRight = bin_phi + 2;
+                if( binRightRight>=int(nBinsPhiHisto_) ) binRightRight -= nBinsPhiHisto_;
+
 
                 float MIPT_W = histoClusters.at({{z_side,bin_R,binLeft}});
                 float MIPT_E = histoClusters.at({{z_side,bin_R,binRight}});
