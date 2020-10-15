@@ -68,10 +68,17 @@ private:
   // module related maps
   std::unordered_map<unsigned, unsigned> wafer_to_module_;
   std::unordered_multimap<unsigned, unsigned> module_to_wafers_;
-  std::unordered_map<unsigned, unsigned> links_per_module_;
-  mutable tbb::concurrent_unordered_set<unsigned> cache_missing_wafers_;
 
-  json mapping_config_;
+  std::unordered_map<unsigned, unsigned> links_per_module_;
+
+  std::unordered_multimap<unsigned,unsigned> stage2_to_stage1_;
+  std::unordered_multimap<unsigned,unsigned> stage1_to_stage2_;
+  std::unordered_multimap<unsigned,unsigned> stage1_to_lpgbts_;
+  std::unordered_map<unsigned,unsigned> lpgbt_to_stage1_;
+  std::unordered_multimap<unsigned,unsigned> lpgbt_to_modules_;
+  std::unordered_multimap<unsigned,unsigned> module_to_lpgbts_;
+
+  mutable tbb::concurrent_unordered_set<unsigned> cache_missing_wafers_;
 
   // Disconnected modules and layers
   std::unordered_set<unsigned> disconnected_modules_;
@@ -85,7 +92,7 @@ private:
   unsigned noseLayers_ = 0;
   unsigned totalLayers_ = 0;
 
-  void loadJsonMappingFile();
+  //void loadJsonMappingFile();
   void fillMaps();
   bool validCellId(unsigned det, unsigned cell_id) const;
   bool validTriggerCellFromCells(const unsigned) const;
@@ -98,15 +105,15 @@ private:
 
   unsigned layerWithOffset(unsigned) const;
 
-  std::vector<unsigned> getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const;
-  std::vector<unsigned> getLbgbtsFromStage1Fpga(const unsigned stage1_id) const;
-  std::vector<unsigned> getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const;
-  unsigned getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const;
-  std::vector<std::tuple<bool, int, int, unsigned>> getModulesFromLpgbt(const unsigned lpgbt_id) const;
-  std::vector<unsigned> getLpgbtsFromModule(const bool isSilicon,
-                                            const int module_u,
-                                            const int module_v,
-                                            const unsigned layer) const;
+  // geom_set getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const;
+  // geom_set getLbgbtsFromStage1Fpga(const unsigned stage1_id) const;
+  // geom_set getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const;
+  // unsigned getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const;
+  // std::vector<std::tuple<bool, int, int, unsigned>> getModulesFromLpgbt(const unsigned lpgbt_id) const;
+  // std::vector<unsigned> getLpgbtsFromModule(const bool isSilicon,
+  //                                           const int module_u,
+  //                                           const int module_v,
+  //                                           const unsigned layer) const;
 };
 
 HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& conf)
@@ -129,9 +136,17 @@ HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& 
 }
 
 void HGCalTriggerGeometryV9Imp3::reset() {
-  wafer_to_module_.clear();
-  module_to_wafers_.clear();
+  // wafer_to_module_.clear();
+  // module_to_wafers_.clear();
   cache_missing_wafers_.clear();
+
+  stage2_to_stage1_.clear();
+  stage1_to_stage2_.clear();
+  stage1_to_lpgbts_.clear();
+  lpgbt_to_stage1_.clear();
+  lpgbt_to_modules_.clear();
+  module_to_lpgbts_.clear();
+
 }
 
 void HGCalTriggerGeometryV9Imp3::initialize(const CaloGeometry* calo_geometry) {
@@ -161,7 +176,7 @@ void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry
   }
   last_trigger_layer_ = trigger_layer - 1;
   fillMaps();
-  loadJsonMappingFile();
+  //loadJsonMappingFile();
 }
 
 void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry,
@@ -561,51 +576,51 @@ unsigned HGCalTriggerGeometryV9Imp3::getModuleSize(const unsigned module_id) con
   return nWafers;
 }
 
-std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const {
-  std::vector<unsigned> stage1_ids = mapping_config_["Stage2"][stage2_id]["Stage1"];
-  return stage1_ids;
-}
+// HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const {
+//   geom_set stage1_ids = mapping_config_["Stage2"][stage2_id]["Stage1"];
+//   return stage1_ids;
+// }
 
-std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLbgbtsFromStage1Fpga(const unsigned stage1_id) const {
-  std::vector<unsigned> lpgbt_ids = mapping_config_["Stage1"][stage1_id]["lpgbts"];
-  return lpgbt_ids;
-}
+// HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getLbgbtsFromStage1Fpga(const unsigned stage1_id) const {
+//   geom_set lpgbt_ids = mapping_config_["Stage1"][stage1_id]["lpgbts"];
+//   return lpgbt_ids;
+// }
 
-std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const {
-  std::vector<unsigned> stage2_ids = mapping_config_["Stage1"][stage1_id]["Stage2"];
-  return stage2_ids;
-}
+// HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const {
+//   geom_set stage2_ids = mapping_config_["Stage1"][stage1_id]["Stage2"];
+//   return stage2_ids;
+// }
 
-unsigned HGCalTriggerGeometryV9Imp3::getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const {
-  unsigned stage1_id = mapping_config_["lpgbt"][lpgbt_id]["Stage1"];
-  return stage1_id;
-}
+// unsigned HGCalTriggerGeometryV9Imp3::getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const {
+//   unsigned stage1_id = mapping_config_["lpgbt"][lpgbt_id]["Stage1"];
+//   return stage1_id;
+// }
 
-std::vector<std::tuple<bool, int, int, unsigned>> HGCalTriggerGeometryV9Imp3::getModulesFromLpgbt(
-    const unsigned lpgbt_id) const {
-  std::vector<std::tuple<bool, int, int, unsigned>> modules;
+// std::vector<std::tuple<bool, int, int, unsigned>> HGCalTriggerGeometryV9Imp3::getModulesFromLpgbt(
+//     const unsigned lpgbt_id) const {
+//   std::vector<std::tuple<bool, int, int, unsigned>> modules;
 
-  for (auto module : mapping_config_["lpgbt"][lpgbt_id]["Modules"]) {
-    modules.emplace_back(std::make_tuple(module["isSilicon"], module["u"], module["v"], module["layer"]));
-  }
-  return modules;
-}
+//   for (auto module : mapping_config_["lpgbt"][lpgbt_id]["Modules"]) {
+//     modules.emplace_back(std::make_tuple(module["isSilicon"], module["u"], module["v"], module["layer"]));
+//   }
+//   return modules;
+// }
 
-std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLpgbtsFromModule(const bool isSilicon,
-                                                                      const int module_u,
-                                                                      const int module_v,
-                                                                      const unsigned layer) const {
-  std::vector<unsigned> lpgbts_ids;
-  for (auto module : mapping_config_["Module"]) {
-    if (module["isSilicon"] == isSilicon && module["u"] == module_u && module["v"] == module_v &&
-        module["layer"] == layer) {
-      for (auto lpgbt : module["lpgbts"]) {
-        lpgbts_ids.emplace_back(lpgbt["id"]);
-      }
-    }
-  }
-  return lpgbts_ids;
-}
+// std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLpgbtsFromModule(const bool isSilicon,
+//                                                                       const int module_u,
+//                                                                       const int module_v,
+//                                                                       const unsigned layer) const {
+//   std::vector<unsigned> lpgbts_ids;
+//   for (auto module : mapping_config_["Module"]) {
+//     if (module["isSilicon"] == isSilicon && module["u"] == module_u && module["v"] == module_v &&
+//         module["layer"] == layer) {
+//       for (auto lpgbt : module["lpgbts"]) {
+//         lpgbts_ids.emplace_back(lpgbt["id"]);
+//       }
+//     }
+//   }
+//   return lpgbts_ids;
+// }
 
 GlobalPoint HGCalTriggerGeometryV9Imp3::getTriggerCellPosition(const unsigned trigger_cell_det_id) const {
   unsigned det = DetId(trigger_cell_det_id).det();
@@ -669,51 +684,117 @@ GlobalPoint HGCalTriggerGeometryV9Imp3::getModulePosition(const unsigned module_
 }
 
 void HGCalTriggerGeometryV9Imp3::fillMaps() {
-  // read module mapping file
-  std::ifstream l1tModulesMappingStream(l1tModulesMapping_.fullPath());
-  if (!l1tModulesMappingStream.is_open()) {
-    throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TModulesMapping file\n";
-  }
 
-  short waferu = 0;
-  short waferv = 0;
-  short module = 0;
-  short layer = 0;
-  for (; l1tModulesMappingStream >> layer >> waferu >> waferv >> module;) {
-    wafer_to_module_.emplace(packLayerWaferId(layer, waferu, waferv), module);
-    module_to_wafers_.emplace(packLayerModuleId(layer, module), packWaferId(waferu, waferv));
-  }
-  if (!l1tModulesMappingStream.eof()) {
-    throw cms::Exception("BadGeometryFile")
-        << "Error reading L1TModulesMapping '" << layer << " " << waferu << " " << waferv << " " << module << "' \n";
-  }
-  l1tModulesMappingStream.close();
-  // read links mapping file
-  std::ifstream l1tLinksMappingStream(l1tLinksMapping_.fullPath());
-  if (!l1tLinksMappingStream.is_open()) {
-    throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TLinksMapping file\n";
-  }
-  short links = 0;
-  const short max_modules_60deg_sector = 127;
-  for (; l1tLinksMappingStream >> layer >> module >> links;) {
-    if (module_to_wafers_.find(packLayerModuleId(layer, module)) == module_to_wafers_.end()) {
-      links = 0;
-    }
-    if (module > max_modules_60deg_sector)
-      sector0_mask_ = 0xff;  // Use 8 bits to encode module number in 120deg sector
-    links_per_module_.emplace(packLayerModuleId(layer, module), links);
-  }
-  if (!l1tLinksMappingStream.eof()) {
-    throw cms::Exception("BadGeometryFile")
-        << "Error reading L1TLinksMapping '" << layer << " " << module << " " << links << "' \n";
-  }
-  l1tLinksMappingStream.close();
-}
-
-void HGCalTriggerGeometryV9Imp3::loadJsonMappingFile() {
+  // read json mapping file
+  json mapping_config_;
   std::ifstream json_input_file(jsonMappingFile_.fullPath());
+  if (!json_input_file.is_open()) {
+    throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TMapping file\n";
+  }
   json_input_file >> mapping_config_;
+
+  //Wafer to module mapping
+  for (unsigned wafer_id = 0; wafer_id < mapping_config_["Module"].size(); wafer_id++){
+    short waferu = mapping_config_["Module"][wafer_id]["u"];
+    short waferv = mapping_config_["Module"][wafer_id]["v"];
+    short moduleid = mapping_config_["Module"][wafer_id]["moduleid"];
+    short layer = mapping_config_["Module"][wafer_id]["layer"];
+
+    wafer_to_module_.emplace(packLayerWaferId(layer, waferu, waferv), moduleid);
+    module_to_wafers_.emplace(packLayerModuleId(layer, moduleid), packWaferId(waferu, waferv));
+  }
+  
+  //Stage 1 to Stage 2 mapping
+  for (unsigned stage1_id = 0; stage1_id < mapping_config_["Stage1"].size(); stage1_id++){
+    for (auto & stage2_id : mapping_config_["Stage1"][stage1_id]["Stage2"]){
+      stage1_to_stage2_.emplace( stage1_id, stage2_id);
+    }
+  }
+
+  //Stage 2 to Stage 1 mapping
+  for (unsigned stage2_id = 0; stage2_id < mapping_config_["Stage2"].size(); stage2_id++){
+    for (auto & stage1_id : mapping_config_["Stage2"][stage2_id]["Stage1"]){
+      stage2_to_stage1_.emplace( stage2_id, stage1_id);
+    }
+  }
+  
+  //Stage 1 to lpgbt mapping
+  for (unsigned stage1_id = 0; stage1_id < mapping_config_["Stage1"].size(); stage1_id++){
+    for (auto & lpgbt_id : mapping_config_["Stage1"][stage1_id]["lpgbts"]){
+      stage1_to_lpgbts_.emplace( stage1_id, lpgbt_id);
+    }
+  }
+  
+  //lpgbt to Stage 1 mapping
+  for (unsigned lpgbt_id = 0; lpgbt_id < mapping_config_["lpgbt"].size(); lpgbt_id++){
+    lpgbt_to_stage1_.emplace( lpgbt_id, mapping_config_["lpgbt"]["Stage1"]);
+  }
+  
+  //lpgbt to module mapping
+  for (unsigned lpgbt_id = 0; lpgbt_id < mapping_config_["lpgbt"].size(); lpgbt_id++){
+    for (auto & modules : mapping_config_["lpgbt"][lpgbt_id]["Modules"]){
+      lpgbt_to_modules_.emplace( lpgbt_id, modules["moduleid"] );
+    }
+  }
+
+  //module to lpgbt mapping
+  for (unsigned module = 0; module < mapping_config_["Module"].size(); module++){
+    links_per_module_.emplace( mapping_config_["Module"][module]["moduleid"], mapping_config_["Module"][module]["lpgbts"].size());
+    for (auto & lpgbt : mapping_config_["Module"][module]["lpgbts"]){
+      module_to_lpgbts_.emplace( mapping_config_["Module"][module]["moduleid"], lpgbt["id"]);
+    }
+  }
+  
+
+  // // read module mapping file
+  // std::ifstream l1tModulesMappingStream(l1tModulesMapping_.fullPath());
+  // if (!l1tModulesMappingStream.is_open()) {
+  //   throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TModulesMapping file\n";
+  // }
+
+  // short waferu = 0;
+  // short waferv = 0;
+  // short module = 0;
+  // short layer = 0;
+  // for (; l1tModulesMappingStream >> layer >> waferu >> waferv >> module;) {
+  //   wafer_to_module_.emplace(packLayerWaferId(layer, waferu, waferv), module);
+  //   module_to_wafers_.emplace(packLayerModuleId(layer, module), packWaferId(waferu, waferv));
+  // }
+  // if (!l1tModulesMappingStream.eof()) {
+  //   throw cms::Exception("BadGeometryFile")
+  //       << "Error reading L1TModulesMapping '" << layer << " " << waferu << " " << waferv << " " << module << "' \n";
+  // }
+  // l1tModulesMappingStream.close();
+  // // read links mapping file
+  // std::ifstream l1tLinksMappingStream(l1tLinksMapping_.fullPath());
+  // if (!l1tLinksMappingStream.is_open()) {
+  //   throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TLinksMapping file\n";
+  // }
+  // short links = 0;
+  // const short max_modules_60deg_sector = 127;
+  // for (; l1tLinksMappingStream >> layer >> module >> links;) {
+  //   if (module_to_wafers_.find(packLayerModuleId(layer, module)) == module_to_wafers_.end()) {
+  //     links = 0;
+  //   }
+  //   if (module > max_modules_60deg_sector)
+  //     sector0_mask_ = 0xff;  // Use 8 bits to encode module number in 120deg sector
+  //   links_per_module_.emplace(packLayerModuleId(layer, module), links);
+  // }
+  // if (!l1tLinksMappingStream.eof()) {
+  //   throw cms::Exception("BadGeometryFile")
+  //       << "Error reading L1TLinksMapping '" << layer << " " << module << " " << links << "' \n";
+  // }
+  // l1tLinksMappingStream.close();
+
+
+
+
+
+
+  json_input_file.close();
 }
+
+
 
 unsigned HGCalTriggerGeometryV9Imp3::packWaferId(int waferU, int waferV) const {
   unsigned packed_value = 0;
