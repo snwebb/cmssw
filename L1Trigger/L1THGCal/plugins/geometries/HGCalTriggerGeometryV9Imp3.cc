@@ -15,9 +15,12 @@
 #include <regex>
 #include <vector>
 
-class HGCalTriggerGeometryV9Imp2 : public HGCalTriggerGeometryBase {
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
+class HGCalTriggerGeometryV9Imp3 : public HGCalTriggerGeometryBase {
 public:
-  HGCalTriggerGeometryV9Imp2(const edm::ParameterSet& conf);
+  HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& conf);
 
   void initialize(const CaloGeometry*) final;
   void initialize(const HGCalGeometry*, const HGCalGeometry*, const HGCalGeometry*) final;
@@ -60,12 +63,15 @@ private:
 
   edm::FileInPath l1tModulesMapping_;
   edm::FileInPath l1tLinksMapping_;
+  edm::FileInPath jsonMappingFile_;
 
   // module related maps
   std::unordered_map<unsigned, unsigned> wafer_to_module_;
   std::unordered_multimap<unsigned, unsigned> module_to_wafers_;
   std::unordered_map<unsigned, unsigned> links_per_module_;
   mutable tbb::concurrent_unordered_set<unsigned> cache_missing_wafers_;
+
+  json mapping_config_;
 
   // Disconnected modules and layers
   std::unordered_set<unsigned> disconnected_modules_;
@@ -79,6 +85,7 @@ private:
   unsigned noseLayers_ = 0;
   unsigned totalLayers_ = 0;
 
+  void loadJsonMappingFile();
   void fillMaps();
   bool validCellId(unsigned det, unsigned cell_id) const;
   bool validTriggerCellFromCells(const unsigned) const;
@@ -92,13 +99,14 @@ private:
   unsigned layerWithOffset(unsigned) const;
 };
 
-HGCalTriggerGeometryV9Imp2::HGCalTriggerGeometryV9Imp2(const edm::ParameterSet& conf)
+HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& conf)
     : HGCalTriggerGeometryBase(conf),
       hSc_triggercell_size_(conf.getParameter<unsigned>("ScintillatorTriggerCellSize")),
       hSc_module_size_(conf.getParameter<unsigned>("ScintillatorModuleSize")),
       hSc_links_per_module_(conf.getParameter<unsigned>("ScintillatorLinksPerModule")),
       l1tModulesMapping_(conf.getParameter<edm::FileInPath>("L1TModulesMapping")),
-      l1tLinksMapping_(conf.getParameter<edm::FileInPath>("L1TLinksMapping")) {
+      l1tLinksMapping_(conf.getParameter<edm::FileInPath>("L1TLinksMapping")) ,
+      jsonMappingFile_(conf.getParameter<edm::FileInPath>("JsonMappingFile")) {
   const unsigned ntc_per_wafer = 48;
   hSc_wafers_per_module_ = std::round(hSc_module_size_ * hSc_module_size_ / float(ntc_per_wafer));
   if (ntc_per_wafer * hSc_wafers_per_module_ < hSc_module_size_ * hSc_module_size_) {
@@ -110,18 +118,18 @@ HGCalTriggerGeometryV9Imp2::HGCalTriggerGeometryV9Imp2(const edm::ParameterSet& 
   std::move(tmp_vector.begin(), tmp_vector.end(), std::inserter(disconnected_layers_, disconnected_layers_.end()));
 }
 
-void HGCalTriggerGeometryV9Imp2::reset() {
+void HGCalTriggerGeometryV9Imp3::reset() {
   wafer_to_module_.clear();
   module_to_wafers_.clear();
   cache_missing_wafers_.clear();
 }
 
-void HGCalTriggerGeometryV9Imp2::initialize(const CaloGeometry* calo_geometry) {
+void HGCalTriggerGeometryV9Imp3::initialize(const CaloGeometry* calo_geometry) {
   throw cms::Exception("BadGeometry")
-      << "HGCalTriggerGeometryV9Imp2 geometry cannot be initialized with the V7/V8 HGCAL geometry";
+      << "HGCalTriggerGeometryV9Imp3 geometry cannot be initialized with the V7/V8 HGCAL geometry";
 }
 
-void HGCalTriggerGeometryV9Imp2::initialize(const HGCalGeometry* hgc_ee_geometry,
+void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry,
                                             const HGCalGeometry* hgc_hsi_geometry,
                                             const HGCalGeometry* hgc_hsc_geometry) {
   setEEGeometry(hgc_ee_geometry);
@@ -143,9 +151,10 @@ void HGCalTriggerGeometryV9Imp2::initialize(const HGCalGeometry* hgc_ee_geometry
   }
   last_trigger_layer_ = trigger_layer - 1;
   fillMaps();
+  loadJsonMappingFile();
 }
 
-void HGCalTriggerGeometryV9Imp2::initialize(const HGCalGeometry* hgc_ee_geometry,
+void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry,
                                             const HGCalGeometry* hgc_hsi_geometry,
                                             const HGCalGeometry* hgc_hsc_geometry,
                                             const HGCalGeometry* hgc_nose_geometry) {
@@ -183,7 +192,7 @@ void HGCalTriggerGeometryV9Imp2::initialize(const HGCalGeometry* hgc_ee_geometry
   }
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::getTriggerCellFromCell(const unsigned cell_id) const {
+unsigned HGCalTriggerGeometryV9Imp3::getTriggerCellFromCell(const unsigned cell_id) const {
   unsigned det = DetId(cell_id).det();
   unsigned trigger_cell_id = 0;
   // Scintillator
@@ -222,11 +231,11 @@ unsigned HGCalTriggerGeometryV9Imp2::getTriggerCellFromCell(const unsigned cell_
   return trigger_cell_id;
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::getModuleFromCell(const unsigned cell_id) const {
+unsigned HGCalTriggerGeometryV9Imp3::getModuleFromCell(const unsigned cell_id) const {
   return getModuleFromTriggerCell(getTriggerCellFromCell(cell_id));
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::getModuleFromTriggerCell(const unsigned trigger_cell_id) const {
+unsigned HGCalTriggerGeometryV9Imp3::getModuleFromTriggerCell(const unsigned trigger_cell_id) const {
   unsigned det = DetId(trigger_cell_id).det();
   unsigned module = 0;
   unsigned subdet_old = 0;
@@ -292,7 +301,7 @@ unsigned HGCalTriggerGeometryV9Imp2::getModuleFromTriggerCell(const unsigned tri
   return module_id;
 }
 
-HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getCellsFromTriggerCell(
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getCellsFromTriggerCell(
     const unsigned trigger_cell_id) const {
   DetId trigger_cell_det_id(trigger_cell_id);
   unsigned det = trigger_cell_det_id.det();
@@ -349,7 +358,7 @@ HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getCellsFromTrigg
   return cell_det_ids;
 }
 
-HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getCellsFromModule(const unsigned module_id) const {
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getCellsFromModule(const unsigned module_id) const {
   geom_set cell_det_ids;
   geom_set trigger_cells = getTriggerCellsFromModule(module_id);
   for (auto trigger_cell_id : trigger_cells) {
@@ -359,7 +368,7 @@ HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getCellsFromModul
   return cell_det_ids;
 }
 
-HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp2::getOrderedCellsFromModule(
+HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp3::getOrderedCellsFromModule(
     const unsigned module_id) const {
   geom_ordered_set cell_det_ids;
   geom_ordered_set trigger_cells = getOrderedTriggerCellsFromModule(module_id);
@@ -370,7 +379,7 @@ HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp2::getOrdere
   return cell_det_ids;
 }
 
-HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getTriggerCellsFromModule(
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getTriggerCellsFromModule(
     const unsigned module_id) const {
   DetId module_det_id(module_id);
   unsigned det = module_det_id.det();
@@ -436,7 +445,7 @@ HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getTriggerCellsFr
   return trigger_cell_det_ids;
 }
 
-HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp2::getOrderedTriggerCellsFromModule(
+HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp3::getOrderedTriggerCellsFromModule(
     const unsigned module_id) const {
   DetId module_det_id(module_id);
   unsigned det = module_det_id.det();
@@ -498,12 +507,12 @@ HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp2::getOrdere
   return trigger_cell_det_ids;
 }
 
-HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp2::getNeighborsFromTriggerCell(
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getNeighborsFromTriggerCell(
     const unsigned trigger_cell_id) const {
-  throw cms::Exception("FeatureNotImplemented") << "Neighbor search is not implemented in HGCalTriggerGeometryV9Imp2";
+  throw cms::Exception("FeatureNotImplemented") << "Neighbor search is not implemented in HGCalTriggerGeometryV9Imp3";
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::getLinksInModule(const unsigned module_id) const {
+unsigned HGCalTriggerGeometryV9Imp3::getLinksInModule(const unsigned module_id) const {
   DetId module_det_id(module_id);
   unsigned links = 0;
   // Scintillator
@@ -524,7 +533,7 @@ unsigned HGCalTriggerGeometryV9Imp2::getLinksInModule(const unsigned module_id) 
   return links;
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::getModuleSize(const unsigned module_id) const {
+unsigned HGCalTriggerGeometryV9Imp3::getModuleSize(const unsigned module_id) const {
   DetId module_det_id(module_id);
   unsigned nWafers = 1;
   // Scintillator
@@ -542,7 +551,7 @@ unsigned HGCalTriggerGeometryV9Imp2::getModuleSize(const unsigned module_id) con
   return nWafers;
 }
 
-GlobalPoint HGCalTriggerGeometryV9Imp2::getTriggerCellPosition(const unsigned trigger_cell_det_id) const {
+GlobalPoint HGCalTriggerGeometryV9Imp3::getTriggerCellPosition(const unsigned trigger_cell_det_id) const {
   unsigned det = DetId(trigger_cell_det_id).det();
   // Position: barycenter of the trigger cell.
   Basic3DVector<float> triggerCellVector(0., 0., 0.);
@@ -573,7 +582,7 @@ GlobalPoint HGCalTriggerGeometryV9Imp2::getTriggerCellPosition(const unsigned tr
   return GlobalPoint(triggerCellVector / cell_ids.size());
 }
 
-GlobalPoint HGCalTriggerGeometryV9Imp2::getModulePosition(const unsigned module_det_id) const {
+GlobalPoint HGCalTriggerGeometryV9Imp3::getModulePosition(const unsigned module_det_id) const {
   unsigned det = DetId(module_det_id).det();
   // Position: barycenter of the module.
   Basic3DVector<float> moduleVector(0., 0., 0.);
@@ -603,7 +612,7 @@ GlobalPoint HGCalTriggerGeometryV9Imp2::getModulePosition(const unsigned module_
   return GlobalPoint(moduleVector / cell_ids.size());
 }
 
-void HGCalTriggerGeometryV9Imp2::fillMaps() {
+void HGCalTriggerGeometryV9Imp3::fillMaps() {
   // read module mapping file
   std::ifstream l1tModulesMappingStream(l1tModulesMapping_.fullPath());
   if (!l1tModulesMappingStream.is_open()) {
@@ -645,7 +654,12 @@ void HGCalTriggerGeometryV9Imp2::fillMaps() {
   l1tLinksMappingStream.close();
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::packWaferId(int waferU, int waferV) const {
+void HGCalTriggerGeometryV9Imp3::loadJsonMappingFile() {
+  std::ifstream json_input_file(jsonMappingFile_.fullPath());
+  json_input_file >> mapping_config_;
+}
+
+unsigned HGCalTriggerGeometryV9Imp3::packWaferId(int waferU, int waferV) const {
   unsigned packed_value = 0;
   unsigned waferUsign = (waferU >= 0) ? 0 : 1;
   unsigned waferVsign = (waferV >= 0) ? 0 : 1;
@@ -656,7 +670,7 @@ unsigned HGCalTriggerGeometryV9Imp2::packWaferId(int waferU, int waferV) const {
   return packed_value;
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::packLayerWaferId(unsigned layer, int waferU, int waferV) const {
+unsigned HGCalTriggerGeometryV9Imp3::packLayerWaferId(unsigned layer, int waferU, int waferV) const {
   unsigned packed_value = 0;
   unsigned subdet = ForwardSubdetector::HGCEE;
   if (layer > heOffset_) {
@@ -674,7 +688,7 @@ unsigned HGCalTriggerGeometryV9Imp2::packLayerWaferId(unsigned layer, int waferU
   return packed_value;
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::packLayerModuleId(unsigned layer, unsigned module) const {
+unsigned HGCalTriggerGeometryV9Imp3::packLayerModuleId(unsigned layer, unsigned module) const {
   unsigned packed_value = 0;
   unsigned subdet = ForwardSubdetector::HGCEE;
   if (layer > heOffset_) {
@@ -687,7 +701,7 @@ unsigned HGCalTriggerGeometryV9Imp2::packLayerModuleId(unsigned layer, unsigned 
   return packed_value;
 }
 
-void HGCalTriggerGeometryV9Imp2::unpackWaferId(unsigned wafer, int& waferU, int& waferV) const {
+void HGCalTriggerGeometryV9Imp3::unpackWaferId(unsigned wafer, int& waferU, int& waferV) const {
   unsigned waferUAbs = (wafer >> HGCSiliconDetId::kHGCalWaferUOffset) & HGCSiliconDetId::kHGCalWaferUMask;
   unsigned waferVAbs = (wafer >> HGCSiliconDetId::kHGCalWaferVOffset) & HGCSiliconDetId::kHGCalWaferVMask;
   waferU = (((wafer >> HGCSiliconDetId::kHGCalWaferUSignOffset) & HGCSiliconDetId::kHGCalWaferUSignMask) ? -waferUAbs
@@ -696,11 +710,11 @@ void HGCalTriggerGeometryV9Imp2::unpackWaferId(unsigned wafer, int& waferU, int&
                                                                                                          : waferVAbs);
 }
 
-bool HGCalTriggerGeometryV9Imp2::validTriggerCell(const unsigned trigger_cell_id) const {
+bool HGCalTriggerGeometryV9Imp3::validTriggerCell(const unsigned trigger_cell_id) const {
   return validTriggerCellFromCells(trigger_cell_id);
 }
 
-bool HGCalTriggerGeometryV9Imp2::disconnectedModule(const unsigned module_id) const {
+bool HGCalTriggerGeometryV9Imp3::disconnectedModule(const unsigned module_id) const {
   bool disconnected = false;
   if (disconnected_modules_.find(HGCalDetId(module_id).wafer()) != disconnected_modules_.end())
     disconnected = true;
@@ -709,7 +723,7 @@ bool HGCalTriggerGeometryV9Imp2::disconnectedModule(const unsigned module_id) co
   return disconnected;
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::triggerLayer(const unsigned id) const {
+unsigned HGCalTriggerGeometryV9Imp3::triggerLayer(const unsigned id) const {
   unsigned layer = layerWithOffset(id);
 
   if (DetId(id).det() == DetId::HGCalTrigger and
@@ -723,7 +737,7 @@ unsigned HGCalTriggerGeometryV9Imp2::triggerLayer(const unsigned id) const {
   return trigger_layers_[layer];
 }
 
-bool HGCalTriggerGeometryV9Imp2::validCell(unsigned cell_id) const {
+bool HGCalTriggerGeometryV9Imp3::validCell(unsigned cell_id) const {
   bool is_valid = false;
   unsigned det = DetId(cell_id).det();
   switch (det) {
@@ -746,7 +760,7 @@ bool HGCalTriggerGeometryV9Imp2::validCell(unsigned cell_id) const {
   return is_valid;
 }
 
-bool HGCalTriggerGeometryV9Imp2::validTriggerCellFromCells(const unsigned trigger_cell_id) const {
+bool HGCalTriggerGeometryV9Imp3::validTriggerCellFromCells(const unsigned trigger_cell_id) const {
   // Check the validity of a trigger cell with the
   // validity of the cells. One valid cell in the
   // trigger cell is enough to make the trigger cell
@@ -762,7 +776,7 @@ bool HGCalTriggerGeometryV9Imp2::validTriggerCellFromCells(const unsigned trigge
   return is_valid;
 }
 
-bool HGCalTriggerGeometryV9Imp2::validCellId(unsigned subdet, unsigned cell_id) const {
+bool HGCalTriggerGeometryV9Imp3::validCellId(unsigned subdet, unsigned cell_id) const {
   bool is_valid = false;
   switch (subdet) {
     case DetId::HGCalEE:
@@ -784,7 +798,7 @@ bool HGCalTriggerGeometryV9Imp2::validCellId(unsigned subdet, unsigned cell_id) 
   return is_valid;
 }
 
-int HGCalTriggerGeometryV9Imp2::detIdWaferType(unsigned det, unsigned layer, short waferU, short waferV) const {
+int HGCalTriggerGeometryV9Imp3::detIdWaferType(unsigned det, unsigned layer, short waferU, short waferV) const {
   int wafer_type = 0;
   switch (det) {
     case DetId::HGCalEE:
@@ -799,7 +813,7 @@ int HGCalTriggerGeometryV9Imp2::detIdWaferType(unsigned det, unsigned layer, sho
   return wafer_type;
 }
 
-unsigned HGCalTriggerGeometryV9Imp2::layerWithOffset(unsigned id) const {
+unsigned HGCalTriggerGeometryV9Imp3::layerWithOffset(unsigned id) const {
   unsigned det = DetId(id).det();
   unsigned layer = 0;
 
@@ -827,4 +841,4 @@ unsigned HGCalTriggerGeometryV9Imp2::layerWithOffset(unsigned id) const {
   return layer;
 }
 
-DEFINE_EDM_PLUGIN(HGCalTriggerGeometryFactory, HGCalTriggerGeometryV9Imp2, "HGCalTriggerGeometryV9Imp2");
+DEFINE_EDM_PLUGIN(HGCalTriggerGeometryFactory, HGCalTriggerGeometryV9Imp3, "HGCalTriggerGeometryV9Imp3");
