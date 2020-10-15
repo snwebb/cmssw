@@ -102,9 +102,11 @@ private:
   std::vector<unsigned> getLbgbtsFromStage1Fpga(const unsigned stage1_id) const;
   std::vector<unsigned> getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const;
   unsigned getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const;
-  std::vector<std::tuple<bool, int, int, unsigned> > getModulesFromLpgbt(const unsigned lpgbt_id) const;
-  std::vector<unsigned> getLpgbtsFromModule(const bool isSilicon, const int module_u, const int module_v, const unsigned layer) const;
-
+  std::vector<std::tuple<bool, int, int, unsigned>> getModulesFromLpgbt(const unsigned lpgbt_id) const;
+  std::vector<unsigned> getLpgbtsFromModule(const bool isSilicon,
+                                            const int module_u,
+                                            const int module_v,
+                                            const unsigned layer) const;
 };
 
 HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& conf)
@@ -113,7 +115,7 @@ HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& 
       hSc_module_size_(conf.getParameter<unsigned>("ScintillatorModuleSize")),
       hSc_links_per_module_(conf.getParameter<unsigned>("ScintillatorLinksPerModule")),
       l1tModulesMapping_(conf.getParameter<edm::FileInPath>("L1TModulesMapping")),
-      l1tLinksMapping_(conf.getParameter<edm::FileInPath>("L1TLinksMapping")) ,
+      l1tLinksMapping_(conf.getParameter<edm::FileInPath>("L1TLinksMapping")),
       jsonMappingFile_(conf.getParameter<edm::FileInPath>("JsonMappingFile")) {
   const unsigned ntc_per_wafer = 48;
   hSc_wafers_per_module_ = std::round(hSc_module_size_ * hSc_module_size_ / float(ntc_per_wafer));
@@ -160,7 +162,6 @@ void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry
   last_trigger_layer_ = trigger_layer - 1;
   fillMaps();
   loadJsonMappingFile();
-
 }
 
 void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry,
@@ -561,56 +562,50 @@ unsigned HGCalTriggerGeometryV9Imp3::getModuleSize(const unsigned module_id) con
 }
 
 std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const {
-
   std::vector<unsigned> stage1_ids = mapping_config_["Stage2"][stage2_id]["Stage1"];
   return stage1_ids;
 }
 
 std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLbgbtsFromStage1Fpga(const unsigned stage1_id) const {
-
   std::vector<unsigned> lpgbt_ids = mapping_config_["Stage1"][stage1_id]["lpgbts"];
   return lpgbt_ids;
 }
 
 std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const {
-
   std::vector<unsigned> stage2_ids = mapping_config_["Stage1"][stage1_id]["Stage2"];
   return stage2_ids;
 }
 
 unsigned HGCalTriggerGeometryV9Imp3::getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const {
-
   unsigned stage1_id = mapping_config_["lpgbt"][lpgbt_id]["Stage1"];
   return stage1_id;
 }
 
-std::vector<std::tuple<bool, int, int, unsigned> > HGCalTriggerGeometryV9Imp3::getModulesFromLpgbt(const unsigned lpgbt_id) const {
+std::vector<std::tuple<bool, int, int, unsigned>> HGCalTriggerGeometryV9Imp3::getModulesFromLpgbt(
+    const unsigned lpgbt_id) const {
+  std::vector<std::tuple<bool, int, int, unsigned>> modules;
 
-  std::vector<std::tuple<bool, int, int, unsigned > > modules;
-
-  for (auto module : mapping_config_["lpgbt"][lpgbt_id]["Modules"] ){
-    modules.emplace_back(std::make_tuple(module["isSilicon"],module["u"],module["v"],module["layer"]));
+  for (auto module : mapping_config_["lpgbt"][lpgbt_id]["Modules"]) {
+    modules.emplace_back(std::make_tuple(module["isSilicon"], module["u"], module["v"], module["layer"]));
   }
   return modules;
 }
 
-
-std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLpgbtsFromModule(const bool isSilicon, const int module_u, const int module_v, const unsigned layer) const {
-
+std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLpgbtsFromModule(const bool isSilicon,
+                                                                      const int module_u,
+                                                                      const int module_v,
+                                                                      const unsigned layer) const {
   std::vector<unsigned> lpgbts_ids;
   for (auto module : mapping_config_["Module"]) {
-    if (module["isSilicon"]==isSilicon 
-	&&module["u"]==module_u
-	&&module["v"]==module_v
-	&&module["layer"]==layer){
+    if (module["isSilicon"] == isSilicon && module["u"] == module_u && module["v"] == module_v &&
+        module["layer"] == layer) {
       for (auto lpgbt : module["lpgbts"]) {
-	lpgbts_ids.emplace_back(lpgbt["id"]);
+        lpgbts_ids.emplace_back(lpgbt["id"]);
       }
     }
   }
   return lpgbts_ids;
 }
-
 
 GlobalPoint HGCalTriggerGeometryV9Imp3::getTriggerCellPosition(const unsigned trigger_cell_det_id) const {
   unsigned det = DetId(trigger_cell_det_id).det();
