@@ -40,6 +40,13 @@ public:
 
   geom_set getNeighborsFromTriggerCell(const unsigned) const final;
 
+  geom_set getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const;
+  geom_set getLbgbtsFromStage1Fpga(const unsigned stage1_id) const;
+  geom_set getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const;
+  unsigned getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const;
+  geom_set getModulesFromLpgbt(const unsigned lpgbt_id) const;
+  geom_set getLpgbtsFromModule(const unsigned module_id) const;
+
   unsigned getLinksInModule(const unsigned module_id) const final;
   unsigned getModuleSize(const unsigned module_id) const final;
 
@@ -105,15 +112,8 @@ private:
 
   unsigned layerWithOffset(unsigned) const;
 
-  // geom_set getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const;
-  // geom_set getLbgbtsFromStage1Fpga(const unsigned stage1_id) const;
-  // geom_set getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const;
-  // unsigned getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const;
-  // std::vector<std::tuple<bool, int, int, unsigned>> getModulesFromLpgbt(const unsigned lpgbt_id) const;
-  // std::vector<unsigned> getLpgbtsFromModule(const bool isSilicon,
-  //                                           const int module_u,
-  //                                           const int module_v,
-  //                                           const unsigned layer) const;
+
+
 };
 
 HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& conf)
@@ -136,8 +136,8 @@ HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& 
 }
 
 void HGCalTriggerGeometryV9Imp3::reset() {
-  // wafer_to_module_.clear();
-  // module_to_wafers_.clear();
+  wafer_to_module_.clear();
+  module_to_wafers_.clear();
   cache_missing_wafers_.clear();
 
   stage2_to_stage1_.clear();
@@ -576,51 +576,66 @@ unsigned HGCalTriggerGeometryV9Imp3::getModuleSize(const unsigned module_id) con
   return nWafers;
 }
 
-// HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const {
-//   geom_set stage1_ids = mapping_config_["Stage2"][stage2_id]["Stage1"];
-//   return stage1_ids;
-// }
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage1FpgasFromStage2Fpga(const unsigned stage2_id) const {
+  geom_set stage1_ids;
 
-// HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getLbgbtsFromStage1Fpga(const unsigned stage1_id) const {
-//   geom_set lpgbt_ids = mapping_config_["Stage1"][stage1_id]["lpgbts"];
-//   return lpgbt_ids;
-// }
+  auto stage2_itrs = stage2_to_stage1_.equal_range(stage2_id);
+  for (auto stage2_itr = stage2_itrs.first; stage2_itr != stage2_itrs.second; stage2_itr++){
+    stage1_ids.emplace(stage2_itr->second);
+  }
 
-// HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const {
-//   geom_set stage2_ids = mapping_config_["Stage1"][stage1_id]["Stage2"];
-//   return stage2_ids;
-// }
+  return stage1_ids;
+}
 
-// unsigned HGCalTriggerGeometryV9Imp3::getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const {
-//   unsigned stage1_id = mapping_config_["lpgbt"][lpgbt_id]["Stage1"];
-//   return stage1_id;
-// }
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getLbgbtsFromStage1Fpga(const unsigned stage1_id) const {
+  geom_set lpgbt_ids;
 
-// std::vector<std::tuple<bool, int, int, unsigned>> HGCalTriggerGeometryV9Imp3::getModulesFromLpgbt(
-//     const unsigned lpgbt_id) const {
-//   std::vector<std::tuple<bool, int, int, unsigned>> modules;
+  auto stage1_itrs = stage1_to_lpgbts_.equal_range(stage1_id);
+  for (auto stage1_itr = stage1_itrs.first; stage1_itr != stage1_itrs.second; stage1_itr++){
+    lpgbt_ids.emplace(stage1_itr->second);
+  }
 
-//   for (auto module : mapping_config_["lpgbt"][lpgbt_id]["Modules"]) {
-//     modules.emplace_back(std::make_tuple(module["isSilicon"], module["u"], module["v"], module["layer"]));
-//   }
-//   return modules;
-// }
+  return lpgbt_ids;
+}
 
-// std::vector<unsigned> HGCalTriggerGeometryV9Imp3::getLpgbtsFromModule(const bool isSilicon,
-//                                                                       const int module_u,
-//                                                                       const int module_v,
-//                                                                       const unsigned layer) const {
-//   std::vector<unsigned> lpgbts_ids;
-//   for (auto module : mapping_config_["Module"]) {
-//     if (module["isSilicon"] == isSilicon && module["u"] == module_u && module["v"] == module_v &&
-//         module["layer"] == layer) {
-//       for (auto lpgbt : module["lpgbts"]) {
-//         lpgbts_ids.emplace_back(lpgbt["id"]);
-//       }
-//     }
-//   }
-//   return lpgbts_ids;
-// }
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage2FpgasFromStage1Fpga(const unsigned stage1_id) const {
+  geom_set stage2_ids;
+
+  auto stage1_itrs = stage1_to_stage2_.equal_range(stage1_id);
+  for (auto stage1_itr = stage1_itrs.first; stage1_itr != stage1_itrs.second; stage1_itr++){
+    stage2_ids.emplace(stage1_itr->second);
+  }
+
+  return stage2_ids;
+}
+
+unsigned HGCalTriggerGeometryV9Imp3::getStage1FpgaFromLpgbt(const unsigned lpgbt_id) const {
+  return lpgbt_to_stage1_.at(lpgbt_id);
+}
+
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getModulesFromLpgbt(
+    const unsigned lpgbt_id) const {
+
+  geom_set modules;
+
+  auto lpgbt_itrs = lpgbt_to_modules_.equal_range(lpgbt_id);
+  for (auto lpgbt_itr = lpgbt_itrs.first; lpgbt_itr != lpgbt_itrs.second; lpgbt_itr++){
+    modules.emplace(lpgbt_itr->second);
+  }
+
+  return modules;
+}
+
+HGCalTriggerGeometryV9Imp3::geom_set HGCalTriggerGeometryV9Imp3::getLpgbtsFromModule(const unsigned module_id) const {
+  geom_set lpgbt_ids;
+
+  auto module_itrs = module_to_lpgbts_.equal_range(module_id);
+  for (auto module_itr = module_itrs.first; module_itr != module_itrs.second; module_itr++){
+    lpgbt_ids.emplace(module_itr->second);
+  }
+
+  return lpgbt_ids;
+}
 
 GlobalPoint HGCalTriggerGeometryV9Imp3::getTriggerCellPosition(const unsigned trigger_cell_det_id) const {
   unsigned det = DetId(trigger_cell_det_id).det();
@@ -745,52 +760,6 @@ void HGCalTriggerGeometryV9Imp3::fillMaps() {
     }
   }
   
-
-  // // read module mapping file
-  // std::ifstream l1tModulesMappingStream(l1tModulesMapping_.fullPath());
-  // if (!l1tModulesMappingStream.is_open()) {
-  //   throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TModulesMapping file\n";
-  // }
-
-  // short waferu = 0;
-  // short waferv = 0;
-  // short module = 0;
-  // short layer = 0;
-  // for (; l1tModulesMappingStream >> layer >> waferu >> waferv >> module;) {
-  //   wafer_to_module_.emplace(packLayerWaferId(layer, waferu, waferv), module);
-  //   module_to_wafers_.emplace(packLayerModuleId(layer, module), packWaferId(waferu, waferv));
-  // }
-  // if (!l1tModulesMappingStream.eof()) {
-  //   throw cms::Exception("BadGeometryFile")
-  //       << "Error reading L1TModulesMapping '" << layer << " " << waferu << " " << waferv << " " << module << "' \n";
-  // }
-  // l1tModulesMappingStream.close();
-  // // read links mapping file
-  // std::ifstream l1tLinksMappingStream(l1tLinksMapping_.fullPath());
-  // if (!l1tLinksMappingStream.is_open()) {
-  //   throw cms::Exception("MissingDataFile") << "Cannot open HGCalTriggerGeometry L1TLinksMapping file\n";
-  // }
-  // short links = 0;
-  // const short max_modules_60deg_sector = 127;
-  // for (; l1tLinksMappingStream >> layer >> module >> links;) {
-  //   if (module_to_wafers_.find(packLayerModuleId(layer, module)) == module_to_wafers_.end()) {
-  //     links = 0;
-  //   }
-  //   if (module > max_modules_60deg_sector)
-  //     sector0_mask_ = 0xff;  // Use 8 bits to encode module number in 120deg sector
-  //   links_per_module_.emplace(packLayerModuleId(layer, module), links);
-  // }
-  // if (!l1tLinksMappingStream.eof()) {
-  //   throw cms::Exception("BadGeometryFile")
-  //       << "Error reading L1TLinksMapping '" << layer << " " << module << " " << links << "' \n";
-  // }
-  // l1tLinksMappingStream.close();
-
-
-
-
-
-
   json_input_file.close();
 }
 
