@@ -1,4 +1,5 @@
 #include "DataFormats/ForwardDetId/interface/ForwardSubdetector.h"
+#include "DataFormats/ForwardDetId/interface/HGCalModuleDetId.h"
 #include "DataFormats/ForwardDetId/interface/HFNoseTriggerDetId.h"
 #include "DataFormats/ForwardDetId/interface/HGCScintillatorDetId.h"
 #include "DataFormats/ForwardDetId/interface/HGCSiliconDetIdToROC.h"
@@ -405,17 +406,20 @@ HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getTriggerCellsFr
   DetId module_det_id(module_id);
   unsigned det = module_det_id.det();
   geom_set trigger_cell_det_ids;
+
+  HGCalModuleDetId hgc_module_id(module_id);
+
   // Scintillator
   if (det == DetId::HGCalHSc) {
-    HGCScintillatorDetId module_sc_id(module_id);
-    int ietamin = hscTopology().dddConstants().getREtaRange(module_sc_id.layer()).first;
+    //HGCScintillatorDetId module_sc_id(module_id);
+    int ietamin = hscTopology().dddConstants().getREtaRange(hgc_module_id.layer()).first;
     int ietamin_tc = ((ietamin - 1) / hSc_triggercell_size_ + 1);
-    int ieta0 = (module_sc_id.ietaAbs() - 1) * hSc_module_size_ + ietamin_tc;
-    int iphi0 = (module_sc_id.iphi() - 1) * hSc_module_size_ + 1;
+    int ieta0 = (hgc_module_id.ietaAbs() - 1) * hSc_module_size_ + ietamin_tc;
+    int iphi0 = (hgc_module_id.iphi() - 1) * hSc_module_size_ + 1;
     for (int ietaAbs = ieta0; ietaAbs < ieta0 + (int)hSc_module_size_; ietaAbs++) {
-      int ieta = ietaAbs * module_sc_id.zside();
+      int ieta = ietaAbs * hgc_module_id.zside();
       for (int iphi = iphi0; iphi < iphi0 + (int)hSc_module_size_; iphi++) {
-        unsigned trigger_cell_id = HGCScintillatorDetId(module_sc_id.type(), module_sc_id.layer(), ieta, iphi);
+        unsigned trigger_cell_id = HGCScintillatorDetId(hgc_module_id.type(), hgc_module_id.layer(), ieta, iphi);
         if (validTriggerCellFromCells(trigger_cell_id))
           trigger_cell_det_ids.emplace(trigger_cell_id);
       }
@@ -423,9 +427,9 @@ HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getTriggerCellsFr
   }
   // HFNose
   else if (det == DetId::Forward && module_det_id.subdetId() == ForwardSubdetector::HFNose) {
-    HFNoseDetId module_nose_id(module_id);
+    //HFNoseDetId module_nose_id(module_id);
     HFNoseDetIdToModule hfn;
-    std::vector<HFNoseTriggerDetId> ids = hfn.getTriggerDetIds(module_nose_id);
+    std::vector<HFNoseTriggerDetId> ids = hfn.getTriggerDetIds(hgc_module_id);
     for (auto const& idx : ids) {
       if (validTriggerCellFromCells(idx.rawId()))
         trigger_cell_det_ids.emplace(idx);
