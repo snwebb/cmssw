@@ -63,6 +63,12 @@ public:
   /// get the module V
   int moduleV() const { return (id_ >> kHGCalModuleVOffset) & kHGCalModuleVMask; }
 
+  /// get the scintillator panel eta
+  int eta() const { return moduleU(); }
+
+  /// get the scintillator panel phi
+  int phi() const { return moduleV(); }
+
   /* /\** Converter for a geometry cell id *\/ */
   /* HGCalModuleDetId geometryCell() const { return id_ & kHGCalMaskCell; } */
 
@@ -72,7 +78,10 @@ public:
   bool isHSilicon() const { return (subdet() == HGCalHSiTrigger); }
   bool isHScintillator() const { return (subdet() == HGCalHScTrigger); }
   bool isForward() const { return true; }
-
+  
+  //get u and v rotated to whole detector coordinates 
+  int wholeDetectorU() const;
+  int wholeDetectorV() const;
 
   static const HGCalModuleDetId Undefined;
 

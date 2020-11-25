@@ -27,6 +27,7 @@ HGCalModuleDetId::HGCalModuleDetId(const DetId& gen) {
   id_ = gen.rawId();
 }
 
+
 HGCalModuleDetId& HGCalModuleDetId::operator=(const DetId& gen) {
   if (!gen.null()) {
     if (gen.det() != HGCalTrigger) {
