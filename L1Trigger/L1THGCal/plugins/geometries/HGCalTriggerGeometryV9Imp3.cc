@@ -267,12 +267,11 @@ unsigned HGCalTriggerGeometryV9Imp3::getModuleFromCell(const unsigned cell_id) c
 
 unsigned HGCalTriggerGeometryV9Imp3::getModuleFromTriggerCell(const unsigned trigger_cell_id) const {
   unsigned det = DetId(trigger_cell_id).det();
-  unsigned module = 0;
-  unsigned subdet_old = 0;
   int zside = 0;
   unsigned tc_type = 1;
   unsigned layer = 0;
   unsigned module_id = 0;
+
   // Scintillator
   if (det == DetId::HGCalHSc) {
     HGCScintillatorDetId trigger_cell_sc_id(trigger_cell_id);
@@ -283,6 +282,7 @@ unsigned HGCalTriggerGeometryV9Imp3::getModuleFromTriggerCell(const unsigned tri
     int ietamin_tc = ((ietamin - 1) / hSc_triggercell_size_ + 1);
     int ieta = ((trigger_cell_sc_id.ietaAbs() - ietamin_tc) / hSc_module_size_ + 1);
     int iphi = (trigger_cell_sc_id.iphi() - 1) / hSc_module_size_ + 1;
+    unsigned sector = etaphiMappingToSector0(ieta, iphi);
     module_id = HGCalModuleDetId(trigger_cell_sc_id.subdet(), zside, tc_type, layer, sector, ieta, iphi);
   }
   // HFNose
@@ -294,39 +294,19 @@ unsigned HGCalTriggerGeometryV9Imp3::getModuleFromTriggerCell(const unsigned tri
     zside = trigger_cell_trig_id.zside();
     int waferu = trigger_cell_trig_id.waferU();
     int waferv = trigger_cell_trig_id.waferV();
-
-    HFNoseDetIdToModule hfn;
-    module_id = hfn.getModule(HFNoseDetId(zside, layer, tc_type, waferu, waferv, 0, 0)).rawId();
+    unsigned sector = uvMappingToSector0(layer, waferu, waferv);
+    module_id = HGCalModuleDetId(trigger_cell_trig_id.subdet(), zside, tc_type, layer, sector, waferu, waferv);
   }
   // Silicon
   else {
     HGCalTriggerDetId trigger_cell_trig_id(trigger_cell_id);
-    unsigned subdet = trigger_cell_trig_id.subdet();
-    subdet_old =
-        (subdet == HGCalTriggerSubdetector::HGCalEETrigger ? ForwardSubdetector::HGCEE : ForwardSubdetector::HGCHEF);
+    tc_type = trigger_cell_trig_id.type();
     layer = trigger_cell_trig_id.layer();
     zside = trigger_cell_trig_id.zside();
-    if (subdet == HGCalTriggerSubdetector::HGCalEETrigger || subdet == HGCalTriggerSubdetector::HGCalHSiTrigger) {
-      int waferu = trigger_cell_trig_id.waferU();
-      int waferv = trigger_cell_trig_id.waferV();
-      unsigned layer_with_offset = layerWithOffset(trigger_cell_id);
-      unsigned packed_wafer = packLayerWaferId(layer_with_offset, waferu, waferv);
-      auto module_itr = wafer_to_module_.find(packed_wafer);
-      if (module_itr == wafer_to_module_.end()) {
-        // return missing modules as disconnected (id=0)
-        module = 0;
-        auto insert_itr = cache_missing_wafers_.emplace(packed_wafer);
-        if (insert_itr.second) {
-          edm::LogWarning("HGCalTriggerGeometry")
-              << "Found missing wafer (layer=" << layer_with_offset << " u=" << waferu << " v=" << waferv
-              << ") in trigger modules mapping";
-        }
-      } else {
-        module = module_itr->second;
-      }
-    }
-    module_id =
-        HGCalDetId((ForwardSubdetector)subdet_old, zside, layer, tc_type, module, HGCalDetId::kHGCalCellMask).rawId();
+    int waferu = trigger_cell_trig_id.waferU();
+    int waferv = trigger_cell_trig_id.waferV();
+    unsigned sector = uvMappingToSector0(layer, waferu, waferv);
+    module_id = HGCalModuleDetId(trigger_cell_trig_id.subdet(), zside, tc_type, layer, sector, waferu, waferv);
   }
   return module_id;
 }
@@ -516,7 +496,7 @@ HGCalTriggerGeometryBase::geom_ordered_set HGCalTriggerGeometryV9Imp3::getOrdere
     int moduleV = hgc_module_id.moduleU();
 
     //Rotate to sector
-    uvMapping(hgc_module_id.layer(), moduleU, moduleV, hgc_module_id.sector());
+    uvMappingFromSector0(hgc_module_id.layer(), moduleU, moduleV, hgc_module_id.sector());
 
     DetId::Detector det = (hgc_module_id.subdetId() == ForwardSubdetector::HGCEE ? DetId::HGCalEE : DetId::HGCalHSi);
     HGCalTriggerSubdetector subdet =
@@ -876,11 +856,11 @@ unsigned HGCalTriggerGeometryV9Imp3::uvMappingToSector0(unsigned layer, int& mod
     if(moduleU>=moduleV && moduleV<0) sector=2;
     else sector=1;
     
-    } else if((layer%2)==1) { // CE-H Odd
+  } else if((layer%2)==1) { // CE-H Odd
     if(moduleU>=0 && moduleV>=0) return sector;
     
-    offset=-1
-      if(moduleU>moduleV && moduleV<0) sector=2;
+    offset=-1;
+    if(moduleU>moduleV && moduleV<0) sector=2;
       else sector=1;
     
   } else { // CE-H Even
@@ -912,9 +892,9 @@ unsigned HGCalTriggerGeometryV9Imp3::etaphiMappingToSector0(int& eta, int& phi) 
 
   unsigned sector = 0;
     
-  if ( phi >= 2*hSc_num_panels_per_sector_ )
+  if ( std::abs(phi) >= 2*hSc_num_panels_per_sector_ )
     sector = 2;
-  else if ( phi >= hSc_num_panels_per_sector_ )
+  else if ( std::abs(phi) >= hSc_num_panels_per_sector_ )
     sector = 1;
   else 
     sector = 0;

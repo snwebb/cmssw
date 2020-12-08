@@ -36,7 +36,7 @@ std::vector<HFNoseTriggerDetId> HFNoseDetIdToModule::getTriggerDetIds(HGCalModul
 
   int moduleU = 0;
   int moduleV = 0;
-  uvMappingFromSector0( id.layer(), moduleU, moduleV, id.sector();
+  uvMappingFromSector0( id.layer(), moduleU, moduleV, id.sector() );
 
   for (int u = 0; u < 2 * nCells; ++u) {
     for (int v = 0; v < 2 * nCells; ++v) {
