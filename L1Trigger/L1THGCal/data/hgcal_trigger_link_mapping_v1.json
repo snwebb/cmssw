@@ -20,15 +20,15 @@
     [
         {"Stage1": 0,
           "Modules": [
-                   {"isSilicon": true,"u":2,"v":1,"layer":1,"moduleid":10,},
-                   {"isSilicon": true,"u":1,"v":3,"layer":1,"moduleid":2,}
+                   {"isSilicon": true,"u":2,"v":1,"layer":1},
+                   {"isSilicon": true,"u":1,"v":3,"layer":1}
                ]
         },
         {"Stage1": 1,
           "Modules": [
-                   {"isSilicon": true,"u":1,"v":1,"layer":12,"moduleid":14,},
-                   {"isSilicon": true,"u":5,"v":2,"layer":12,"moduleid":56,},
-                   {"isSilicon": true,"u":2,"v":4,"layer":12,"moduleid":11,}
+                   {"isSilicon": true,"u":1,"v":1,"layer":12},
+                   {"isSilicon": true,"u":5,"v":2,"layer":12},
+                   {"isSilicon": true,"u":2,"v":4,"layer":12}
                ]
          }
         
@@ -37,9 +37,9 @@
 
     "Module":
     [
-        {"isSilicon": true,"u":2,"v":1,"layer":1,"moduleid":10,"lpgbts":[{"id":0,"nElinks":6}]},
-        {"isSilicon": true,"u":1,"v":3,"layer":1,"moduleid":2,"lpgbts":[{"id":0,"nElinks":1},{"id":1,"nElinks":6}]},
-        {"isSilicon": true,"u":4,"v":3,"layer":1,"moduleid":34,"lpgbts":[{"id":1,"nElinks":2},{"id":2,"nElinks":4}]}
+        {"isSilicon": true,"u":2,"v":1,"layer":1,"lpgbts":[{"id":0,"nElinks":6}]},
+        {"isSilicon": true,"u":1,"v":3,"layer":1,"lpgbts":[{"id":0,"nElinks":1},{"id":1,"nElinks":6}]},
+        {"isSilicon": true,"u":4,"v":3,"layer":1,"lpgbts":[{"id":1,"nElinks":2},{"id":2,"nElinks":4}]}
         
     ]
 
