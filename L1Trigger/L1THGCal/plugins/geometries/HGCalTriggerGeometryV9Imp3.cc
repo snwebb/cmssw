@@ -74,9 +74,6 @@ private:
   edm::FileInPath jsonMappingFile_;
 
   // module related maps
-  std::unordered_map<unsigned, unsigned> wafer_to_module_;
-  std::unordered_multimap<unsigned, unsigned> module_to_wafers_;
-
   std::unordered_map<unsigned, unsigned> links_per_module_;
 
   std::unordered_multimap<unsigned, unsigned> stage2_to_stage1_;
@@ -85,8 +82,6 @@ private:
   std::unordered_map<unsigned, unsigned> lpgbt_to_stage1_;
   std::unordered_multimap<unsigned, unsigned> lpgbt_to_modules_;
   std::unordered_multimap<unsigned, unsigned> module_to_lpgbts_;
-
-  mutable tbb::concurrent_unordered_set<unsigned> cache_missing_wafers_;
 
   // Disconnected modules and layers
   std::unordered_set<unsigned> disconnected_modules_;
@@ -103,7 +98,6 @@ private:
   unsigned noseLayers_ = 0;
   unsigned totalLayers_ = 0;
 
-  //void loadJsonMappingFile();
   void fillMaps();
   bool validCellId(unsigned det, unsigned cell_id) const;
   bool validTriggerCellFromCells(const unsigned) const;
@@ -113,6 +107,7 @@ private:
   unsigned packLayerWaferId(unsigned layer, int waferU, int waferV) const;
   unsigned packLayerModuleId(unsigned layer, unsigned wafer) const;
   void unpackWaferId(unsigned wafer, int& waferU, int& waferV) const;
+  void unpackLayerWaferId(unsigned wafer, unsigned &layer, int& waferU, int& waferV) const;
   void uvMappingFromSector0(unsigned layer, int& moduleU, int& moduleV, unsigned sector) const;
   unsigned uvMappingToSector0(unsigned layer, int& moduleU, int& moduleV) const;
   void etaphiMappingFromSector0(int& eta, int& phi, unsigned sector) const;
@@ -142,10 +137,6 @@ HGCalTriggerGeometryV9Imp3::HGCalTriggerGeometryV9Imp3(const edm::ParameterSet& 
 }
 
 void HGCalTriggerGeometryV9Imp3::reset() {
-  wafer_to_module_.clear();
-  module_to_wafers_.clear();
-  cache_missing_wafers_.clear();
-
   stage2_to_stage1_.clear();
   stage1_to_stage2_.clear();
   stage1_to_lpgbts_.clear();
@@ -181,7 +172,6 @@ void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry
   }
   last_trigger_layer_ = trigger_layer - 1;
   fillMaps();
-  //loadJsonMappingFile();
 }
 
 void HGCalTriggerGeometryV9Imp3::initialize(const HGCalGeometry* hgc_ee_geometry,
@@ -549,21 +539,7 @@ unsigned HGCalTriggerGeometryV9Imp3::getLinksInModule(const unsigned module_id) 
 }
 
 unsigned HGCalTriggerGeometryV9Imp3::getModuleSize(const unsigned module_id) const {
-  DetId module_det_id(module_id);
-  unsigned nWafers = 1;
-  // Scintillator
-  if (module_det_id.det() == DetId::HGCalHSc) {
-    nWafers = hSc_wafers_per_module_;
-  }
-  // Check for HFNOSE : getModuleSize
-  // Silicon
-  else {
-    HGCalDetId module_det_id_si(module_id);
-    unsigned module = module_det_id_si.wafer();
-    unsigned layer = layerWithOffset(module_id);
-    nWafers = module_to_wafers_.count(packLayerModuleId(layer, module));
-  }
-  return nWafers;
+  throw cms::Exception("FeatureNotImplemented") << "getModuleSize is not implemented in HGCalTriggerGeometryV9Imp3";
 }
 
 HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryV9Imp3::getStage1FpgasFromStage2Fpga(
@@ -697,17 +673,6 @@ void HGCalTriggerGeometryV9Imp3::fillMaps() {
   }
   json_input_file >> mapping_config_;
 
-  //Wafer to module mapping
-  for (unsigned wafer_id = 0; wafer_id < mapping_config_["Module"].size(); wafer_id++) {
-    short waferu = mapping_config_["Module"][wafer_id]["u"];
-    short waferv = mapping_config_["Module"][wafer_id]["v"];
-    short moduleid = mapping_config_["Module"][wafer_id]["moduleid"];
-    short layer = mapping_config_["Module"][wafer_id]["layer"];
-
-    wafer_to_module_.emplace(packLayerWaferId(layer, waferu, waferv), moduleid);
-    module_to_wafers_.emplace(packLayerModuleId(layer, moduleid), packWaferId(waferu, waferv));
-  }
-
   //Stage 1 to Stage 2 mapping
   for (unsigned stage1_id = 0; stage1_id < mapping_config_["Stage1"].size(); stage1_id++) {
     for (auto& stage2_id : mapping_config_["Stage1"][stage1_id]["Stage2"]) {
@@ -737,16 +702,16 @@ void HGCalTriggerGeometryV9Imp3::fillMaps() {
   //lpgbt to module mapping
   for (unsigned lpgbt_id = 0; lpgbt_id < mapping_config_["lpgbt"].size(); lpgbt_id++) {
     for (auto& modules : mapping_config_["lpgbt"][lpgbt_id]["Modules"]) {
-      lpgbt_to_modules_.emplace(lpgbt_id, modules["moduleid"]);
+      lpgbt_to_modules_.emplace(lpgbt_id, packLayerWaferId(modules["layer"], modules["u"], modules["v"]));
     }
   }
 
   //module to lpgbt mapping
   for (unsigned module = 0; module < mapping_config_["Module"].size(); module++) {
-    links_per_module_.emplace(mapping_config_["Module"][module]["moduleid"],
+    links_per_module_.emplace(packLayerWaferId(module["layer"], module["u"], module["v"]),
                               mapping_config_["Module"][module]["lpgbts"].size());
     for (auto& lpgbt : mapping_config_["Module"][module]["lpgbts"]) {
-      module_to_lpgbts_.emplace(mapping_config_["Module"][module]["moduleid"], lpgbt["id"]);
+      module_to_lpgbts_.emplace(packLayerWaferId(module["layer"], module["u"], module["v"]), lpgbt["id"]);
     }
   }
 
@@ -766,19 +731,10 @@ unsigned HGCalTriggerGeometryV9Imp3::packWaferId(int waferU, int waferV) const {
 
 unsigned HGCalTriggerGeometryV9Imp3::packLayerWaferId(unsigned layer, int waferU, int waferV) const {
   unsigned packed_value = 0;
-  unsigned subdet = ForwardSubdetector::HGCEE;
-  if (layer > heOffset_) {
-    layer -= heOffset_;
-    subdet = ForwardSubdetector::HGCHEF;
-  }
-  unsigned waferUsign = (waferU >= 0) ? 0 : 1;
-  unsigned waferVsign = (waferV >= 0) ? 0 : 1;
-  packed_value |= ((std::abs(waferU) & HGCSiliconDetId::kHGCalWaferUMask) << HGCSiliconDetId::kHGCalWaferUOffset);
-  packed_value |= ((waferUsign & HGCSiliconDetId::kHGCalWaferUSignMask) << HGCSiliconDetId::kHGCalWaferUSignOffset);
-  packed_value |= ((std::abs(waferV) & HGCSiliconDetId::kHGCalWaferVMask) << HGCSiliconDetId::kHGCalWaferVOffset);
-  packed_value |= ((waferVsign & HGCSiliconDetId::kHGCalWaferVSignMask) << HGCSiliconDetId::kHGCalWaferVSignOffset);
-  packed_value |= ((layer & HGCSiliconDetId::kHGCalLayerMask) << HGCSiliconDetId::kHGCalLayerOffset);
-  packed_value |= ((subdet & DetId::kSubdetMask) << DetId::kSubdetOffset);
+
+  packed_value |= ((waferU & HGCalModuleDetId::kHGCalModuleUMask) << HGCalModuleDetId::kHGCalModuleUOffset);
+  packed_value |= ((waferV & HGCalModuleDetId::kHGCalModuleVMask) << HGCalModuleDetId::kHGCalModuleVOffset);
+  packed_value |= ((layer & HGCalModuleDetId::kHGCalLayerMask) << HGCalModuleDetId::kHGCalLayerOffset);
   return packed_value;
 }
 
@@ -802,6 +758,12 @@ void HGCalTriggerGeometryV9Imp3::unpackWaferId(unsigned wafer, int& waferU, int&
                                                                                                          : waferUAbs);
   waferV = (((wafer >> HGCSiliconDetId::kHGCalWaferVSignOffset) & HGCSiliconDetId::kHGCalWaferVSignMask) ? -waferVAbs
                                                                                                          : waferVAbs);
+}
+
+void HGCalTriggerGeometryV9Imp3::unpackLayerWaferId(unsigned wafer, unsigned& layer, int& waferU, int& waferV) const {
+  layer = (wafer >> HGCalModuleDetId::kHGCalLayerOffset) & HGCalModuleDetId::kHGCalLayerMask;
+  waferU = (wafer >> HGCalModuleDetId::kHGCalModuleUOffset) & HGCalModuleDetId::kHGCalModuleUMask;
+  waferV = (wafer >> HGCalModuleDetId::kHGCalModuleUOffset) & HGCalModuleDetId::kHGCalModuleUMask;
 }
 
 void HGCalTriggerGeometryV9Imp3::uvMappingFromSector0(unsigned layer, int& moduleU, int& moduleV, unsigned sector) const{
