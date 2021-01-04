@@ -3,6 +3,7 @@
 
 #include "DataFormats/ForwardDetId/interface/HGCalTriggerDetId.h"
 #include "DataFormats/ForwardDetId/interface/HGCSiliconDetId.h"
+#include "DataFormats/ForwardDetId/interface/HGCalModuleDetId.h"
 #include <vector>
 
 class HGCSiliconDetIdToModule {
@@ -14,5 +15,11 @@ public:
   static const HGCSiliconDetId getModule(HGCSiliconDetId const& id) { return id.moduleId(); }
   std::vector<HGCSiliconDetId> getDetIds(HGCSiliconDetId const& id) const;
   std::vector<HGCalTriggerDetId> getDetTriggerIds(HGCSiliconDetId const& id) const;
+
+  std::vector<HGCalTriggerDetId> getDetTriggerIds(HGCalModuleDetId const& id) const;
+
+private:
+  void uvMappingFromSector0(unsigned layer, int& moduleU, int& moduleV, unsigned sector) const;  
+
 };
 #endif

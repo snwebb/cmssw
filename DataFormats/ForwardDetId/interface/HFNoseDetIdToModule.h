@@ -3,6 +3,7 @@
 
 #include "DataFormats/ForwardDetId/interface/HFNoseDetId.h"
 #include "DataFormats/ForwardDetId/interface/HFNoseTriggerDetId.h"
+#include "DataFormats/ForwardDetId/interface/HGCalModuleDetId.h"
 #include <vector>
 
 class HFNoseDetIdToModule {
@@ -14,5 +15,11 @@ public:
   static const HFNoseDetId getModule(HFNoseTriggerDetId const& id) { return id.moduleId(); }
   std::vector<HFNoseDetId> getDetIds(HFNoseDetId const& id) const;
   std::vector<HFNoseTriggerDetId> getTriggerDetIds(HFNoseDetId const& id) const;
+
+  std::vector<HFNoseTriggerDetId> getTriggerDetIds(HGCalModuleDetId const& id) const;
+
+private:
+  void uvMappingFromSector0(unsigned layer, int& moduleU, int& moduleV, unsigned sector) const;  
+
 };
 #endif
