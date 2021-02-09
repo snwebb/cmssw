@@ -1,0 +1,46 @@
+{
+    "Stage2":
+    [
+        {"Stage1": [0,1,2]},
+        {"Stage1": [15,16,17]}
+        
+
+    ],
+
+
+    "Stage1":
+    [
+        {"Stage2": [4,6,5,9],"lpgbts":[0,1,2,3]},
+        {"Stage2": [0,1,2,3],"lpgbts":[24,25,26,27]},
+        {"Stage2": [12,13,14,15],"lpgbts":[48,49,50,51]}
+        
+    ],
+
+    "lpgbt":
+    [
+        {"Stage1": 0,
+          "Modules": [
+                   {"isSilicon": true,"u":2,"v":1,"layer":1},
+                   {"isSilicon": true,"u":1,"v":3,"layer":1}
+               ]
+        },
+        {"Stage1": 1,
+          "Modules": [
+                   {"isSilicon": true,"u":1,"v":1,"layer":12},
+                   {"isSilicon": true,"u":5,"v":2,"layer":12},
+                   {"isSilicon": true,"u":2,"v":4,"layer":12}
+               ]
+         }
+        
+
+    ],
+
+    "Module":
+    [
+        {"isSilicon": true,"u":2,"v":1,"layer":1,"lpgbts":[{"id":0,"nElinks":6}]},
+        {"isSilicon": true,"u":1,"v":3,"layer":1,"lpgbts":[{"id":0,"nElinks":1},{"id":1,"nElinks":6}]},
+        {"isSilicon": true,"u":4,"v":3,"layer":1,"lpgbts":[{"id":1,"nElinks":2},{"id":2,"nElinks":4}]}
+        
+    ]
+
+}

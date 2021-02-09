@@ -32,6 +32,13 @@ public:
 
   geom_set getNeighborsFromTriggerCell(const unsigned) const final;
 
+  geom_set getStage1FpgasFromStage2Fpga(const unsigned) const final;
+  geom_set getLbgbtsFromStage1Fpga(const unsigned) const final;
+  geom_set getStage2FpgasFromStage1Fpga(const unsigned) const final;
+  unsigned getStage1FpgaFromLpgbt(const unsigned) const final;
+  geom_set getModulesFromLpgbt(const unsigned) const final;
+  geom_set getLpgbtsFromModule(const unsigned) const final;
+
   unsigned getLinksInModule(const unsigned module_id) const final;
   unsigned getModuleSize(const unsigned module_id) const final;
 
@@ -783,6 +790,36 @@ unsigned HGCalTriggerGeometryHexLayerBasedImp1::layerWithOffset(unsigned id) con
       break;
   };
   return layer;
+}
+
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryHexLayerBasedImp1::getStage1FpgasFromStage2Fpga(const unsigned) const {
+  geom_set stage1_ids;
+  return stage1_ids;
+}
+
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryHexLayerBasedImp1::getLbgbtsFromStage1Fpga(const unsigned) const {
+  geom_set lpgbt_ids;
+  return lpgbt_ids;
+}
+
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryHexLayerBasedImp1::getStage2FpgasFromStage1Fpga(const unsigned) const {
+  geom_set stage2_ids;
+  return stage2_ids;
+}
+
+unsigned HGCalTriggerGeometryHexLayerBasedImp1::getStage1FpgaFromLpgbt(const unsigned) const {
+  unsigned stage1_id = 0;
+  return stage1_id;
+}
+
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryHexLayerBasedImp1::getModulesFromLpgbt(const unsigned) const {
+  geom_set modules;
+  return modules;
+}
+
+HGCalTriggerGeometryBase::geom_set HGCalTriggerGeometryHexLayerBasedImp1::getLpgbtsFromModule(const unsigned) const {
+  geom_set lpgbt_ids;
+  return lpgbt_ids;
 }
 
 DEFINE_EDM_PLUGIN(HGCalTriggerGeometryFactory,
