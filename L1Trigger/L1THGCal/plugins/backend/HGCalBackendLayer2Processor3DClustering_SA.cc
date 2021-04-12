@@ -8,7 +8,7 @@
 #include "L1Trigger/L1THGCal/interface/backend/HGCalMulticlusteringImpl.h"
 #include "L1Trigger/L1THGCal/interface/backend/HGCalHistoSeedingImpl.h"
 #include "L1Trigger/L1THGCal/interface/backend/HGCalHistoClusteringImpl.h"
-#include "L1Trigger/L1THGCal/interface/backend/HGCalHistoClusteringWrapper.h"
+#include "L1Trigger/L1THGCal/interface/backend/HGCalAlgoWrapperBase.h"
 #include "L1Trigger/L1THGCal/interface/backend/HGCalTriggerClusterInterpreterBase.h"
 
 #include <utility>
@@ -32,8 +32,12 @@ public:
       multiclusteringAlgoType_ = SAHistoC3d;
       multiclusteringHistoSeeding_ = std::make_unique<HGCalHistoSeedingImpl>(
           conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_seeding_parameters"));
-      multiclusteringHistoClusteringWrapper_ = std::make_unique<HGCalHistoClusteringWrapper>(
-          conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_clustering_parameters"));
+      
+      const edm::ParameterSet& paramConfig = conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_clustering_parameters");
+      const std::string& algoWrapperName = "HGCalHistoClusteringWrapper";
+      multiclusteringHistoClusteringWrapper_ = std::unique_ptr<HGCalHistoClusteringWrapperBase>{
+          HGCalHistoClusteringWrapperBaseFactory::get()->create(algoWrapperName, paramConfig)};
+
     } else {
       throw cms::Exception("HGCTriggerParameterError") << "Unknown Multiclustering type '" << typeMulticluster << "'";
     }
@@ -111,7 +115,8 @@ private:
   /* algorithms instances */
   std::unique_ptr<HGCalHistoSeedingImpl> multiclusteringHistoSeeding_;
   std::unique_ptr<HGCalHistoClusteringImpl> multiclusteringHistoClustering_;
-  std::unique_ptr<HGCalHistoClusteringWrapper> multiclusteringHistoClusteringWrapper_;
+
+  std::unique_ptr<HGCalHistoClusteringWrapperBase> multiclusteringHistoClusteringWrapper_;
 
   /* algorithm type */
   MulticlusterType multiclusteringAlgoType_;

@@ -9,7 +9,7 @@
 #include "L1Trigger/L1THGCal/interface/backend/HGCalTowerMap2DImpl.h"
 #include "L1Trigger/L1THGCal/interface/backend/HGCalTowerMap3DImpl.h"
 
-#include "L1Trigger/L1THGCal/interface/backend/HGCalTowerMapsWrapper.h"
+#include "L1Trigger/L1THGCal/interface/backend/HGCalAlgoWrapperBase.h"
 
 // Can never get MessageLogger to do what I want...
 #include <iostream>
@@ -22,7 +22,9 @@ public:
     towermap2D_ = std::make_unique<HGCalTowerMap2DImpl>(conf.getParameterSet("towermap_parameters"));
     towermap3D_ = std::make_unique<HGCalTowerMap3DImpl>();
 
-    towerMapWrapper_ = std::make_unique<HGCalTowerMapsWrapper>( conf );
+    const std::string& algoWrapperName = "HGCalTowerMapsWrapperBaseFactory";
+    towerMapWrapper_ = std::unique_ptr<HGCalTowerMapsWrapperBase>{
+        HGCalTowerMapsWrapperBaseFactory::get()->create(algoWrapperName, conf)};
   }
 
   void eventSetup(const edm::EventSetup& es) override { towermap2D_->eventSetup(es); }
@@ -60,7 +62,7 @@ private:
   std::unique_ptr<HGCalTowerMap3DImpl> towermap3D_;
 
   /* Standalone algorithm instance */
-  std::unique_ptr<HGCalTowerMapsWrapper> towerMapWrapper_;
+  std::unique_ptr<HGCalTowerMapsWrapperBase> towerMapWrapper_;
 
   const edm::ParameterSet conf_;
 

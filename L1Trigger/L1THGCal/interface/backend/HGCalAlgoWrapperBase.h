@@ -2,6 +2,7 @@
 #define __L1Trigger_L1THGCal_HGCalAlgoWrapperBase_h__
 
 #include "L1Trigger/L1THGCal/interface/backend/HGCalAlgoWrapperBaseT.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/L1THGCal/interface/HGCalCluster.h"
 #include "DataFormats/L1THGCal/interface/HGCalMulticluster.h"
@@ -14,5 +15,8 @@ typedef HGCalAlgoWrapperBaseT<std::pair< const std::vector<edm::Ptr<l1t::HGCalCl
 
 typedef HGCalAlgoWrapperBaseT< std::vector<edm::Ptr<l1t::HGCalTowerMap>>, l1t::HGCalTowerBxCollection, std::pair<const edm::EventSetup&, const edm::ParameterSet& > > HGCalTowerMapsWrapperBase;
 
+#include "FWCore/PluginManager/interface/PluginFactory.h"
+typedef edmplugin::PluginFactory<HGCalHistoClusteringWrapperBase*(const edm::ParameterSet&)> HGCalHistoClusteringWrapperBaseFactory;
+typedef edmplugin::PluginFactory<HGCalTowerMapsWrapperBase*(const edm::ParameterSet&)> HGCalTowerMapsWrapperBaseFactory;
 
 #endif
