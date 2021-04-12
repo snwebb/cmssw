@@ -17,28 +17,17 @@ class HGCalBackendLayer2Processor3DClusteringSA : public HGCalBackendLayer2Proce
 public:
   HGCalBackendLayer2Processor3DClusteringSA(const edm::ParameterSet& conf)
       : HGCalBackendLayer2ProcessorBase(conf), conf_(conf) {
-    std::string typeMulticluster(conf.getParameterSet("C3d_parameters").getParameter<std::string>("type_multicluster"));
-    if (typeMulticluster == "Histo") {
-      multiclusteringAlgoType_ = HistoC3d;
-      multiclusteringHistoSeeding_ = std::make_unique<HGCalHistoSeedingImpl>(
-          conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_seeding_parameters"));
-      multiclusteringHistoClustering_ = std::make_unique<HGCalHistoClusteringImpl>(
-          conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_clustering_parameters"));
-    } else if (typeMulticluster == "SAHisto") {
-      multiclusteringAlgoType_ = SAHistoC3d;
-      multiclusteringHistoSeeding_ = std::make_unique<HGCalHistoSeedingImpl>(
-          conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_seeding_parameters"));
+    multiclusteringAlgoType_ = SAHistoC3d;
 
-      const edm::ParameterSet& paramConfig =
-          conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_clustering_parameters");
-      const std::string& algoWrapperName =
-          conf.getParameterSet("C3d_parameters").getParameter<std::string>("ClusteringAlgoName");
-      multiclusteringHistoClusteringWrapper_ = std::unique_ptr<HGCalHistoClusteringWrapperBase>{
-          HGCalHistoClusteringWrapperBaseFactory::get()->create(algoWrapperName, paramConfig)};
+    multiclusteringHistoSeeding_ = std::make_unique<HGCalHistoSeedingImpl>(
+        conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_seeding_parameters"));
 
-    } else {
-      throw cms::Exception("HGCTriggerParameterError") << "Unknown Multiclustering type '" << typeMulticluster << "'";
-    }
+    const edm::ParameterSet& clusteringParamConfig =
+        conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_clustering_parameters");
+    const std::string& clusteringAlgoWrapperName =
+        conf.getParameterSet("C3d_parameters").getParameter<std::string>("ClusteringAlgoName");
+    multiclusteringHistoClusteringWrapper_ = std::unique_ptr<HGCalHistoClusteringWrapperBase>{
+        HGCalHistoClusteringWrapperBaseFactory::get()->create(clusteringAlgoWrapperName, clusteringParamConfig)};
 
     for (const auto& interpretationPset : conf.getParameter<std::vector<edm::ParameterSet>>("energy_interpretations")) {
       std::unique_ptr<HGCalTriggerClusterInterpreterBase> interpreter{
@@ -54,8 +43,6 @@ public:
     es.get<CaloGeometryRecord>().get("", triggerGeometry_);
     if (multiclusteringHistoSeeding_)
       multiclusteringHistoSeeding_->eventSetup(es);
-    if (multiclusteringHistoClustering_)
-      multiclusteringHistoClustering_->eventSetup(es);
 
     auto& collCluster3D = be_output.first;
     auto& rejectedClusters = be_output.second;
@@ -71,32 +58,20 @@ public:
     std::vector<std::pair<GlobalPoint, double>> seedPositionsEnergy;
 
     /* call to multiclustering and compute shower shape*/
-    switch (multiclusteringAlgoType_) {
-      case HistoC3d:
-        multiclusteringHistoSeeding_->findHistoSeeds(clustersPtrs, seedPositionsEnergy);
-        multiclusteringHistoClustering_->clusterizeHisto(
-            clustersPtrs, seedPositionsEnergy, *triggerGeometry_, collCluster3D, rejectedClusters);
-        break;
-      case SAHistoC3d: {
-        multiclusteringHistoSeeding_->findHistoSeeds(clustersPtrs, seedPositionsEnergy);
+    multiclusteringHistoSeeding_->findHistoSeeds(clustersPtrs, seedPositionsEnergy);
 
-        // Inputs
-        std::pair<const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>>>
-            inputClustersAndSeeds{clustersPtrs, seedPositionsEnergy};
-        // Outputs
-        std::pair<l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>
-            outputMulticlustersAndRejectedClusters{collCluster3D, rejectedClusters};
-        // Configuration
-        const std::pair<const edm::EventSetup&, const edm::ParameterSet&> configuration{es, conf_};
+    // Inputs
+    std::pair<const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>>>
+        inputClustersAndSeeds{clustersPtrs, seedPositionsEnergy};
+    // Outputs
+    std::pair<l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection> outputMulticlustersAndRejectedClusters{
+        collCluster3D, rejectedClusters};
+    // Configuration
+    const std::pair<const edm::EventSetup&, const edm::ParameterSet&> configuration{es, conf_};
 
-        // Configure and process
-        multiclusteringHistoClusteringWrapper_->configure(configuration);
-        multiclusteringHistoClusteringWrapper_->process(inputClustersAndSeeds, outputMulticlustersAndRejectedClusters);
-      } break;
-      default:
-        // Should not happen, clustering type checked in constructor
-        break;
-    }
+    // Configure and process
+    multiclusteringHistoClusteringWrapper_->configure(configuration);
+    multiclusteringHistoClusteringWrapper_->process(inputClustersAndSeeds, outputMulticlustersAndRejectedClusters);
 
     // Call all the energy interpretation modules on the cluster collection
     for (const auto& interpreter : energy_interpreters_) {
@@ -112,7 +87,6 @@ private:
 
   /* algorithms instances */
   std::unique_ptr<HGCalHistoSeedingImpl> multiclusteringHistoSeeding_;
-  std::unique_ptr<HGCalHistoClusteringImpl> multiclusteringHistoClustering_;
 
   std::unique_ptr<HGCalHistoClusteringWrapperBase> multiclusteringHistoClusteringWrapper_;
 
