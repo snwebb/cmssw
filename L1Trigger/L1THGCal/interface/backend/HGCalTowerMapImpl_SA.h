@@ -10,8 +10,8 @@ public:
   HGCalTowerMapImplSA() {}
   ~HGCalTowerMapImplSA() {}
 
-  void runAlgorithm( std::vector<l1t::HGCalTowerMap_SA>& inputTowerMaps_SA, std::vector<l1t::HGCalTower_SA>& outputTowers_SA ) const;
-
+  void runAlgorithm(std::vector<l1t::HGCalTowerMap_SA>& inputTowerMaps_SA,
+                    std::vector<l1t::HGCalTower_SA>& outputTowers_SA) const;
 };
 
 #endif

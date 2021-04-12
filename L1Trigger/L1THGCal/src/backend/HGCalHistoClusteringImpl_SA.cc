@@ -87,11 +87,12 @@ std::vector<l1t::HGCalMulticluster_SA> HGCalHistoClusteringImplSA::clusterSeedMu
   return multiclustersOut;
 }
 
-void HGCalHistoClusteringImplSA::finalizeClusters_SA(std::vector<l1t::HGCalMulticluster_SA>& multiclusters_in,
-                                                     const std::vector<l1t::HGCalCluster_SA>& rejected_clusters_in,
-                                                     std::vector<l1t::HGCalMulticluster_SA>& multiclusters_out,
-                                                     std::vector<l1t::HGCalCluster_SA>& rejected_clusters_out,
-                                                     const std::unique_ptr<l1t::clusterAlgoConfig_SA>& configuration) const {
+void HGCalHistoClusteringImplSA::finalizeClusters_SA(
+    std::vector<l1t::HGCalMulticluster_SA>& multiclusters_in,
+    const std::vector<l1t::HGCalCluster_SA>& rejected_clusters_in,
+    std::vector<l1t::HGCalMulticluster_SA>& multiclusters_out,
+    std::vector<l1t::HGCalCluster_SA>& rejected_clusters_out,
+    const std::unique_ptr<l1t::clusterAlgoConfig_SA>& configuration) const {
   for (const auto& tc : rejected_clusters_in) {
     rejected_clusters_out.push_back(tc);
   }

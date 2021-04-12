@@ -11,12 +11,20 @@
 
 #include "FWCore/Framework/interface/EventSetup.h"
 
-typedef HGCalAlgoWrapperBaseT<std::pair< const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>> >, std::pair< l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>, std::pair<const edm::EventSetup&, const edm::ParameterSet& > > HGCalHistoClusteringWrapperBase;
+typedef HGCalAlgoWrapperBaseT<
+    std::pair<const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>>>,
+    std::pair<l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>,
+    std::pair<const edm::EventSetup&, const edm::ParameterSet&>>
+    HGCalHistoClusteringWrapperBase;
 
-typedef HGCalAlgoWrapperBaseT< std::vector<edm::Ptr<l1t::HGCalTowerMap>>, l1t::HGCalTowerBxCollection, std::pair<const edm::EventSetup&, const edm::ParameterSet& > > HGCalTowerMapsWrapperBase;
+typedef HGCalAlgoWrapperBaseT<std::vector<edm::Ptr<l1t::HGCalTowerMap>>,
+                              l1t::HGCalTowerBxCollection,
+                              std::pair<const edm::EventSetup&, const edm::ParameterSet&>>
+    HGCalTowerMapsWrapperBase;
 
 #include "FWCore/PluginManager/interface/PluginFactory.h"
-typedef edmplugin::PluginFactory<HGCalHistoClusteringWrapperBase*(const edm::ParameterSet&)> HGCalHistoClusteringWrapperBaseFactory;
+typedef edmplugin::PluginFactory<HGCalHistoClusteringWrapperBase*(const edm::ParameterSet&)>
+    HGCalHistoClusteringWrapperBaseFactory;
 typedef edmplugin::PluginFactory<HGCalTowerMapsWrapperBase*(const edm::ParameterSet&)> HGCalTowerMapsWrapperBaseFactory;
 
 #endif

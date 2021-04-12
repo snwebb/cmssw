@@ -19,10 +19,11 @@ public:
 
   void runAlgorithm() const;
 
-  std::vector<l1t::HGCalMulticluster_SA> clusterSeedMulticluster_SA(const std::vector<l1t::HGCalCluster_SA>& clusters,
-                                                                    const std::vector<l1t::HGCalSeed_SA>& seeds,
-                                                                    std::vector<l1t::HGCalCluster_SA>& rejected_clusters,
-                                                                    const std::unique_ptr<l1t::clusterAlgoConfig_SA>& configuration) const;
+  std::vector<l1t::HGCalMulticluster_SA> clusterSeedMulticluster_SA(
+      const std::vector<l1t::HGCalCluster_SA>& clusters,
+      const std::vector<l1t::HGCalSeed_SA>& seeds,
+      std::vector<l1t::HGCalCluster_SA>& rejected_clusters,
+      const std::unique_ptr<l1t::clusterAlgoConfig_SA>& configuration) const;
 
   void finalizeClusters_SA(std::vector<l1t::HGCalMulticluster_SA>&,
                            const std::vector<l1t::HGCalCluster_SA>&,

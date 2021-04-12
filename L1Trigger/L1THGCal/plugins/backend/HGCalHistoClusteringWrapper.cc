@@ -17,18 +17,19 @@
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 #include "L1Trigger/L1THGCal/interface/backend/HGCalTriggerClusterIdentificationBase.h"
 
-
 class HGCalHistoClusteringWrapper : public HGCalHistoClusteringWrapperBase {
 public:
   HGCalHistoClusteringWrapper(const edm::ParameterSet& conf);
-  ~HGCalHistoClusteringWrapper() {}
+  ~HGCalHistoClusteringWrapper() override {}
 
-  void configure( const std::pair<const edm::EventSetup&, const edm::ParameterSet& >& configuration ) override;
+  void configure(const std::pair<const edm::EventSetup&, const edm::ParameterSet&>& configuration) override;
 
-  void process(const std::pair< const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>> >& inputClustersAndSeeds, std::pair<  l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>& outputMulticlustersAndRejectedClusters) const override;
+  void process(const std::pair<const std::vector<edm::Ptr<l1t::HGCalCluster>>,
+                               const std::vector<std::pair<GlobalPoint, double>>>& inputClustersAndSeeds,
+               std::pair<l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>&
+                   outputMulticlustersAndRejectedClusters) const override;
 
 private:
-
   void convertCMSSWInputs(const std::vector<edm::Ptr<l1t::HGCalCluster>>& clustersPtrs,
                           l1t::HGCalClusterSACollection& clusters_SA,
                           const std::vector<std::pair<GlobalPoint, double>>& seeds,
@@ -88,8 +89,9 @@ HGCalHistoClusteringWrapper::HGCalHistoClusteringWrapper(const edm::ParameterSet
       ptC3dThreshold_(conf.getParameter<double>("minPt_multicluster")),
       cluster_association_input_(conf.getParameter<string>("cluster_association")),
       shape_(conf),
-      theAlgo_(), 
-      theConfiguration_( std::make_unique<l1t::clusterAlgoConfig_SA>( kMidRadius_, dr_, dr_byLayer_coefficientA_, dr_byLayer_coefficientB_, ptC3dThreshold_) ) {
+      theAlgo_(),
+      theConfiguration_(std::make_unique<l1t::clusterAlgoConfig_SA>(
+          kMidRadius_, dr_, dr_byLayer_coefficientA_, dr_byLayer_coefficientB_, ptC3dThreshold_)) {
   if (cluster_association_input_ == "NearestNeighbour") {
     cluster_association_strategy_ = NearestNeighbour;
   } else {
@@ -168,41 +170,43 @@ void HGCalHistoClusteringWrapper::convertAlgorithmOutputs(
   }
 }
 
-void HGCalHistoClusteringWrapper::process(const std::pair< const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>> >& inputClustersAndSeeds, std::pair<  l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>& outputMulticlustersAndRejectedClusters) const {
-
+void HGCalHistoClusteringWrapper::process(
+    const std::pair<const std::vector<edm::Ptr<l1t::HGCalCluster>>, const std::vector<std::pair<GlobalPoint, double>>>&
+        inputClustersAndSeeds,
+    std::pair<l1t::HGCalMulticlusterBxCollection, l1t::HGCalClusterBxCollection>&
+        outputMulticlustersAndRejectedClusters) const {
   l1t::HGCalClusterSACollection clusters_SA;
   l1t::HGCalSeedSACollection seeds_SA;
   convertCMSSWInputs(inputClustersAndSeeds.first, clusters_SA, inputClustersAndSeeds.second, seeds_SA);
 
   l1t::HGCalClusterSACollection rejected_clusters_finalized_SA;
   l1t::HGCalMulticlusterSACollection multiclusters_finalized_SA;
-  clusterizeHisto( clusters_SA, seeds_SA, multiclusters_finalized_SA, rejected_clusters_finalized_SA );
+  clusterizeHisto(clusters_SA, seeds_SA, multiclusters_finalized_SA, rejected_clusters_finalized_SA);
 
-  convertAlgorithmOutputs(
-      multiclusters_finalized_SA, rejected_clusters_finalized_SA, inputClustersAndSeeds.first, outputMulticlustersAndRejectedClusters.first, outputMulticlustersAndRejectedClusters.second);
+  convertAlgorithmOutputs(multiclusters_finalized_SA,
+                          rejected_clusters_finalized_SA,
+                          inputClustersAndSeeds.first,
+                          outputMulticlustersAndRejectedClusters.first,
+                          outputMulticlustersAndRejectedClusters.second);
 }
 
 void HGCalHistoClusteringWrapper::clusterizeHisto(const l1t::HGCalClusterSACollection& inputClusters,
-                       const l1t::HGCalSeedSACollection& inputSeeds,
-                       l1t::HGCalMulticlusterSACollection& outputMulticlusters,
-                       l1t::HGCalClusterSACollection& outputRejectedClusters) const {
+                                                  const l1t::HGCalSeedSACollection& inputSeeds,
+                                                  l1t::HGCalMulticlusterSACollection& outputMulticlusters,
+                                                  l1t::HGCalClusterSACollection& outputRejectedClusters) const {
   // Call SA clustering
   std::vector<l1t::HGCalCluster_SA> rejected_clusters_vec_SA;
   std::vector<l1t::HGCalMulticluster_SA> multiclusters_vec_SA =
       theAlgo_.clusterSeedMulticluster_SA(inputClusters, inputSeeds, rejected_clusters_vec_SA, theConfiguration_);
 
-  theAlgo_.finalizeClusters_SA(multiclusters_vec_SA,
-                               rejected_clusters_vec_SA,
-                               outputMulticlusters,
-                               outputRejectedClusters,
-                               theConfiguration_);
+  theAlgo_.finalizeClusters_SA(
+      multiclusters_vec_SA, rejected_clusters_vec_SA, outputMulticlusters, outputRejectedClusters, theConfiguration_);
 }
 
-void HGCalHistoClusteringWrapper::configure( const std::pair<const edm::EventSetup&, const edm::ParameterSet& >& configuration ) {
+void HGCalHistoClusteringWrapper::configure(
+    const std::pair<const edm::EventSetup&, const edm::ParameterSet&>& configuration) {
   eventSetup(configuration.first);
   // theConfiguration_->setParameters( ... );
 };
 
-DEFINE_EDM_PLUGIN(HGCalHistoClusteringWrapperBaseFactory, 
-                   HGCalHistoClusteringWrapper, 
-                   "HGCalHistoClusteringWrapper"); 
+DEFINE_EDM_PLUGIN(HGCalHistoClusteringWrapperBaseFactory, HGCalHistoClusteringWrapper, "HGCalHistoClusteringWrapper");

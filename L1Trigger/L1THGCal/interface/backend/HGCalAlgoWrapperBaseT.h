@@ -6,7 +6,7 @@ class HGCalAlgoWrapperBaseT {
 public:
   HGCalAlgoWrapperBaseT() {}
 
-  virtual ~HGCalAlgoWrapperBaseT(){}
+  virtual ~HGCalAlgoWrapperBaseT() {}
 
   virtual void configure(const Tparam& parameters) = 0;
   virtual void process(const InputCollection& inputCollection, OutputCollection& outputCollection) const = 0;

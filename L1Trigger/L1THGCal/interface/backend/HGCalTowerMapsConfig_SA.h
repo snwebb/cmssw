@@ -6,10 +6,10 @@
 namespace l1t {
 
   class towerMapsAlgoConfig_SA {
-    public:
-        towerMapsAlgoConfig_SA() {}
+  public:
+    towerMapsAlgoConfig_SA() {}
 
-        void setParameters( const towerMapsAlgoConfig_SA& newConfig ) {}
+    void setParameters(const towerMapsAlgoConfig_SA& newConfig) {}
   };
 
 }  // namespace l1t

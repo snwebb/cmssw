@@ -9,18 +9,18 @@
 namespace l1t {
 
   class HGCalTowerMap_SA {
-    public:
-      HGCalTowerMap_SA() {};
-      HGCalTowerMap_SA( const std::vector<unsigned short> tower_ids );
+  public:
+    HGCalTowerMap_SA(){};
+    HGCalTowerMap_SA(const std::vector<unsigned short> tower_ids);
 
-      ~HGCalTowerMap_SA(){};
+    ~HGCalTowerMap_SA(){};
 
-      HGCalTowerMap_SA& operator+=(HGCalTowerMap_SA& map);
+    HGCalTowerMap_SA& operator+=(HGCalTowerMap_SA& map);
 
-      std::unordered_map<unsigned short, l1t::HGCalTower_SA>& towers() { return towerMap_; }
+    std::unordered_map<unsigned short, l1t::HGCalTower_SA>& towers() { return towerMap_; }
 
-    private:
-      std::unordered_map<unsigned short, l1t::HGCalTower_SA> towerMap_;
+  private:
+    std::unordered_map<unsigned short, l1t::HGCalTower_SA> towerMap_;
   };
 
 }  // namespace l1t
