@@ -13,14 +13,10 @@
 
 #include <utility>
 
-// Can never get MessageLogger to do what I want...
-#include <iostream>
 
 class HGCalBackendLayer2Processor3DClusteringSA : public HGCalBackendLayer2ProcessorBase {
 public:
   HGCalBackendLayer2Processor3DClusteringSA(const edm::ParameterSet& conf) : HGCalBackendLayer2ProcessorBase(conf), conf_(conf) {
-    std::cout << "In stand alone Clustering Processor" << std::endl;
-
     std::string typeMulticluster(conf.getParameterSet("C3d_parameters").getParameter<std::string>("type_multicluster"));
     if (typeMulticluster == "Histo") {
       multiclusteringAlgoType_ = HistoC3d;
@@ -34,7 +30,7 @@ public:
           conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_seeding_parameters"));
       
       const edm::ParameterSet& paramConfig = conf.getParameterSet("C3d_parameters").getParameterSet("histoMax_C3d_clustering_parameters");
-      const std::string& algoWrapperName = "HGCalHistoClusteringWrapper";
+      const std::string& algoWrapperName = conf.getParameterSet("C3d_parameters").getParameter<std::string>("ClusteringAlgoName");
       multiclusteringHistoClusteringWrapper_ = std::unique_ptr<HGCalHistoClusteringWrapperBase>{
           HGCalHistoClusteringWrapperBaseFactory::get()->create(algoWrapperName, paramConfig)};
 

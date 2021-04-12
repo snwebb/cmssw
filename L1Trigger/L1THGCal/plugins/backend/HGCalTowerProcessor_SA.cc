@@ -11,30 +11,21 @@
 
 #include "L1Trigger/L1THGCal/interface/backend/HGCalAlgoWrapperBase.h"
 
-// Can never get MessageLogger to do what I want...
-#include <iostream>
-
 class HGCalTowerProcessorSA : public HGCalTowerProcessorBase {
 public:
   HGCalTowerProcessorSA(const edm::ParameterSet& conf) : HGCalTowerProcessorBase(conf), conf_(conf) {
-    std::cout << "In stand alone Tower Map Processor" << std::endl;
-
-    towermap2D_ = std::make_unique<HGCalTowerMap2DImpl>(conf.getParameterSet("towermap_parameters"));
-    towermap3D_ = std::make_unique<HGCalTowerMap3DImpl>();
-
-    const std::string& algoWrapperName = "HGCalTowerMapsWrapperBaseFactory";
+    
+    const std::string towerMapsAlgoName(conf.getParameterSet("towermap_parameters").getParameter<std::string>("AlgoName"));
     towerMapWrapper_ = std::unique_ptr<HGCalTowerMapsWrapperBase>{
-        HGCalTowerMapsWrapperBaseFactory::get()->create(algoWrapperName, conf)};
+        HGCalTowerMapsWrapperBaseFactory::get()->create(towerMapsAlgoName, conf)};
   }
 
-  void eventSetup(const edm::EventSetup& es) override { towermap2D_->eventSetup(es); }
+  void eventSetup(const edm::EventSetup& es) override { }
 
   void run(const std::pair<edm::Handle<l1t::HGCalTowerMapBxCollection>, edm::Handle<l1t::HGCalClusterBxCollection>>&
                collHandle,
            l1t::HGCalTowerBxCollection& collTowers,
            const edm::EventSetup& es) override {
-
-
 
       es.get<CaloGeometryRecord>().get("", triggerGeometry_);
 
@@ -56,10 +47,6 @@ public:
 
 private:
   edm::ESHandle<HGCalTriggerGeometryBase> triggerGeometry_;
-
-  /* algorithms instances */
-  std::unique_ptr<HGCalTowerMap2DImpl> towermap2D_;
-  std::unique_ptr<HGCalTowerMap3DImpl> towermap3D_;
 
   /* Standalone algorithm instance */
   std::unique_ptr<HGCalTowerMapsWrapperBase> towerMapWrapper_;

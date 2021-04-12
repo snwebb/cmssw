@@ -71,7 +71,6 @@ void HGCalTowerMapsWrapper::convertAlgorithmOutputs(const std::vector<l1t::HGCal
 }
 
 void HGCalTowerMapsWrapper::process( const std::vector<edm::Ptr<l1t::HGCalTowerMap>>& inputs, l1t::HGCalTowerBxCollection& outputs ) const {
-
     std::vector<l1t::HGCalTowerMap_SA> inputs_SA;
     convertCMSSWInputs( inputs, inputs_SA );
 

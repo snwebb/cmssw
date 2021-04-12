@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include <iostream>
-
 HGCalHistoClusteringImplSA::HGCalHistoClusteringImplSA() {}
 
 // void HGCalHistoClusteringImplSA::runAlgorithm() const {

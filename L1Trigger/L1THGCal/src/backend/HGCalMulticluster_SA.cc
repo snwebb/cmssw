@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include <iostream>
 using namespace l1t;
 
 HGCalMulticluster_SA::HGCalMulticluster_SA(const l1t::HGCalCluster_SA& tc, float fraction) {
