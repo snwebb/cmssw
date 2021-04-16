@@ -139,6 +139,7 @@ histoThreshold_C3d_params = histoMax_C3d_seeding_params.clone(
 histoMax_C3d_params = cms.PSet(
         type_multicluster=cms.string('Histo'),
         ClusteringAlgoName = cms.string('HGCalHistoClusteringWrapper'),
+        SortingTruncationAlgoName = cms.string('HGCalSortingTruncationWrapper'),
         histoMax_C3d_clustering_parameters = histoMaxVariableDR_C3d_params.clone(),
         histoMax_C3d_seeding_parameters = histoMax_C3d_seeding_params.clone(),
         )
