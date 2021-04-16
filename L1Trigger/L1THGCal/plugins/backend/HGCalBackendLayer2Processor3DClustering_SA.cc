@@ -33,8 +33,9 @@ public:
 
     multiclusteringHistoClusteringWrapper_ = std::unique_ptr<HGCalHistoClusteringWrapperBase>{
         HGCalHistoClusteringWrapperBaseFactory::get()->create(clusteringAlgoWrapperName, clusteringParamConfig)};
-    multiclusteringSortingTruncationWrapper_ = std::unique_ptr<HGCalSortingTruncationWrapperBase>{
-      HGCalSortingTruncationWrapperBaseFactory::get()->create(sortingTruncationAlgoWrapperName, sortingTruncationParamConfig)};
+    multiclusteringSortingTruncationWrapper_ =
+        std::unique_ptr<HGCalSortingTruncationWrapperBase>{HGCalSortingTruncationWrapperBaseFactory::get()->create(
+            sortingTruncationAlgoWrapperName, sortingTruncationParamConfig)};
 
     for (const auto& interpretationPset : conf.getParameter<std::vector<edm::ParameterSet>>("energy_interpretations")) {
       std::unique_ptr<HGCalTriggerClusterInterpreterBase> interpreter{
@@ -54,7 +55,6 @@ public:
     auto& collCluster3D_sorted = be_output.first;
     auto& rejectedClusters = be_output.second;
 
-    
     /* create a persistent vector of pointers to the trigger-cells */
     std::vector<edm::Ptr<l1t::HGCalCluster>> clustersPtrs;
     for (unsigned i = 0; i < collHandle->size(); ++i) {
@@ -87,8 +87,6 @@ public:
 
     multiclusteringSortingTruncationWrapper_->configure(configuration);
     multiclusteringSortingTruncationWrapper_->process(collCluster3D, outputSortedAndTruncatedClusters);
-
-    
 
     // Call all the energy interpretation modules on the cluster collection
     for (const auto& interpreter : energy_interpreters_) {
