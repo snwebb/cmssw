@@ -104,17 +104,17 @@ void HGCalSortingTruncationWrapper::convertAlgorithmOutputs(
 
   std::vector<l1t::HGCalMulticluster> multiclusters;
   multiclusters.reserve(multiclusters_out.size());
-  for (unsigned int imulticluster = 0; imulticluster < multiclusters_out.size(); ++imulticluster) {
-    bool firstConstituent = true;
-    for (const auto& constituent : multiclusters_out[imulticluster].constituents()) {
-      if (firstConstituent) {
-        multiclusters.emplace_back(l1t::HGCalMulticluster(clustersPtrs.at(constituent.index_cmssw()), 1.));
-      } else {
-        multiclusters.at(imulticluster).addConstituent(clustersPtrs.at(constituent.index_cmssw()), 1.);
-      }
-      firstConstituent = false;
-    }
-  }
+  // for (unsigned int imulticluster = 0; imulticluster < multiclusters_out.size(); ++imulticluster) {
+  //   bool firstConstituent = true;
+  //   for (const auto& constituent : multiclusters_out[imulticluster].constituents()) {
+  //     if (firstConstituent) {
+  //       multiclusters.emplace_back(l1t::HGCalMulticluster(clustersPtrs.at(constituent.index_cmssw()), 1.));
+  //     } else {
+  //       multiclusters.at(imulticluster).addConstituent(clustersPtrs.at(constituent.index_cmssw()), 1.);
+  //     }
+  //     firstConstituent = false;
+  //   }
+  // }
 
   for (const auto& multicluster : multiclusters) {
     multiclustersBXCollection.push_back(0, multicluster);
@@ -140,8 +140,8 @@ unsigned HGCalSortingTruncationWrapper::packMulticlusterClusterId(const unsigned
   
 }
 
-void HGCalSortingTruncationWrapper::process(const l1t::HGCalMulticlusterBxCollection inputMulticlusters,
-                                            l1t::HGCalMulticlusterBxCollection outputMulticlusters) const {
+void HGCalSortingTruncationWrapper::process(const l1t::HGCalMulticlusterBxCollection& inputMulticlusters,
+                                            l1t::HGCalMulticlusterBxCollection& outputMulticlusters) const {
   l1t::HGCalMulticlusterSACollection multiclusters_SA;
   convertCMSSWInputs(inputMulticlusters, multiclusters_SA);
 
