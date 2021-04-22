@@ -18,88 +18,89 @@ public:
 
   void configure(const std::pair<const edm::EventSetup&, const edm::ParameterSet&>& configuration) override;
 
-  void process(const l1t::HGCalMulticlusterBxCollection, l1t::HGCalMulticlusterBxCollection) const override;
+  void process(const l1t::HGCalMulticlusterBxCollection&, l1t::HGCalMulticlusterBxCollection&) const override;
 
 private:
-  void convertCMSSWInputs(const l1t::HGCalMulticlusterBxCollection& multiclusters, l1t::HGCalMulticlusterSACollection& multiclusters_SA) const;
+  void convertCMSSWInputs(const l1t::HGCalMulticlusterBxCollection& multiclusters,
+                          l1t::HGCalMulticlusterSACollection& multiclusters_SA) const;
   void convertAlgorithmOutputs(const l1t::HGCalMulticlusterSACollection& multiclusters_out,
-                               l1t::HGCalMulticlusterBxCollection& multiclusters) const;
+                               l1t::HGCalMulticlusterBxCollection& multiclustersBXCollection) const;
 
-  void sortAndTruncate(const l1t::HGCalMulticlusterSACollection& inputMulticlusters, l1t::HGCalMulticlusterSACollection& outputMulticlusters) const;
+  unsigned packMulticlusterClusterId(const unsigned multicluster_id, const unsigned cluster_id ) const;
 
-  void eventSetup(const edm::EventSetup& es) {
-    triggerTools_.eventSetup(es);
-  }
+  void unpackMulticlusterClusterId(unsigned id, unsigned& multicluster_id, unsigned& cluster_id ) const;
+
+  void sortAndTruncate(const l1t::HGCalMulticlusterSACollection& inputMulticlusters,
+                       l1t::HGCalMulticlusterSACollection& outputMulticlusters) const;
+
+  void eventSetup(const edm::EventSetup& es) { triggerTools_.eventSetup(es); }
 
   HGCalTriggerTools triggerTools_;
+  std::vector<double> truncation_byRoverZbin_;
   HGCalSortingTruncationImplSA theAlgo_;
   std::unique_ptr<l1t::sortingTruncationAlgoConfig_SA> theConfiguration_;
+
+  unsigned kClusterIdMask = 0xFFFFF;
+  unsigned kMulticlusterIdMask = 0xFFFFF;
+  unsigned kClusterIdOffset = 0xFFF;
+  unsigned kMulticlusterIdOffset = 20;
+
 
 };
 
 HGCalSortingTruncationWrapper::HGCalSortingTruncationWrapper(const edm::ParameterSet& conf)
-    : theAlgo_(),
-      theConfiguration_(std::make_unique<l1t::sortingAlgoConfig_SA>(truncation_byRoverZbin)) {
-}
+  : truncation_byRoverZbin_(conf.existsAs<std::vector<double>>("truncation_byRoverZbin")  ? conf.getParameter<std::vector<double>>("truncation_byRoverZbin") : std::vector<double>()),
+
+theAlgo_(), theConfiguration_(std::make_unique<l1t::sortingTruncationAlgoConfig_SA>(truncation_byRoverZbin_)) {}
+
 
 void HGCalSortingTruncationWrapper::convertCMSSWInputs(const l1t::HGCalMulticlusterBxCollection& multiclusters,
-						       l1t::HGCalMulticlusterSACollection& multiclusters_SA) const {
+                                                       l1t::HGCalMulticlusterSACollection& multiclusters_SA) const {
+  //std::vector<l1t::HGCalMulticluster> multiclusters;
 
+  multiclusters_SA.reserve(multiclusters.size());
 
-  std::vector<l1t::HGCalMulticluster> multiclusters;
-  multiclusters.reserve(multiclusters_out.size());
-  for (unsigned int imulticluster = 0; imulticluster < multiclusters_out.size(); ++imulticluster) {
+  for (unsigned int imulticluster = 0; imulticluster < multiclusters.size(); ++imulticluster) {
     bool firstConstituent = true;
-    for (const auto& constituent : multiclusters_out[imulticluster].constituents()) {
+    unsigned int clusterIndex = 0;
+    for (const auto& constituent : multiclusters[imulticluster].constituents()) {
       if (firstConstituent) {
-        multiclusters.emplace_back(l1t::HGCalMulticluster(clustersPtrs.at(constituent.index_cmssw()), 1.));
+        multiclusters_SA.emplace_back(
+            l1t::HGCalMulticluster_SA(l1t::HGCalCluster_SA(constituent.second->centreProj().x(),
+                                                           constituent.second->centreProj().y(),
+                                                           triggerTools_.zside(constituent.second->detId()),
+                                                           triggerTools_.layerWithOffset(constituent.second->detId()),
+                                                           constituent.second->eta(),
+                                                           constituent.second->phi(),
+                                                           constituent.second->pt(),
+                                                           constituent.second->mipPt(),
+                                                           packMulticlusterClusterId(imulticluster, clusterIndex)),
+                                      1.));
+
       } else {
-        multiclusters.at(imulticluster).addConstituent(clustersPtrs.at(constituent.index_cmssw()), 1.);
+        multiclusters_SA.at(imulticluster).addConstituent(l1t::HGCalCluster_SA(constituent.second->centreProj().x(),
+                                                           constituent.second->centreProj().y(),
+                                                           triggerTools_.zside(constituent.second->detId()),
+                                                           triggerTools_.layerWithOffset(constituent.second->detId()),
+                                                           constituent.second->eta(),
+                                                           constituent.second->phi(),
+                                                           constituent.second->pt(),
+                                                           constituent.second->mipPt(),
+                                                           packMulticlusterClusterId(imulticluster, clusterIndex)),
+							  1.);
+
       }
       firstConstituent = false;
+      ++clusterIndex;
     }
   }
 
-
-  multiclusters_SA.clear();
-  multiclusters_SA.reserve(multiclusters.size());
-  unsigned int clusterIndex = 0;
-  for (const auto& cluster : clustersPtrs) {
-    clusters_SA.emplace_back(l1t::HGCalCluster_SA(cluster->centreProj().x(),
-                                                  cluster->centreProj().y(),
-                                                  triggerTools_.zside(cluster->detId()),
-                                                  triggerTools_.layerWithOffset(cluster->detId()),
-                                                  cluster->eta(),
-                                                  cluster->phi(),
-                                                  cluster->pt(),
-                                                  cluster->mipPt(),
-                                                  clusterIndex));
-    ++clusterIndex;
-  }
-
-  seeds_SA.clear();
-  seeds_SA.reserve(seeds.size());
-  for (const auto& seed : seeds) {
-    seeds_SA.emplace_back(l1t::HGCalSeed_SA(seed.first.x(), seed.first.y(), seed.first.z(), seed.second));
-  }
 }
 
 void HGCalSortingTruncationWrapper::convertAlgorithmOutputs(
     const std::vector<l1t::HGCalMulticluster_SA>& multiclusters_out,
-    const std::vector<l1t::HGCalCluster_SA>& rejected_clusters_out,
-    const std::vector<edm::Ptr<l1t::HGCalCluster>>& clustersPtrs,
-    l1t::HGCalMulticlusterBxCollection& multiclustersBXCollection,
-    l1t::HGCalClusterBxCollection& rejected_clusters) const {
-  // Not doing completely the correct thing here
-  // Taking the multiclusters from the stand alone emulation
-  // Getting their consistuent clusters (stand alone objects)
-  // Linking back to the original CMSSW-type cluster
-  // And creating a CMSSW-type multicluster based from these clusters
-  // So the output multiclusters will not be storing bit accurate quantities (or whatever was derived by the stand along emulation)
-  // As these inherit from L1Candidate, could set their HW quantities to the bit accurate ones
-  for (const auto& rejected_cluster : rejected_clusters_out) {
-    rejected_clusters.push_back(0, *clustersPtrs.at(rejected_cluster.index_cmssw()));
-  }
+    l1t::HGCalMulticlusterBxCollection& multiclustersBXCollection ) const {
+
 
   std::vector<l1t::HGCalMulticluster> multiclusters;
   multiclusters.reserve(multiclusters_out.size());
@@ -118,25 +119,42 @@ void HGCalSortingTruncationWrapper::convertAlgorithmOutputs(
   for (const auto& multicluster : multiclusters) {
     multiclustersBXCollection.push_back(0, multicluster);
   }
-}
-	
-void HGCalSortingTruncationWrapper::process(const l1t::HGCalMulticlusterBxCollection inputMulticlusters, l1t::HGCalMulticlusterBxCollection outputMulticlusters) const {
-
-      l1t::HGCalMulticlusterSACollection multiclusters_SA;
-      convertCMSSWInputs(inputMulticlusters, multiclusters_SA);
-      
-      l1t::HGCalMulticlusterSACollection multiclusters_finalized_SA;
-      sortAndTruncate(multiclusters_SA, multiclusters_finalized_SA);
-      
-      convertAlgorithmOutputs(multiclusters_finalized_SA, outputMulticlusters);
 
 }
 
-void HGCalSortingTruncationWrapper::sortAndTruncate(const l1t::HGCalMulticlusterSACollection& inputMulticlusters, l1t::HGCalMulticlusterSACollection& outputMulticlusters) const {
+unsigned HGCalSortingTruncationWrapper::packMulticlusterClusterId(const unsigned multicluster_id, const unsigned cluster_id ) const{
+
+  unsigned packed_value = 0;
+
+  packed_value |= ((multicluster_id & kMulticlusterIdMask) << kMulticlusterIdOffset);
+  packed_value |= ((cluster_id & kClusterIdMask) << kClusterIdOffset);
+
+  return packed_value;
+  
+}
+
+  void HGCalSortingTruncationWrapper::unpackMulticlusterClusterId(unsigned id, unsigned& multicluster_id, unsigned& cluster_id ) const{
+
+  multicluster_id = (id >> kMulticlusterIdOffset) & kMulticlusterIdMask;
+  cluster_id = (id >> kClusterIdOffset) & kClusterIdMask;
+  
+}
+
+void HGCalSortingTruncationWrapper::process(const l1t::HGCalMulticlusterBxCollection inputMulticlusters,
+                                            l1t::HGCalMulticlusterBxCollection outputMulticlusters) const {
+  l1t::HGCalMulticlusterSACollection multiclusters_SA;
+  convertCMSSWInputs(inputMulticlusters, multiclusters_SA);
+
+  l1t::HGCalMulticlusterSACollection multiclusters_finalized_SA;
+  sortAndTruncate(multiclusters_SA, multiclusters_finalized_SA);
+
+  convertAlgorithmOutputs(multiclusters_finalized_SA, outputMulticlusters);
+}
+
+void HGCalSortingTruncationWrapper::sortAndTruncate(const l1t::HGCalMulticlusterSACollection& inputMulticlusters,
+                                                    l1t::HGCalMulticlusterSACollection& outputMulticlusters) const {
   // Call SA sorting
-  std::vector<l1t::HGCalMulticluster_SA> multiclusters_vec_sortedtruncated_SA =
-      theAlgo_.sortAndTruncate_SA(inputMulticlusters, outputMulticlusters, theConfiguration_);
-
+  theAlgo_.sortAndTruncate_SA(inputMulticlusters, outputMulticlusters, theConfiguration_);
 }
 
 void HGCalSortingTruncationWrapper::configure(
@@ -145,4 +163,6 @@ void HGCalSortingTruncationWrapper::configure(
   // theConfiguration_->setParameters( ... );
 };
 
-DEFINE_EDM_PLUGIN(HGCalSortingTruncationWrapperBaseFactory, HGCalSortingTruncationWrapper, "HGCalSortingTruncationWrapper");
+DEFINE_EDM_PLUGIN(HGCalSortingTruncationWrapperBaseFactory,
+                  HGCalSortingTruncationWrapper,
+                  "HGCalSortingTruncationWrapper");

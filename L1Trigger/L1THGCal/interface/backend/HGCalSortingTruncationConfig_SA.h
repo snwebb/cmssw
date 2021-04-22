@@ -8,12 +8,10 @@ namespace l1t {
   class sortingTruncationAlgoConfig_SA {
   public:
     sortingTruncationAlgoConfig_SA(std::vector<double> truncation_byRoverZbin)
-      : truncation_byRoverZbin(truncation_byRoverZbin) {}
+        : truncation_byRoverZbin_(truncation_byRoverZbin) {}
 
-    void setParameters(std::vector<double> truncation_byRoverZbin) {
-      truncation_byRoverZbin = truncation_byRoverZbin;
-    }
-    
+    void setParameters(std::vector<double> truncation_byRoverZbin) { truncation_byRoverZbin = truncation_byRoverZbin; }
+
     void setParameters(const sortingTruncationAlgoConfig_SA& newConfig) {
       setParameters(newConfig.truncation_byRoverZbin());
     }
