@@ -1,7 +1,7 @@
-import FWCore.ParameterSet.Config as cms 
+import FWCore.ParameterSet.Config as cms
 
-from Configuration.Eras.Era_Phase2_cff import Phase2
-process = cms.Process('DIGI',Phase2)
+from Configuration.Eras.Era_Phase2C9_cff import Phase2C9
+process = cms.Process('SIM',Phase2C9)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -9,8 +9,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2023D17_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D49Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D49_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedHLLHC14TeV_cfi')
@@ -46,16 +46,8 @@ process.configurationMetadata = cms.untracked.PSet(
 process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    #outputCommands = process.FEVTDEBUGEventContent.outputCommands,
-    outputCommands = cms.untracked.vstring(
-        'keep *_*_HGCHitsEE_*',
-        'keep *_*_HGCHitsHEback_*',
-        'keep *_*_HGCHitsHEfront_*',
-        'keep *_mix_*_*',
-        'keep *_genParticles_*_*',
-        'keep *_hgcalTriggerPrimitiveDigiProducer_*_*'
-    ),
-    fileName = cms.untracked.string('file:test.root'),
+    outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
+    fileName = cms.untracked.string('file:junk.root'),
     dataset = cms.untracked.PSet(
         filterName = cms.untracked.string(''),
         dataTier = cms.untracked.string('GEN-SIM-DIGI-RAW')
@@ -68,32 +60,33 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string("ntuple.root")
+    fileName = cms.string("test_triggergeom.root")
     )
+
+
 
 # Other statements
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic_T15', '')
 
 process.generator = cms.EDProducer("FlatRandomPtGunProducer",
     PGunParameters = cms.PSet(
-        MaxPt = cms.double(50.01),
-        MinPt = cms.double(49.99),
-        PartID = cms.vint32(11),
-        MaxEta = cms.double(3.0),
+        MaxPt = cms.double(10.01),
+        MinPt = cms.double(9.99),
+        PartID = cms.vint32(13),
+        MaxEta = cms.double(2.5),
         MaxPhi = cms.double(3.14159265359),
-        MinEta = cms.double(1.5),
+        MinEta = cms.double(-2.5),
         MinPhi = cms.double(-3.14159265359)
     ),
     Verbosity = cms.untracked.int32(0),
-    psethack = cms.string('single electron pt 50'),
+    psethack = cms.string('single electron pt 10'),
     AddAntiParticle = cms.bool(True),
     firstRun = cms.untracked.uint32(1)
 )
 
 process.mix.digitizers = cms.PSet(process.theDigitizersValid)
-
 
 
 # Path and EndPath definitions
@@ -102,28 +95,28 @@ process.simulation_step = cms.Path(process.psim)
 process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
 process.digitisation_step = cms.Path(process.pdigi_valid)
 process.L1simulation_step = cms.Path(process.SimL1Emulator)
-
-process.load('L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff')
-process.hgcl1tpg_step = cms.Path(process.hgcalTriggerPrimitives)
-
-
 process.digi2raw_step = cms.Path(process.DigiToRaw)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGoutput_step = cms.EndPath(process.FEVTDEBUGoutput)
 
-# load ntuplizer
-process.load('L1Trigger.L1THGCal.hgcalTriggerNtuples_cff')
-process.ntuple_step = cms.Path(process.hgcalTriggerNtuples)
+process.load('L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff')
+# Eventually modify default geometry parameters
+from L1Trigger.L1THGCal.customTriggerGeometry import custom_geometry_decentralized_V11
+process = custom_geometry_decentralized_V11(process, implementation=2)
+
+process.hgcaltriggergeomtester = cms.EDAnalyzer(
+    "HGCalTriggerGeomTesterV9Imp3"
+    )
+process.test_step = cms.Path(process.hgcaltriggergeomtester)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.hgcl1tpg_step,process.digi2raw_step, process.ntuple_step, process.endjob_step, process.FEVTDEBUGoutput_step)
-
+process.schedule = cms.Schedule(process.test_step,process.endjob_step)
+#  process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.test_step,process.endjob_step,process.FEVTDEBUGoutput_step)
+#process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.endjob_step,process.FEVTDEBUGoutput_step)
 # filter all path with the production filter sequence
 for path in process.paths:
-        getattr(process,path)._seq = process.generator * getattr(process,path)._seq
+    getattr(process,path)._seq = process.generator * getattr(process,path)._seq
 
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
-# End adding early deletion
-

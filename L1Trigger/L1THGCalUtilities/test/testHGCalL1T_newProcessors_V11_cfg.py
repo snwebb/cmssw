@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms 
 
-from Configuration.Eras.Era_Phase2C8_cff import Phase2C8
-process = cms.Process('DIGI',Phase2C8)
+from Configuration.Eras.Era_Phase2C9_cff import Phase2C9
+process = cms.Process('DIGI',Phase2C9)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -9,8 +9,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2026D41Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2026D41_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D49Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D49_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedHLLHC14TeV_cfi')
@@ -29,7 +29,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-       fileNames = cms.untracked.vstring('/store/mc/PhaseIITDRSpring19DR/TTbar_14TeV_TuneCP5_Pythia8/GEN-SIM-DIGI-RAW/PU200_106X_upgrade2023_realistic_v3_ext1-v3/60000/FFB5D0CA-208F-6040-A9BF-3F5354D0AA59.root'),
+       fileNames = cms.untracked.vstring('/store/mc/Phase2HLTTDRWinter20DIGI/SingleElectron_PT2to200/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3_ext2-v2/40000/00582F93-5A2A-5847-8162-D81EE503500F.root'),
        inputCommands=cms.untracked.vstring(
            'keep *',
            'drop l1tEMTFHit2016Extras_simEmtfDigis_CSC_HLT',
@@ -64,21 +64,24 @@ process.TFileService = cms.Service(
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic_T15', '')
 
 # load HGCAL TPG simulation
 process.load('L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff')
 
-# To add truth-matched calo cells and downstream objects
-#process.load('L1Trigger.L1THGCalUtilities.caloTruthCells_cff')
-#process.hgcalTriggerPrimitives += process.caloTruthCells
-#process.load('L1Trigger.L1THGCalUtilities.caloTruthCellsNtuples_cff')
+# Use new processors and standalone algorithms
+from L1Trigger.L1THGCal.customNewProcessors import custom_clustering_standalone, custom_tower_standalone
+process = custom_clustering_standalone(process)
+process = custom_tower_standalone(process)
 
 process.hgcl1tpg_step = cms.Path(process.hgcalTriggerPrimitives)
 
 
 # load ntuplizer
 process.load('L1Trigger.L1THGCalUtilities.hgcalTriggerNtuples_cff')
+from L1Trigger.L1THGCalUtilities.customNtuples import custom_ntuples_standalone_clustering, custom_ntuples_standalone_tower
+process = custom_ntuples_standalone_clustering(process)
+process = custom_ntuples_standalone_tower(process)
 process.ntuple_step = cms.Path(process.hgcalTriggerNtuples)
 
 # Schedule definition
