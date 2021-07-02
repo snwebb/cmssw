@@ -9,7 +9,6 @@ HGCalSortingTruncationImplSA::HGCalSortingTruncationImplSA() {}
 // }
 
 void HGCalSortingTruncationImplSA::sortAndTruncate_SA(
-						      const std::vector<l1thgcfirmware::HGCalMulticluster> inputMulticlusters,	std::vector<l1thgcfirmware::HGCalMulticluster>& outputMulticlusters,
-      const l1thgcfirmware::sortingTruncationAlgoConfig& configuration) const {
-
-}
+    const std::vector<l1thgcfirmware::HGCalMulticluster> inputMulticlusters,
+    std::vector<l1thgcfirmware::HGCalMulticluster>& outputMulticlusters,
+    const l1thgcfirmware::sortingTruncationAlgoConfig& configuration) const {}

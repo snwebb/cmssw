@@ -19,14 +19,11 @@ public:
 
   void runAlgorithm() const;
 
-  void sortAndTruncate_SA(
-			  const std::vector<l1thgcfirmware::HGCalMulticluster> inputMulticlusters,	
-std::vector<l1thgcfirmware::HGCalMulticluster>& outputMulticlusters,  const l1thgcfirmware::sortingTruncationAlgoConfig& configuration) const;
+  void sortAndTruncate_SA(const std::vector<l1thgcfirmware::HGCalMulticluster> inputMulticlusters,
+                          std::vector<l1thgcfirmware::HGCalMulticluster>& outputMulticlusters,
+                          const l1thgcfirmware::sortingTruncationAlgoConfig& configuration) const;
 
 private:
-
-
-
 };
 
 #endif
