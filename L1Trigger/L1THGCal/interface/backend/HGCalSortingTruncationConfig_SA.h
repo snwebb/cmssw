@@ -3,16 +3,16 @@
 
 #include <vector>
 
-namespace l1t {
+namespace l1thgcfirmware {
 
-  class sortingTruncationAlgoConfig_SA {
+  class sortingTruncationAlgoConfig {
   public:
-    sortingTruncationAlgoConfig_SA(std::vector<double> truncation_byRoverZbin)
+    sortingTruncationAlgoConfig(std::vector<double> truncation_byRoverZbin)
         : truncation_byRoverZbin_(truncation_byRoverZbin) {}
 
     void setParameters(std::vector<double> truncation_byRoverZbin) { truncation_byRoverZbin = truncation_byRoverZbin; }
 
-    void setParameters(const sortingTruncationAlgoConfig_SA& newConfig) {
+    void setParameters(const sortingTruncationAlgoConfig& newConfig) {
       setParameters(newConfig.truncation_byRoverZbin());
     }
 
@@ -22,6 +22,6 @@ namespace l1t {
     std::vector<double> truncation_byRoverZbin_;
   };
 
-}  // namespace l1t
+}  // namespace l1thgcfirmware
 
 #endif
