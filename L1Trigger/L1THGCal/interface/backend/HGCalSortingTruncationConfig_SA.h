@@ -7,13 +7,12 @@ namespace l1thgcfirmware {
 
   class sortingTruncationAlgoConfig {
   public:
-    sortingTruncationAlgoConfig(std::vector<double> truncation_byRoverZbin)
-        : truncation_byRoverZbin_(truncation_byRoverZbin) {}
+    sortingTruncationAlgoConfig(){};
 
-    void setParameters(std::vector<double> truncation_byRoverZbin) { truncation_byRoverZbin = truncation_byRoverZbin; }
+    void setParameters() {};
 
     void setParameters(const sortingTruncationAlgoConfig& newConfig) {
-      setParameters(newConfig.truncation_byRoverZbin());
+      setParameters();
     }
 
     std::vector<double> truncation_byRoverZbin() const { return truncation_byRoverZbin_; }

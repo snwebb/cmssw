@@ -56,9 +56,6 @@ seed_smoothing_hcal = cms.vdouble(
         1., 1., 1., 1., 1.,
         )
 
-truncation_roverz = cms.vdouble( 1,  4, 13, 13, 10, 10,  8,  8,  8,  7,  7,  6,  6,  6,  6,  6,  5,  5,  5,  5,  5,  5,  5,  4,  4,  4,  4,  4,  4,  4,  4,  4,  3,  2,  2,  2,  2,  2,  2,  2,  2,  1)
-
-
 distance_C3d_params = cms.PSet(type_multicluster=cms.string('dRC3d'),
                                dR_multicluster=cms.double(0.01),
                                minPt_multicluster=cms.double(0.5),  # minimum pt of the multicluster (GeV)
@@ -102,7 +99,6 @@ histoMax_C3d_clustering_params = cms.PSet(dR_multicluster=cms.double(0.03),
 
 
 histoMax_C3d_sorting_truncation_params = cms.PSet(AlgoName = cms.string('HGCalSortingTruncationWrapper.cc'),
-                                                  truncation_byRoverZbin=cms.vdouble(truncation_roverz),
                                )
 
 

@@ -50,7 +50,7 @@ private:
 HGCalSortingTruncationWrapper::HGCalSortingTruncationWrapper(const edm::ParameterSet& conf)
   : HGCalSortingTruncationWrapperBase(conf),
     theAlgo_(), 
-    theConfiguration_(conf.existsAs<std::vector<double>>("truncation_byRoverZbin") ? conf.getParameter<std::vector<double>>("truncation_byRoverZbin") : std::vector<double>()) {}
+    theConfiguration_() {}
 
 
 void HGCalSortingTruncationWrapper::convertCMSSWInputs(const l1t::HGCalMulticlusterBxCollection& multiclusters,
