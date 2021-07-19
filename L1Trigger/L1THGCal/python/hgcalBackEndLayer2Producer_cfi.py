@@ -98,7 +98,7 @@ histoMax_C3d_clustering_params = cms.PSet(dR_multicluster=cms.double(0.03),
                                )
 
 
-histoMax_C3d_sorting_truncation_params = cms.PSet(AlgoName = cms.string('HGCalSortingTruncationWrapper.cc'),
+histoMax_C3d_sorting_truncation_params = cms.PSet(AlgoName = cms.string('HGCalSortingTruncationWrapper'),
                                )
 
 
